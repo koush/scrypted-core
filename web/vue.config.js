@@ -21,14 +21,14 @@ module.exports = {
           enforce: "pre"
         }
       ]
-    }
+    },
   },
   chainWebpack: config => config.resolve.symlinks(false),
   runtimeCompiler: true,
   devServer: {
     https: true,
     proxy: {
-      '^/(login|static|endpoint|web/message)': proxyOpts,
+      '^/(login|static|endpoint|whitelist|web/message)': proxyOpts,
     }
   }
 }

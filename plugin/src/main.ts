@@ -63,8 +63,14 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             session.listeners.forEach(l => l.removeListener())
         };
 
+        // this listener keeps the system state up to date on the other end.
         const systemListener = systemManager.listen((eventSource: ScryptedDevice|null, eventDetails: EventDetails, eventData: object) => {
+            // no events for builtins
             if (parseInt(eventSource.id) <= 0) {
+                return;
+            }
+            // no events if its not a property (ie, no events for face detect, zwave, etc).
+            if (!eventDetails.property) {
                 return;
             }
             ws.send(JSON.stringify({

@@ -26,7 +26,7 @@
       </v-menu>
     </v-app-bar>
 
-    <v-content>
+    <v-content elevation="-2">
       <v-container grid-list-xs grid-list-xl grid-list-md grid-list-sm grid-list-lg fluid>
         <v-fade-transition mode="out-in">
           <router-view></router-view>
@@ -87,8 +87,8 @@ Vue.prototype.$pushconnect = function() {
     ],
   })
   .then(rtcManager => {
-    console.log('persistent gcm connection created', rtcManager != null);
-    console.log(rtcManager.registrationId);
+    // console.log('persistent gcm connection created', rtcManager != null);
+    // console.log(rtcManager.registrationId);
     return rtcManager;
   });
 
