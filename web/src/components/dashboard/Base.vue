@@ -1,18 +1,10 @@
 <script lang="ts">
 import { ScryptedDeviceType } from "@scrypted/sdk";
+import {typeToIcon} from "../helpers";
+
 export default {
   methods: {
-    typeToIcon(type) {
-      switch (type) {
-        case ScryptedDeviceType.Light:
-          return "lightbulb";
-        case ScryptedDeviceType.Outlet:
-          return "plug";
-        case ScryptedDeviceType.Lock:
-          return "lock";
-      }
-      return "toggle-on";
-    },
+    typeToIcon,
     pluralize(type) {
       switch (type) {
         case ScryptedDeviceType.Light:
@@ -26,8 +18,11 @@ export default {
       }
       return type;
     },
+    getDevice(id) {
+      return this.$scrypted.systemManager.getDeviceById(id);
+    },
     setOnOff(id, value) {
-      const device = this.$scrypted.systemManager.getDeviceById(id);
+      const device = this.getDevice(id);
       if (value) {
         device.turnOn();
       } else {

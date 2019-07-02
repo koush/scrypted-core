@@ -1,49 +1,63 @@
 <template>
-  <v-card raised color="blue" dark>
-    <v-card-title>
-      All Devices
-      <v-spacer></v-spacer>
-      <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-    </v-card-title>
-    <v-data-table
-      light
-      :headers="headers"
-      :items="tableDevices"
-      :items-per-page="50"
-      :search="search"
-    >
-      <template v-slot:item.icon="{ item }">
-        <font-awesome-icon size="sm" :icon="item.icon" :color="colors.blue.base"/>
-      </template>
-    </v-data-table>
-  </v-card>
+  <v-flex xs12 md8 lg6>
+    <v-card raised color="blue" dark>
+      <v-card-title>
+        All Devices
+        <v-spacer></v-spacer>
+        <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+      </v-card-title>
+      <v-data-table
+        light
+        :headers="headers"
+        :items="tableDevices"
+        :items-per-page="50"
+        :search="search"
+      >
+        <template v-slot:item.icon="{ item }">
+          <font-awesome-icon size="sm" :icon="typeToIcon(item.type)" :color="colors.blue.base" />
+        </template>
+        <template v-slot:item.name="{ item }">
+                    <a link :href="'#/device/' + item.id">{{ item.name }}</a>
+          </template>
+      </v-data-table>
+    </v-card>
+  </v-flex>
 </template>
 <script>
 import colors from "vuetify/es5/util/colors";
+import { typeToIcon, getComponentName } from "./helpers";
 
 export default {
-  created: async function() {
-    fetch("/endpoint/@scrypted/ui/api/devices")
-      .then(response => response.json())
-      .then(json => {
-        this.$data.devices.push(...json);
-      })
-      .catch();
-  },
   methods: {
-    getOwner(device) {
-      if (device.owner) {
-        return device.owner;
+    getOwner(owner) {
+      if (!owner) {
+        return undefined;
       }
-      return;
-    }
+      return this.$scrypted.systemManager.getDeviceById(owner).metadata
+        .npmPackage;
+    },
+    getComponent(component) {
+      return getComponentName(component);
+    },
+    typeToIcon
   },
   computed: {
+    devices() {
+      return Object.keys(this.$store.state.systemState)
+        .map(id => this.$scrypted.systemManager.getDeviceById(id))
+        .map(device => ({
+          id: device.id,
+          name: device.name,
+          type: device.type,
+          owner: this.getOwner(device.metadata.ownerPlugin),
+          component: this.getComponent(device.component)
+        }));
+    },
     tableDevices() {
       return this.devices.map(device =>
         Object.assign(
           {
-            plugin: (device.owner || device.component).name
+            plugin: device.owner || device.component
           },
           device
         )
@@ -90,8 +104,7 @@ export default {
   data: function() {
     return {
       search: "",
-      colors,
-      devices: []
+      colors
     };
   }
 };

@@ -1,7 +1,7 @@
 const scryptedServer = 'https://192.168.2.27:9443';
 
 const proxyOpts = {
-  changeOrigin: true, 
+  changeOrigin: true,
   ws: true,
   target: scryptedServer,
   onProxyReq: (proxyReq) => {
@@ -13,12 +13,32 @@ const proxyOpts = {
 
 module.exports = {
   configureWebpack: {
+    resolve: {
+      extensions: ['.js', '.ts', '.vue']
+    },
     module: {
       rules: [
         {
           test: /\.js$/,
           use: ["source-map-loader"],
           enforce: "pre"
+        },
+        {
+          test: /\.(ts|js)x?$/,
+          // unsure if this is correct... need to transpile node modules at times.
+          exclude: /(node_modules|bower_components)/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              "plugins": [
+                "@babel/plugin-transform-typescript",
+              ],
+              "presets": [
+                '@vue/app',
+                "@babel/typescript",
+              ]
+            }
+          }
         }
       ]
     },
@@ -28,7 +48,7 @@ module.exports = {
   devServer: {
     https: true,
     proxy: {
-      '^/(login|static|endpoint|whitelist|web/message)': proxyOpts,
+      '^/(login|static|endpoint|whitelist|web)': proxyOpts,
     }
   }
 }

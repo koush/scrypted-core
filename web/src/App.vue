@@ -1,12 +1,12 @@
 <template>
   <v-app>
     <Drawer v-model="$data"></Drawer>
-    
+
     <v-app-bar dark app clipped-left>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="headline text-uppercase">
-        <span>{{ title }} </span>
+        <span>{{ title }}</span>
         <!-- <span class="font-weight-light">Management Console</span> -->
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -29,7 +29,7 @@
     <v-content elevation="-2">
       <v-container grid-list-xs grid-list-xl grid-list-md grid-list-sm grid-list-lg fluid>
         <v-fade-transition mode="out-in">
-          <router-view></router-view>
+          <router-view v-if="!loading"></router-view>
         </v-fade-transition>
       </v-container>
     </v-content>
@@ -37,56 +37,76 @@
 </template>
 
 <script lang="ts">
-// import Dashboard from './components/Dashboard';
-import Dashboard from './components/dashboard/Dashboard.vue';
-import Drawer from './components/Drawer.vue';
-import Devices from './components/Devices.vue';
-import VueRouter from 'vue-router'
+import Device from "./components/Device.vue";
+import AggregateComponent from "./components/builtin/AggregateComponent.vue";
+import AutomationComponent from "./components/builtin/AutomationComponent.vue";
+import ScriptComponent from "./components/builtin/ScriptComponent.vue";
+import Dashboard from "./components/dashboard/Dashboard.vue";
+import Drawer from "./components/Drawer.vue";
+import Devices from "./components/Devices.vue";
+import VueRouter from "vue-router";
 let router = new VueRouter({
   routes: [
     {
-      path: '/devices',
-      component:  Devices,
+      path: "/devices",
+      component: Devices
     },
     {
-      path: '/',
-      component:  Dashboard,
+      path: "/",
+      component: Dashboard
+    },
+    {
+      path: "/component/automation",
+      component: AutomationComponent
+    },
+    {
+      path: "/component/script",
+      component: ScriptComponent
+    },
+    {
+      path: "/component/aggregate",
+      component: AggregateComponent
+    },
+    {
+      path: "/device/:id",
+      component: Device,
     }
   ]
 });
 
-import Vue from 'vue';
-import Vuex from 'vuex'
-Vue.use(Vuex)
+import Vue from "vue";
+import Vuex from "vuex";
+Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    systemState: {},
+    systemState: {}
   },
   mutations: {
     setSystemState: function(store, systemState) {
       store.systemState = systemState;
     }
   }
-})
+});
 
-const PushConnectionManager = window['pushconnect'].PushConnectionManager;
+const PushConnectionManager = window["pushconnect"].PushConnectionManager;
 var pushConnectionPromise;
 Vue.prototype.$pushconnect = function() {
   if (pushConnectionPromise) {
     return pushConnectionPromise;
   }
-  pushConnectionPromise = PushConnectionManager.start({},
-  {
-    iceServers: [
-      {
-        urls: ["turn:n0.clockworkmod.com", "turn:n1.clockworkmod.com"],
-        username: "foo",
-        credential: "bar"
-      },
-    ],
-  })
-  .then(rtcManager => {
+  pushConnectionPromise = PushConnectionManager.start(
+    {},
+    {
+      iceServers: [
+        {
+          urls: ["turn:n0.clockworkmod.com", "turn:n1.clockworkmod.com"],
+          username: "foo",
+          credential: "bar"
+        }
+      ]
+    }
+  ).then(rtcManager => {
     // console.log('persistent gcm connection created', rtcManager != null);
     // console.log(rtcManager.registrationId);
     return rtcManager;
@@ -95,51 +115,40 @@ Vue.prototype.$pushconnect = function() {
   return pushConnectionPromise;
 };
 
+import client from "@scrypted/client";
 
-
-import client from '@scrypted/client';
-
-const clientPromise = client.connect(null);
-Vue.use((Vue) => {
-  clientPromise.then(scrypted => {
-    Vue.prototype.$scrypted = scrypted;
-    const systemState = scrypted.systemManager.getSystemState();
-    store.commit('setSystemState', systemState);
-
-    scrypted.systemManager.listen((eventSource, eventDetails, eventData) => {
-      if (!eventDetails.property) {
-          return;
-      }
-
-      const device = systemState[eventSource.id] = systemState[eventSource.id] || {};
-      var state = device[eventDetails.property] = device[eventDetails.property] || {};
-      Object.assign(state, {
-          stateTime: state.value !== eventData ? eventDetails.eventTime : state.lastEventTime,
-          lastEventTime: eventDetails.eventTime,
-          sourceInterface: eventDetails.eventInterface,
-          value: eventData,
-      });
-    });
-  });
-});
 
 export default {
   name: "App",
   components: {
-    Drawer,
+    Drawer
   },
   created() {
     router.beforeEach((to, from, next) => {
       this.title = to.name || "Scrypted";
       next();
-    })
+    });
+
+
+    const clientPromise = client.connect(null);
+    Vue.use(Vue => {
+      clientPromise.then(scrypted => {
+        Vue.prototype.$scrypted = scrypted;
+        // system state is returned as a reference and updated by the scrypted client, so passing it to vue allows direct model updates.
+        // this is not the same behavior as on android. fix?
+        const systemState = scrypted.systemManager.getSystemState();
+        store.commit("setSystemState", systemState);
+        this.loading = false;
+      });
+    });
   },
   store,
   router,
   data() {
     return {
-      title: 'Scrypted',
+      title: "Scrypted",
       drawer: false,
+      loading: true,
     };
   }
 };

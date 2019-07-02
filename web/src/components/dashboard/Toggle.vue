@@ -1,7 +1,11 @@
 <template>
   <v-list-item ripple @click="showDevices(type)">
     <v-list-item-icon>
-      <font-awesome-icon size="sm" :icon="typeToIcon(type.type)" :color="on ? 'orange' : '#a9afbb'"/>
+      <font-awesome-icon
+        size="sm"
+        :icon="typeToIcon(type.type)"
+        :color="on ? 'orange' : '#a9afbb'"
+      />
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title class="font-weight-light">{{ groupName }}</v-list-item-title>
@@ -26,11 +30,27 @@
 
           <v-flex xs12>
             <v-layout align-center justify-center column>
-              <div class="slider-pad-bottom"></div>
-              <vue-slider :width="40" :height="200" ref="slider" direction="btt" :dotSize="60"></vue-slider>
-              <div class="slider-pad-bottom"></div>
+              <div v-if="brightness !== undefined">
+                <div class="slider-pad-bottom"></div>
+                <vue-slider
+                  :width="40"
+                  :height="200"
+                  ref="slider"
+                  direction="btt"
+                  :dotSize="60"
+                  v-model="brightness"
+                ></vue-slider>
+                <div class="slider-pad-bottom"></div>
+              </div>
               <v-list color="green">
-                <SingleToggle v-for="deviceId in type.ids" :key="deviceId" :type="type.type" :ids="[deviceId]" :name="$store.state.systemState[deviceId].name.value"></SingleToggle>
+                <SingleToggle
+                  :light="true"
+                  v-for="deviceId in type.ids"
+                  :key="deviceId"
+                  :type="type.type"
+                  :ids="[deviceId]"
+                  :name="$store.state.systemState[deviceId].name.value"
+                ></SingleToggle>
               </v-list>
               <v-btn rounded color="primary" dark x-small>Rounded Button</v-btn>
             </v-layout>
@@ -46,7 +66,8 @@ import SingleToggle from "./SingleToggle.vue";
 import ClickOutside from "vue-click-outside";
 import VueSlider from "vue-slider-component";
 import "vue-slider-component/theme/material.css";
-
+import { ScryptedInterface } from "@scrypted/sdk";
+import throttle from "lodash.throttle";
 
 export default {
   props: ["type", "group"],
@@ -61,7 +82,7 @@ export default {
   data() {
     return {
       showLightsDialog: false,
-      watchClickOutside: false
+      watchClickOutside: false,
     };
   },
   methods: {
@@ -79,9 +100,38 @@ export default {
       setTimeout(() => {
         this.watchClickOutside = true;
       }, 1000);
-    }
+    },
+    debounceSetBrightness: throttle(function(self) {
+      self.type.ids
+        .map(id => self.getDevice(id))
+        .filter(device =>
+          device.interfaces.includes(ScryptedInterface.Brightness)
+        )
+        .forEach(device => device.setBrightness(self._debouncedBrightness));
+    }, 500)
   },
   computed: {
+    brightness: {
+      get() {
+        const brightnessDevices = this.type.ids
+          .map(id => this.getDevice(id))
+          .filter(device =>
+            device.interfaces.includes(ScryptedInterface.Brightness)
+          );
+        if (!brightnessDevices.length) {
+          return undefined;
+        }
+        const brightness = brightnessDevices.reduce(
+          (brightness, device) => brightness + device.brightness,
+          0
+        );
+        return brightness / brightnessDevices.length;
+      },
+      set(value) {
+        this._debouncedBrightness = value;
+        this.debounceSetBrightness(this);
+      }
+    },
     groupName() {
       if (this.type.name) {
         return this.type.name;
@@ -90,14 +140,14 @@ export default {
     },
     on: {
       get() {
-        var on = false;
-        this.type.ids.forEach(
-          id => (on = on || this.$store.state.systemState[id].on.value)
-        );
-        return on;
+        return this.type.ids
+          .map(id => this.getDevice(id))
+          .reduce((on, device) => on || device.on, false);
       },
       set(value) {
-        this.type.ids.forEach(id => this.setOnOff(id, value));
+        this.type.ids
+          .map(id => this.getDevice(id))
+          .forEach(device => device[value ? "turnOn" : "turnOff"]());
       }
     }
   }

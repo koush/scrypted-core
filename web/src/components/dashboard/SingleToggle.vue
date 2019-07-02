@@ -12,14 +12,14 @@
     </v-list-item-content>
 
     <v-list-item-action>
-      <v-switch inset v-model="on" color="white"></v-switch>
+      <v-switch inset v-model="on" color="white" :light="light"></v-switch>
     </v-list-item-action>
   </v-list-item>
 </template>
 <script lang="ts">
 import Base from "./Base.vue";
 export default {
-  props: ["ids", "type", "name"],
+  props: ["ids", "type", "name", "light"],
   mixins: [Base],
   computed: {
     on: {

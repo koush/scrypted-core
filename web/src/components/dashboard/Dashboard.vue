@@ -6,12 +6,42 @@
           <v-card-title
             :class="randomGradient(index * 4 + roomIndex)"
             class="subtitle-1 text--white header-card-gradient font-weight-light"
-          >{{ room.name }}</v-card-title>
+          >
+            {{ room.name }}
+            <div
+              style="position: absolute; right: 10px"
+              v-for="type in room.types"
+              :key="type.name || type.type"
+            >
+              <component
+                v-if="validTypes[type.type].collapse && type.type == 'Sensor'"
+                :group="room.name"
+                :type="type"
+                :is="validTypes[type.type].component"
+              ></component>
+            </div>
+          </v-card-title>
+          <div class="header-card-spacer"></div>
+
           <v-list flat class="header-card-content">
             <v-list-item-group>
               <div v-for="type in room.types" :key="type.name || type.type">
-                <component v-if="validTypes[type.type].collapse" :group="room.name" :type="type" :is="validTypes[type.type].component"></component>
-                <component v-else v-for="deviceId in type.ids" :key="deviceId" :group="room.name" :deviceId="deviceId" :is="validTypes[type.type].component"></component>
+                <div v-if="type.type != 'Sensor'">
+                  <component
+                    v-if="validTypes[type.type].collapse"
+                    :group="room.name"
+                    :type="type"
+                    :is="validTypes[type.type].component"
+                  ></component>
+                  <component
+                    v-else
+                    v-for="deviceId in type.ids"
+                    :key="deviceId"
+                    :group="room.name"
+                    :deviceId="deviceId"
+                    :is="validTypes[type.type].component"
+                  ></component>
+                </div>
               </div>
             </v-list-item-group>
           </v-list>
@@ -21,20 +51,14 @@
   </v-layout>
 </template>
 <script lang="ts">
-// import Vue from "vue";
-// import Vuex from "vuex";
-// Vue.use(Vuex);
-
 import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
 import Toggle from "./Toggle.vue";
 import Empty from "./Empty.vue";
 import Camera from "./Camera.vue";
 import Lock from "./Lock.vue";
+import Sensors from "./Sensors.vue";
 import Base from "./Base.vue";
-
-interface Foo {
-  poops: number;
-}
+import "../header-card.css";
 
 const validTypes = [];
 
@@ -57,12 +81,15 @@ validTypes[ScryptedDeviceType.Lock] = lock;
 
 const sensors = {
   priority: 10,
-  component: "Empty"
+  component: "Sensors",
+  collapse: true,
+  typeKey: "Sensor"
 };
 sensors[ScryptedInterface.Thermometer] = "Thermometer";
 sensors[ScryptedInterface.HumiditySensor] = "HumiditySensor";
 sensors[ScryptedInterface.EntrySensor] = "EntrySensor";
-// validTypes[ScryptedDeviceType.Sensor] = sensors;
+validTypes[ScryptedDeviceType.Sensor] = sensors;
+validTypes[ScryptedDeviceType.Thermostat] = sensors;
 
 const camera = {
   priority: 0,
@@ -83,7 +110,8 @@ export default {
     Toggle,
     Empty,
     Camera,
-    Lock
+    Lock,
+    Sensors
   },
   methods: {
     getColumnsForBreakpoint(bp) {
@@ -164,7 +192,9 @@ export default {
       var ret = {};
       Object.entries(this.$store.state.systemState)
         // filter out devices we can't show in the ui
-        .filter(([, device]) => device.type && validTypes[device.type.value])
+        .filter(([, device]) => {
+          return device.type && validTypes[device.type.value];
+        })
         // verify the interfaces we need exist on the devices we can use.
         .filter(([, device]) => {
           if (!device.interfaces || !device.interfaces.value) {
@@ -185,8 +215,9 @@ export default {
             name,
             types: {}
           });
-          var type = (room.types[device.type.value] =
-            room.types[device.type.value] || []);
+          const typeKey =
+            validTypes[device.type.value].typeKey || device.type.value;
+          var type = (room.types[typeKey] = room.types[typeKey] || []);
           type.push(id);
         });
 
@@ -238,35 +269,4 @@ export default {
 };
 </script>
 <style>
-.header-card {
-  margin-bottom: 20px;
-}
-.purple-gradient {
-  background: linear-gradient(60deg, #ab47bc, #8e24aa);
-}
-.red-gradient {
-  background: linear-gradient(60deg, #ef5350, #e53935);
-}
-.orange-gradient {
-  background: linear-gradient(60deg, #ffa726, #fb8c00);
-}
-.green-gradient {
-  background: linear-gradient(60deg, #66bb6a, #43a047);
-}
-.header-card-gradient {
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
-  color: white;
-  width: 90%;
-  margin-top: -20px;
-  margin-left: 5%;
-  position: absolute;
-  padding-top: 10px;
-  padding-bottom: px;
-}
-.header-card-content {
-  padding-top: 40px;
-}
 </style>

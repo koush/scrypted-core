@@ -120,9 +120,28 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 break;
             }
             case 'method': {
-                const { id, method, resultId, argArray } = message;
+                const { id, method, argArray } = message;
                 const device = systemManager.getDeviceById(id);
                 device[method](... argArray);
+                break;
+            }
+            case 'system': {
+                const { method, argArray, resultId } = message;
+                systemManager[method](...argArray || [])
+                .then(result => {
+                    this.sendOutgoingMessage({
+                        type: 'system',
+                        resultId,
+                        result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
+                    }, session.webSocket);
+                })
+                .catch(e => {
+                    this.sendOutgoingMessage({
+                        type: 'system',
+                        resultId,
+                        error: e.toString(),
+                    }, session.webSocket);
+                })
                 break;
             }
             case 'media': {

@@ -28,7 +28,7 @@
           v-for="item in filterComponents(category)"
           :key="item.id"
           link
-          :to="'/' + item.id"
+          :to="'/component/' + item.id"
           :ripple="false"
           style="padding: 10px;"
           active-class="purple white--text tile"
