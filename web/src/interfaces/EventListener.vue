@@ -8,18 +8,17 @@ import RPCInterface from './RPCInterface.vue'
 
 export default {
     mixins: [RPCInterface],
-    mounted: function() {
-        // this is an implicit command, so immediately trigger the change.
-        if (!this.device) {
-            this.onEvent();
+    data() {
+        return {
+            model: this.cloneValue(),
         }
     },
     methods: {
-        onEvent: function() {
+        onChange() {
             this.rpc({
                 varargs: true,
             }).onEvent();
-        },
+        }
     }
 };
 </script>

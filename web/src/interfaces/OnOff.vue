@@ -2,7 +2,7 @@
   <v-switch
     inset
     :label="label"
-    v-model="on"
+    v-model="model.on"
     color="indigo"
     @click.self="onClick"
     @change="onChange"
@@ -17,12 +17,12 @@ export default {
   data: function() {
     return {
       radio: Math.random(),
-      on: this.value.on
+      model: this.cloneValue(),
     };
   },
   computed: {
     label() {
-      return this.value.on ? "On" : "Off";
+      return this.model.on ? "On" : "Off";
     }
   },
   methods: {
@@ -34,17 +34,16 @@ export default {
     },
     onClick() {
       // click.self is fired only if it does not change.
-      if (this.on) {
+      if (this.model.on) {
         this.turnOn();
       } else {
         this.turnOff();
       }
     },
     onChange: function() {
-      this.value.on = this.on;
       // guard with this.device as device calls are actually done in onClick
       if (!this.device) {
-        if (this.on) {
+        if (this.model.on) {
           this.turnOn();
         } else {
           this.turnOff();

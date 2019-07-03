@@ -1,9 +1,9 @@
 <template>
   <v-flex>
-    <v-btn class="mx-2" fab @click="unlock" :color="value.lockState === 'Locked' ? '#a9afbb' : 'orange'" dark>
+    <v-btn class="mx-2" fab @click="unlock" :color="model.lockState === 'Locked' ? '#a9afbb' : 'orange'" dark>
       <v-icon >lock_open</v-icon>
     </v-btn>
-    <v-btn class="mx-2" fab @click="lock" :color="value.lockState === 'Locked' ? 'green' : '#a9afbb'" dark>
+    <v-btn class="mx-2" fab @click="lock" :color="model.lockState === 'Locked' ? 'green' : '#a9afbb'" dark>
       <v-icon>lock</v-icon>
     </v-btn>
   </v-flex>
@@ -17,21 +17,21 @@ export default {
   data: function() {
     return {
       radio: Math.random(),
-      locked: this.value.lockState == "Locked"
+      model: this.cloneValue(),
     };
   },
   methods: {
     lock: function() {
-      this.locked = true;
+      this.model.lockState = 'Locked';
       this.onChange();
     },
     unlock: function() {
-      this.locked = false;
+      this.model.lockState = 'Unlocked';
       this.onChange();
     },
     onChange: function() {
       // prefer locked in case of error.
-      if (this.locked) {
+      if (this.model.lockState !== 'Unlocked') {
         this.rpc().lock();
       } else {
         this.rpc().unlock();

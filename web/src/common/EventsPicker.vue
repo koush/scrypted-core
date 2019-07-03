@@ -2,21 +2,20 @@
   <div>
     <EventPicker
       @input="onChange"
-      v-for="trigger in keyedTriggers"
-      :key="trigger.key"
-      :selected="trigger.value"
+      v-for="(trigger, index) in triggers"
+      :key="index"
       :events="events"
       :interfaces="interfaces"
-      v-model="trigger.value"
+      v-model="triggers[index]"
       style="margin-bottom: 20px;"
     ></EventPicker>
-    <input type="hidden" ref="jsonData" :name="name" />
 
     <v-btn v-on:click.stop.prevent="addTrigger" class="btn btn-secondary mb-3">Add Another Trigger</v-btn>
   </div>
 </template>
 
 <script>
+import cloneDeep from "lodash.clonedeep";
 import EventPicker from "./EventPicker.vue";
 
 export default {
@@ -26,12 +25,17 @@ export default {
     interfaces: Array,
     value: Array
   },
+  data() {
+    return {
+      triggers: cloneDeep(this.value),
+    }
+  },
   components: {
     EventPicker
   },
   mounted: function() {
     if (!this.value.length) this.addTrigger();
-    this.updateJson();
+    this.onChange();
   },
   computed: {
     keyedTriggers: function() {
@@ -42,13 +46,9 @@ export default {
     }
   },
   methods: {
-    updateJson: function() {
-      var newValue = this.value.slice().filter(e => e.id != "unassigned");
-      this.$refs.jsonData.value = JSON.stringify(newValue);
-      this.$emit("input", newValue);
-    },
     onChange: function() {
-      this.updateJson();
+      var newValue = this.triggers.slice().filter(e => e.id != "unassigned");
+      this.$emit("input", newValue);
     },
     addTrigger: function() {
       this.value.push({

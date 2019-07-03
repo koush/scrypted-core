@@ -18,7 +18,7 @@ import Vue from "vue";
 export default {
   props: ["label", "options", "value", "unselected", "multiple"],
   data: function() {
-    const selected = Vue.util.extend(this.value);
+    const selected = Vue.util.extend({}, this.value);
     const sortedOptions = this.makeSortedOptions(selected);
     return {
       selected,
@@ -32,7 +32,7 @@ export default {
       }
       const selectedIds = selected.map(item => item.id);
       const sortedOptions = Vue.util
-        .extend(this.options)
+        .extend([], this.options)
         .filter(item => !selectedIds.includes(item.id));
 
       sortedOptions.unshift(...selected);

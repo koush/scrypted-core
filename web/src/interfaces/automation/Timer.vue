@@ -1,8 +1,22 @@
 <template>
   <div>
-    <v-slider v-model="hours" label="Hours" thumb-label="always" min="0" max="23"></v-slider>
-    <v-slider v-model="minutes" label="Minutes" thumb-label="always" min="0" max="59"></v-slider>
-    <v-slider v-model="seconds" label="Seconds" thumb-label="always" min="0" max="59"></v-slider>
+    <v-slider @input="onChange" v-model="hours" label="Hours" thumb-label="always" min="0" max="23"></v-slider>
+    <v-slider
+      @input="onChange"
+      v-model="minutes"
+      label="Minutes"
+      thumb-label="always"
+      min="0"
+      max="59"
+    ></v-slider>
+    <v-slider
+      @input="onChange"
+      v-model="seconds"
+      label="Seconds"
+      thumb-label="always"
+      min="0"
+      max="59"
+    ></v-slider>
     <v-btn outlined color="indigo">{{ time }}</v-btn>
   </div>
 </template>
@@ -12,9 +26,19 @@ import RPCInterface from "../RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
+  data() {
+    return {
+      model: this.cloneValue()
+    };
+  },
   methods: {
     update(hours, minutes, seconds) {
-      this.value.seconds = hours * 60 * 60 + minutes * 60 + seconds;
+      this.model.seconds = hours * 60 * 60 + minutes * 60 + seconds;
+    },
+    onChange() {
+      this.rpc({
+        varargs: true
+      }).create(parseInt((this.model.seconds || 0) * 1000));
     }
   },
   computed: {

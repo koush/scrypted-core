@@ -13,11 +13,16 @@ import RPCInterface from "../RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
+  data() {
+    return {
+      model: this.cloneValue(),
+    }
+  },
   methods: {
     onChange: function() {
       this.rpc({
         varargs: true
-      }).evaluate(this.value.condition);
+      }).evaluate(this.model.condition);
     }
   }
 };

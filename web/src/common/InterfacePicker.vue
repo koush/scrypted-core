@@ -13,10 +13,9 @@
             ></Select2>
 
             <component
-              :key="value.id"
               :is="selected.component"
               :properties="selected.properties"
-              v-model="value.model"
+              v-model="model"
               @input="onChange"
             ></component>
           </v-flex>
@@ -27,6 +26,7 @@
 </template>
 
 <script>
+import cloneDeep from "lodash.clonedeep";
 
 import Unassigned from './../interfaces/Unassigned.vue'
 
@@ -47,7 +47,6 @@ function unassigned() {
     id: "unassigned",
     text: "Select Action",
     component: "Unassigned",
-    model: {}
   };
 }
 
@@ -62,6 +61,14 @@ export default {
       default: unassigned
     }
   },
+  data() {
+    let selected = this.value.id == "unassigned" ? unassigned() : this.interfaces.find(e => e.id == this.value.id);
+    selected = cloneDeep(selected) || unassigned();
+    return {
+      selected,
+      model: cloneDeep(this.value.model),
+    };
+  },
   mounted: function() {
     if (!this.selected) {
       this.selected = unassigned();
@@ -74,16 +81,6 @@ export default {
         return this.interfaces.filter(iface => iface.action);
       }
     },
-    selected: {
-      get: function() {
-        if (this.value.id == "unassigned") return unassigned();
-        return this.interfaces.find(e => e.id == this.value.id);
-      },
-      set: function(val) {
-        this.value.model = {};
-        this.value.id = val.id;
-      }
-    }
   },
   components: {
     Unassigned,
@@ -102,7 +99,10 @@ export default {
   },
   methods: {
     onChange: function() {
-      this.$emit("input", this.value);
+      this.$emit("input", {
+        id: this.selected.id,
+        model: this.model,
+      });
     }
   }
 };

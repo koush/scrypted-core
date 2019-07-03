@@ -3,7 +3,7 @@
     <v-card
       raised
       class="header-card"
-      v-if="automationType !== 'Scene'"
+      v-if="device.automationType !== 'Scene'"
       style="margin-bottom: 60px"
     >
       <v-card-title
@@ -21,15 +21,20 @@
           <v-layout>
             <v-flex xs12>
               <EventsPicker
-                :name="triggers.name"
-                :events="events"
-                :interfaces="interfaces"
-                v-model="triggers.triggers"
-                @change="onChange"
+                :name="device.triggers.name"
+                :events="deviceProps.automationData.events"
+                :interfaces="deviceProps.automationData.interfaces"
+                v-model="device.triggers.triggers"
+                @input="onChange"
               ></EventsPicker>
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
-                  <v-checkbox v-on="on" v-model="denoiseEvents" label="Denoise All Events"></v-checkbox>
+                  <v-checkbox
+                    @input="onChange"
+                    v-on="on"
+                    v-model="device.denoiseEvents"
+                    label="Denoise All Events"
+                  ></v-checkbox>
                 </template>
                 <span>Denoising events will suppress events where the same event data is sent multiple times in a row. For example, if a sensor sent multiple door open events, only the first event will trigger this automation. The automation will fire again once the door sends a close event.</span>
               </v-tooltip>
@@ -37,8 +42,9 @@
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <v-checkbox
+                    @input="onChange"
                     v-on="on"
-                    v-model="staticEvents"
+                    v-model="device.staticEvents"
                     label="Reset Automation on All Events"
                   ></v-checkbox>
                 </template>
@@ -48,8 +54,9 @@
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <v-checkbox
+                    @input="onChange"
                     v-on="on"
-                    v-model="resetOnCompletion"
+                    v-model="device.resetOnCompletion"
                     label="Run Automations to Completion"
                   ></v-checkbox>
                 </template>
@@ -66,13 +73,13 @@
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >
         <font-awesome-icon size="sm" icon="play" />
-        <span v-if="automationType !== 'Scene'">&nbsp;&nbsp;Automation Actions</span>
+        <span v-if="device.automationType !== 'Scene'">&nbsp;&nbsp;Automation Actions</span>
         <span v-else>&nbsp;&nbsp;Scene Activation Actions</span>
       </v-card-title>
 
       <div class="header-card-spacer"></div>
       <v-card-text
-        v-if="automationType !== 'Scene'"
+        v-if="device.automationType !== 'Scene'"
       >Specify action(s) to take when the automation is triggered.</v-card-text>
       <v-card-text v-else>Specify action(s) to take when the scene is activated.</v-card-text>
 
@@ -81,10 +88,10 @@
           <v-layout>
             <v-flex xs12>
               <InterfacesPicker
-                :name="actions.name"
+                :name="device.actions.name"
                 :interfaces="contextualInterfaces"
-                v-model="actions.actions"
-                @change="onChange"
+                v-model="device.actions.actions"
+                @input="onChange"
               ></InterfacesPicker>
             </v-flex>
           </v-layout>
@@ -92,17 +99,17 @@
       </v-form>
     </v-card>
 
-    <div v-if="automationType === 'Scene'" class="card col-12 col-lg-6">
+    <div v-if="device.automationType === 'Scene'" class="card col-12 col-lg-6">
       <div class="card-header">
         <h5 class="card-title">Scene Dectivation Actions</h5>
         <h6 class="card-subtitle text-muted">Specify action(s) to take when the scene deactivated.</h6>
       </div>
 
       <InterfacesPicker
-        :name="deactivateActions.name"
+        :name="device.deactivateActions.name"
         :interfaces="contextualInterfaces"
-        v-model="deactivateActions.actions"
-                @change="onChange"
+        v-model="device.deactivateActions.actions"
+        @input="onChange"
       ></InterfacesPicker>
     </div>
   </v-flex>
@@ -110,22 +117,41 @@
 <script lang="ts">
 import InterfacesPicker from "../common/InterfacesPicker.vue";
 import EventsPicker from "../common/EventsPicker.vue";
-
+import cloneDeep from "lodash.clonedeep";
 
 export default {
   data() {
-    return this.value.automationData;
+    const {
+      triggers,
+      actions,
+      deactivateActions,
+      staticEvents,
+      denoiseEvents,
+      resetOnCompletion,
+      automationType
+    } = this.deviceProps.automationData;
+    return {
+      device: cloneDeep({
+        triggers,
+        actions,
+        deactivateActions,
+        staticEvents,
+        denoiseEvents,
+        resetOnCompletion,
+        automationType
+      })
+    };
   },
-  props: ["value"],
+  props: ["value", "deviceProps"],
   components: {
     InterfacesPicker,
-    EventsPicker,
+    EventsPicker
   },
   computed: {
     mappedEvents: {
       get: function() {
         var ret = {};
-        for (var event of this.events) {
+        for (var event of this.deviceProps.automationData.events) {
           ret[event.id] = event;
         }
         return ret;
@@ -135,7 +161,7 @@ export default {
       get: function() {
         var ret = [];
         var triggeredEvents = {};
-        for (var trigger of this.triggers.triggers) {
+        for (var trigger of this.device.triggers.triggers) {
           trigger = this.mappedEvents[trigger.id];
           if (!trigger || !trigger.component) continue;
           triggeredEvents[trigger.component] = trigger.component;
@@ -148,19 +174,21 @@ export default {
           action: true
         }));
         Array.prototype.push.apply(ret, contextual);
-        Array.prototype.push.apply(ret, this.interfaces);
+        Array.prototype.push.apply(
+          ret,
+          this.deviceProps.automationData.interfaces
+        );
         return ret;
       }
     }
   },
-  watch: {
-    'actions.actions': function() {
-      console.log(this.value);
-    }
+  mounted() {
+    // this is a hack until device is propertly send across from the java side.
+    this.onChange();
   },
   methods: {
-    onChange: function() {
-      console.log(this.value);
+    onChange() {
+      this.$emit("input", this.device);
     }
   }
 };

@@ -7,12 +7,12 @@
         @click="toggleDay(day)"
         color="info"
         small
-        :text="!$data[day]"
+        :text="!model[day]"
       >{{ day.substring(0, 3) }}</v-btn>
     </v-flex>
     <v-flex xs12>
       <v-layout justify-center align-center>
-        <v-time-picker v-model="time" format="24hr"></v-time-picker>
+        <v-time-picker v-model="time" format="24hr" @input="onChange"></v-time-picker>
       </v-layout>
     </v-flex>
     <v-flex xs12>
@@ -23,8 +23,8 @@
             :items="clockTypes"
             solo
             item-value="id"
-            v-model="clockType"
-            @change="onChange"
+            v-model="model.clockType"
+            @input="onChange"
           ></v-select>
         </v-flex>
       </v-layout>
@@ -33,7 +33,15 @@
 </template>
 <script>
 import RPCInterface from "../RPCInterface.vue";
-const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const days = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday"
+];
 const hours = [];
 const minutes = [];
 
@@ -42,6 +50,36 @@ function zeroPrefix(arr, len) {
     arr.push(i >= 10 ? i.toString() : "0" + i);
   }
 }
+const clockTypes = [
+  {
+    id: "AM",
+    text: "AM"
+  },
+  {
+    id: "PM",
+    text: "PM"
+  },
+  {
+    text: "24 Hour Clock",
+    id: "TwentyFourHourClock"
+  },
+  {
+    text: "Before Sunrise",
+    id: "BeforeSunrise"
+  },
+  {
+    text: "After Sunrise",
+    id: "AfterSunrise"
+  },
+  {
+    text: "Before Sunset",
+    id: "BeforeSunset"
+  },
+  {
+    text: "After Sunset",
+    id: "AfterSunset"
+  }
+];
 
 zeroPrefix(hours, 24);
 zeroPrefix(minutes, 59);
@@ -49,49 +87,11 @@ zeroPrefix(minutes, 59);
 export default {
   mixins: [RPCInterface],
   data: function() {
-    var ret = {
-      hours,
-      minutes,
+    return {
+      model: this.cloneValue(),
+      clockTypes,
       days,
-      hour: this.value.hour || "00",
-      minute: this.value.minute || "00",
-      clockType: this.value.clockType || "AM",
-      clockTypes: [
-        {
-          id: "AM",
-          text: "AM"
-        },
-        {
-          id: "PM",
-          text: "PM"
-        },
-        {
-          text: "24 Hour Clock",
-          id: "TwentyFourHourClock"
-        },
-        {
-          text: "Before Sunrise",
-          id: "BeforeSunrise"
-        },
-        {
-          text: "After Sunrise",
-          id: "AfterSunrise"
-        },
-        {
-          text: "Before Sunset",
-          id: "BeforeSunset"
-        },
-        {
-          text: "After Sunset",
-          id: "AfterSunset"
-        }
-      ]
     };
-
-    for (var day of days) {
-      ret[day] = !!this.value[day];
-    }
-    return ret;
   },
   computed: {
     time: {
@@ -99,27 +99,29 @@ export default {
         return `${this.value.hour}:${this.value.minute}`;
       },
       set(value) {
-        this.hour = parseInt(value.split(':')[0]);
-        this.minute = parseInt(value.split(':')[1]);
+        this.model.hour = value.split(":")[0];
+        this.model.minute = value.split(":")[1];
         this.onChange();
       }
     }
   },
   methods: {
     toggleDay: function(day) {
-      this[day] = !this[day];
+      this.model[day] = !this.model[day];
       this.onChange();
     },
     onChange: function() {
-      var schedule = {};
-      for (var day of days) {
-        schedule[day] = this.value[day] = this.$data[day];
-      }
-      schedule.hour = this.value.hour = this.hour;
-      schedule.minute = this.value.minute = this.minute;
-      schedule.clockType = this.value.clockType = this.clockType;
+      const model = this.model;
+      const schedule = {
+        hour: parseInt(model.hour) || 0,
+        minute: parseInt(model.minute) || 0,
+        clockType: model.clockType || "AM",
+      };
+      days.forEach(day => {
+        schedule[day] = model[day] || false;
+      });
+
       this.rpc().schedule(schedule);
-      this.$emit('input', this.value);
     }
   }
 };

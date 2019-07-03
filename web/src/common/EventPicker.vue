@@ -19,14 +19,14 @@
               v-model="value.model"
               :events="events"
               :interfaces="interfaces"
-              @change="onChange"
+              @input="onChange"
             ></component>
             <v-text-field
               label="Trigger Condition (optional)"
               v-model="value.condition"
               persistent-hint
               hint="OnOff example: eventData === true"
-              @change="onChange"
+              @input="onChange"
             ></v-text-field>
           </v-flex>
         </v-layout>
@@ -36,8 +36,10 @@
 </template>
 
 <script>
+import cloneDeep from "lodash.clonedeep";
+
 import Select2 from "./Select2.vue";
-import Scheduler from '../interfaces/automation/Scheduler.vue'
+import Scheduler from "../interfaces/automation/Scheduler.vue";
 
 function unassigned() {
   return {
@@ -58,23 +60,23 @@ export default {
       default: unassigned
     }
   },
+  data() {
+    let selected =
+      this.value.id == "unassigned"
+        ? unassigned()
+        : this.events.find(e => e.id == this.value.id);
+    selected = cloneDeep(selected);
+    const condition = this.value.condition;
+    return {
+      selected,
+      condition,
+      model: cloneDeep(this.value.model),
+    };
+  },
   mounted: function() {
     if (!this.selected) {
       this.selected = unassigned();
       this.onChange();
-    }
-  },
-  computed: {
-    selected: {
-      get: function() {
-        if (this.value.id == "unassigned") return unassigned();
-        return this.events.find(e => e.id == this.value.id);
-      },
-      set: function(val) {
-        this.value.condition = null;
-        this.value.id = val.id;
-        this.value.model = {};
-      }
     }
   },
   components: {

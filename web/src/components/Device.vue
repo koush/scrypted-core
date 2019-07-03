@@ -31,8 +31,10 @@
 
     <v-flex xs12 v-if="!loading">
       <component
-        :is="device.box"
-        :value="device"
+      @input="onChange"
+        :is="deviceProps.box"
+        :deviceProps="deviceProps"
+        v-model="device"
         :id="id"
         :name="name"
         :type="type"
@@ -57,6 +59,7 @@ export default {
   },
   data() {
     return {
+      deviceProps: {},
       device: {},
       loading: true,
       name: undefined,
@@ -73,14 +76,17 @@ export default {
     }
   },
   methods: {
+    onChange() {
+    },
     reload() {
       this.name = this.$store.state.systemState[this.id].name.value;
       this.type = this.$store.state.systemState[this.id].type.value;
       this.syncWithIntegrations = this.$store.state.systemState[this.id].metadata.value.syncWithIntegrations;
       this.device = {};
+      this.deviceProps = {};
       this.loading = true;
       axios.get(`/web/device/${this.id}.json`).then(response => {
-        this.device = response.data;
+        this.deviceProps = response.data;
 
         this.loading = false;
       });
