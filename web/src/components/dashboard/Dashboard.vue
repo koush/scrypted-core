@@ -52,19 +52,18 @@
 </template>
 <script lang="ts">
 import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
-import Toggle from "./Toggle.vue";
-import Empty from "./Empty.vue";
-import Camera from "./Camera.vue";
-import Lock from "./Lock.vue";
-import Sensors from "./Sensors.vue";
-import Base from "./Base.vue";
+import DashboardToggle from "./DashboardToggle.vue";
+import DashboardCamera from "./DashboardCamera.vue";
+import DashboardLock from "./DashboardLock.vue";
+import DashboardSensors from "./DashboardSensors.vue";
+import DashboardBase from "./DashboardBase.vue";
 import "../header-card.css";
 
 const validTypes = [];
 
 const toggles = {
   priority: 30,
-  component: "Toggle",
+  component: "DashboardToggle",
   collapse: true
 };
 toggles[ScryptedInterface.OnOff] = "Toggle";
@@ -74,14 +73,14 @@ validTypes[ScryptedDeviceType.Outlet] = validTypes[
 
 const lock = {
   priority: 20,
-  component: "Lock"
+  component: "DashboardLock"
 };
 lock[ScryptedInterface.Lock] = "Lock";
 validTypes[ScryptedDeviceType.Lock] = lock;
 
 const sensors = {
   priority: 10,
-  component: "Sensors",
+  component: "DashboardSensors",
   collapse: true,
   typeKey: "Sensor"
 };
@@ -93,7 +92,7 @@ validTypes[ScryptedDeviceType.Thermostat] = sensors;
 
 const camera = {
   priority: 0,
-  component: "Camera",
+  component: "DashboardCamera",
   height: 4
 };
 camera[ScryptedInterface.VideoCamera] = "VideoCamera";
@@ -105,13 +104,12 @@ for (var rrr = 0; rrr < 100; rrr++) {
 }
 
 export default {
-  mixins: [Base],
+  mixins: [DashboardBase],
   components: {
-    Toggle,
-    Empty,
-    Camera,
-    Lock,
-    Sensors
+    DashboardToggle,
+    DashboardCamera,
+    DashboardLock,
+    DashboardSensors
   },
   methods: {
     getColumnsForBreakpoint(bp) {

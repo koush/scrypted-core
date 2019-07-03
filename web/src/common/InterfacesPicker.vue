@@ -36,9 +36,11 @@ export default {
   },
   methods: {
     updateJson: function() {
-      this.$refs.jsonData.value = JSON.stringify(
-        this.value.slice().filter(e => e.id != "unassigned" && e.model.rpc)
-      );
+      var newValue = this.value
+        .slice()
+        .filter(e => e.id != "unassigned");
+      this.$refs.jsonData.value = JSON.stringify(newValue);
+      this.$emit("input", newValue);
     },
     onChange: function() {
       this.updateJson();

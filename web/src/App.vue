@@ -36,7 +36,7 @@
   </v-app>
 </template>
 
-<script lang="ts">
+<script>
 import Device from "./components/Device.vue";
 import AggregateComponent from "./components/builtin/AggregateComponent.vue";
 import AutomationComponent from "./components/builtin/AutomationComponent.vue";
@@ -48,7 +48,7 @@ import VueRouter from "vue-router";
 let router = new VueRouter({
   routes: [
     {
-      path: "/devices",
+      path: "/device",
       component: Devices
     },
     {
@@ -147,7 +147,7 @@ export default {
   data() {
     return {
       title: "Scrypted",
-      drawer: false,
+      drawer: this.$vuetify.breakpoint.lgAndUp,
       loading: true,
     };
   }

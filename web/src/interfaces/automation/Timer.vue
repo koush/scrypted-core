@@ -3,6 +3,7 @@
     <v-slider v-model="hours" label="Hours" thumb-label="always" min="0" max="23"></v-slider>
     <v-slider v-model="minutes" label="Minutes" thumb-label="always" min="0" max="59"></v-slider>
     <v-slider v-model="seconds" label="Seconds" thumb-label="always" min="0" max="59"></v-slider>
+    <v-btn outlined color="indigo">{{ time }}</v-btn>
   </div>
 </template>
 
@@ -11,24 +12,51 @@ import RPCInterface from "../RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
+  methods: {
+    update(hours, minutes, seconds) {
+      this.value.seconds = hours * 60 * 60 + minutes * 60 + seconds;
+    }
+  },
   computed: {
     hours: {
       get() {
         return Math.floor(this.value.seconds / 60 / 60);
       },
-      set(value) {}
+      set(value) {
+        this.update(value, this.minutes, this.seconds);
+      }
     },
     minutes: {
       get() {
         return Math.floor(this.value.seconds / 60) % 60;
       },
-      set(value) {}
+      set(value) {
+        this.update(this.hours, value, this.seconds);
+      }
     },
     seconds: {
       get() {
         return this.value.seconds % 60;
       },
-      set(value) {}
+      set(value) {
+        this.update(this.hours, this.minutes, value);
+      }
+    },
+    time() {
+      var ret = [];
+      if (this.hours) {
+        ret.push(`${this.hours} hours`);
+      }
+      if (this.minutes) {
+        ret.push(`${this.minutes} minutes`);
+      }
+      if (this.seconds) {
+        ret.push(`${this.seconds} seconds`);
+      }
+      if (!ret.length) {
+        return "Adjust the sliders to set the timer.";
+      }
+      return "Timer will trigger after: " + ret.join(", ");
     }
   }
 };

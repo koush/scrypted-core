@@ -17,8 +17,11 @@
           <font-awesome-icon size="sm" :icon="typeToIcon(item.type)" :color="colors.blue.base" />
         </template>
         <template v-slot:item.name="{ item }">
-                    <a link :href="'#/device/' + item.id">{{ item.name }}</a>
-          </template>
+          <a link :href="'#/device/' + item.id">{{ item.name }}</a>
+        </template>
+        <template v-slot:item.plugin="{ item }">
+          <a link :href="item.plugin.link">{{ item.plugin.name }}</a>
+        </template>
       </v-data-table>
     </v-card>
   </v-flex>
@@ -33,8 +36,7 @@ export default {
       if (!owner) {
         return undefined;
       }
-      return this.$scrypted.systemManager.getDeviceById(owner).metadata
-        .npmPackage;
+      return this.$scrypted.systemManager.getDeviceById(owner).name;
     },
     getComponent(component) {
       return getComponentName(component);
@@ -49,8 +51,14 @@ export default {
           id: device.id,
           name: device.name,
           type: device.type,
-          owner: this.getOwner(device.metadata.ownerPlugin),
-          component: this.getComponent(device.component)
+          owner: device.metadata.ownerPlugin ? {
+            name: this.getOwner(device.metadata.ownerPlugin),
+            link: `#/device/${device.metadata.ownerPlugin}`
+          } : undefined,
+          component: {
+            name: this.getComponent(device.component),
+            link: `#/component/${device.component}`
+          }
         }));
     },
     tableDevices() {
@@ -92,7 +100,7 @@ export default {
       }
       if (this.$vuetify.breakpoint.mdAndUp) {
         ret.push({
-          text: "Plugin",
+          text: "Source",
           align: "left",
           sortable: true,
           value: "plugin"

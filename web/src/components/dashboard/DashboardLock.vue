@@ -26,10 +26,10 @@
 </template>
 
 <script lang="ts">
-import Base from "./Base.vue";
+import DashboardBase from "./DashboardBase.vue";
 
 export default {
-  mixins: [Base],
+  mixins: [DashboardBase],
   props: ["type", "group", "deviceId"],
   computed: {
     locked: {

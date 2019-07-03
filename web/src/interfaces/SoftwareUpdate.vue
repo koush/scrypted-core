@@ -1,5 +1,13 @@
 <template>
-    <div class="form-group row col-2" v-if="!device">
+<v-flex>
+    <v-btn dark :color="checkUpdate ? 'indigo' : '#a9afbb'" @click="checkForUpdate">
+        Check for Update
+    </v-btn>
+    <v-btn dark :color="checkUpdate ? '#a9afbb' : 'indigo'" @click="installUpdate">
+        Install Updates
+    </v-btn>
+</v-flex>
+    <!-- <div class="form-group row col-2" v-if="!device">
         <div class="btn-group btn-group-toggle">
             <label class="btn btn-outline-success" :class="{active: checkUpdate === true}">
                 <input :name='radio' type="radio" v-model='checkUpdate' :value="true" @change='onChange' @click='checkForUpdate'>Check For Update
@@ -9,7 +17,7 @@
             </label>
             <br>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <script>
@@ -25,19 +33,21 @@ export default {
     },
     methods: {
         checkForUpdate: function() {
-            this.rpc().checkForUpdate();
+            this.checkUpdate = true;
+            this.onChange();
         },
         installUpdate: function() {
-            this.rpc().installUpdate();
+            this.checkUpdate = false;
+            this.onChange();
         },
         onChange: function() {
             this.value.checkUpdate = this.checkUpdate;
             if (!this.device) {
                 if (this.checkUpdate) {
-                    this.checkForUpdate();
+                    this.rpc().checkForUpdate();
                 }
                 else {
-                    this.installUpdate();
+                    this.rpc().installUpdate();
                 }
             }
             else {

@@ -1,5 +1,12 @@
 <template>
-  <v-switch inset :label="label" v-model="on" color="indigo" @click.self="onClick" @change="onChange"></v-switch>
+  <v-switch
+    inset
+    :label="label"
+    v-model="on"
+    color="indigo"
+    @click.self="onClick"
+    @change="onChange"
+  ></v-switch>
 </template>
 
 <script>
@@ -34,12 +41,14 @@ export default {
       }
     },
     onChange: function() {
-      console.log("onChange");
       this.value.on = this.on;
+      // guard with this.device as device calls are actually done in onClick
       if (!this.device) {
-        this.onClick();
-      } else {
-        this.on = undefined;
+        if (this.on) {
+          this.turnOn();
+        } else {
+          this.turnOff();
+        }
       }
     }
   }

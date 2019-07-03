@@ -1,0 +1,64 @@
+<template>
+  <v-flex xs12 md6 lg6>
+    <v-flex>
+      <v-card raised class="header-card" style="margin-bottom: 60px">
+        <v-card-title
+          class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        >
+          <font-awesome-icon size="sm" icon="database" />
+          <span class="title font-weight-light">&nbsp;&nbsp;Managed Device</span>
+        </v-card-title>
+        <div class="header-card-spacer"></div>
+        <v-card-text>
+          {{ name }} was created by
+          <a :href="`#/device/${ownerDevice.id}`">{{ ownerDevice.name }}.</a>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+
+    <v-flex>
+      <v-card raised class="header-card" style="margin-bottom: 60px">
+        <v-card-title
+          class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        >Script Storage</v-card-title>
+        <div class="header-card-spacer"></div>
+        <v-flex>
+          <Storage v-model="device.configuration" @input="onChange"></Storage>
+        </v-flex>
+      </v-card>
+    </v-flex>
+  </v-flex>
+</template>
+<script>
+import Vue from 'vue';
+import Storage from "../common/Storage";
+
+export default {
+  props: ["value", "id", "name"],
+  components: {
+    Storage,
+  },
+  data: function() {
+    return {
+      device: Vue.util.extend(this.value.device)
+    };
+  },
+  methods: {
+    onChange() {
+      this.$emit('input', this.device);
+    },
+  },
+  computed: {
+    ownerDevice() {
+      const id = this.id;
+      const ownerPlugin = this.$store.state.systemState[id].metadata.value
+        .ownerPlugin;
+      return {
+        id: ownerPlugin,
+        name: this.$store.state.systemState[ownerPlugin].name.value,
+        type: this.$store.state.systemState[ownerPlugin].type.value
+      };
+    }
+  }
+};
+</script>

@@ -17,10 +17,10 @@
   </v-list-item>
 </template>
 <script lang="ts">
-import Base from "./Base.vue";
+import DashboardBase from "./DashboardBase.vue";
 export default {
   props: ["ids", "type", "name", "light"],
-  mixins: [Base],
+  mixins: [DashboardBase],
   computed: {
     on: {
       get() {

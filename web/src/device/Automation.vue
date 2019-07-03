@@ -25,6 +25,7 @@
                 :events="events"
                 :interfaces="interfaces"
                 v-model="triggers.triggers"
+                @change="onChange"
               ></EventsPicker>
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
@@ -83,6 +84,7 @@
                 :name="actions.name"
                 :interfaces="contextualInterfaces"
                 v-model="actions.actions"
+                @change="onChange"
               ></InterfacesPicker>
             </v-flex>
           </v-layout>
@@ -100,21 +102,19 @@
         :name="deactivateActions.name"
         :interfaces="contextualInterfaces"
         v-model="deactivateActions.actions"
+                @change="onChange"
       ></InterfacesPicker>
     </div>
   </v-flex>
 </template>
 <script lang="ts">
-import InterfacesPicker from "./InterfacesPicker.vue";
-import EventsPicker from "./EventsPicker.vue";
+import InterfacesPicker from "../common/InterfacesPicker.vue";
+import EventsPicker from "../common/EventsPicker.vue";
 
 
 export default {
-  mounted() {
-    console.log(this.value);
-  },
   data() {
-    return this.value;
+    return this.value.automationData;
   },
   props: ["value"],
   components: {
@@ -153,8 +153,15 @@ export default {
       }
     }
   },
+  watch: {
+    'actions.actions': function() {
+      console.log(this.value);
+    }
+  },
   methods: {
-    onChange: function() {}
+    onChange: function() {
+      console.log(this.value);
+    }
   }
 };
 </script>

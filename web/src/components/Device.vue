@@ -12,8 +12,8 @@
             <v-container>
               <v-layout>
                 <v-flex xs12>
-                  <v-text-field :value="name" label="Name" required></v-text-field>
-                  <v-select :items="[type]" label="Type" outlined :value="type"></v-select>
+                  <v-text-field v-model="name" label="Name" required></v-text-field>
+                  <v-select :items="[type]" label="Type" outlined v-model="type"></v-select>
                   <v-checkbox v-model="syncWithIntegrations" label="Sync with Integrations"></v-checkbox>
                 </v-flex>
               </v-layout>
@@ -23,53 +23,85 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="error" v-if="!loading" text>Delete</v-btn>
-            <v-btn color="primary" v-if="!loading" text>Save</v-btn>
+            <v-btn color="primary" v-if="!loading" text @click="save">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
     </v-flex>
 
     <v-flex xs12 v-if="!loading">
-      <component :is="device.box" :value="device.automationData"></component>
+      <component
+        :is="device.box"
+        :value="device"
+        :id="id"
+        :name="name"
+        :type="type"
+        :componentWebPath="componentWebPath"
+      ></component>
     </v-flex>
   </v-layout>
 </template>
 <script>
 import axios from "axios";
-import Automation from "../device/Automation";
+import Automation from "../device/Automation.vue";
+import Script from "../device/Script.vue";
+import ScriptDevice from "../device/ScriptDevice.vue";
+import AggregateDevice from "../device/AggregateDevice.vue";
 
 export default {
   components: {
-    Automation
+    Automation,
+    Script,
+    ScriptDevice,
+    AggregateDevice,
   },
   data() {
     return {
       device: {},
-      loading: true
+      loading: true,
+      name: undefined,
+      type: undefined,
+      syncWithIntegrations: undefined,
     };
   },
   created() {
-    axios.get(`/web/device/${this.id}.json`).then(response => {
-      this.device = response.data;
-      this.loading = false;
-    });
+    this.reload();
+  },
+  watch: {
+    id() {
+      this.reload();
+    }
+  },
+  methods: {
+    reload() {
+      this.name = this.$store.state.systemState[this.id].name.value;
+      this.type = this.$store.state.systemState[this.id].type.value;
+      this.syncWithIntegrations = this.$store.state.systemState[this.id].metadata.value.syncWithIntegrations;
+      this.device = {};
+      this.loading = true;
+      axios.get(`/web/device/${this.id}.json`).then(response => {
+        this.device = response.data;
+
+        this.loading = false;
+      });
+    },
+    save() {
+      const post = {
+        type: this.type,
+        name: this.name,
+        syncWithIntegrations: this.syncWithIntegrations,
+        device: this.device
+      };
+
+      axios.post(`/web/device/${this.id}/`, post);
+    }
   },
   computed: {
     id() {
       return this.$route.params.id;
     },
-    name() {
-      return this.$store.state.systemState[this.id].name.value;
-    },
-    type() {
-      return this.$store.state.systemState[this.id].type.value;
-    },
-    syncWithIntegrations: {
-      get() {
-        return this.$store.state.systemState[this.id].metadata.value
-          .syncWithIntegrations;
-      },
-      set() {}
+    componentWebPath() {
+      return `/web/component/${this.$store.state.systemState[this.id].component.value}`;
     }
   }
 };

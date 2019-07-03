@@ -61,8 +61,8 @@
   </v-list-item>
 </template>
 <script lang="ts">
-import Base from "./Base.vue";
-import SingleToggle from "./SingleToggle.vue";
+import DashboardBase from "./DashboardBase.vue";
+import DashboardPopupToggle from "./DashboardPopupToggle.vue";
 import ClickOutside from "vue-click-outside";
 import VueSlider from "vue-slider-component";
 import "vue-slider-component/theme/material.css";
@@ -71,10 +71,10 @@ import throttle from "lodash.throttle";
 
 export default {
   props: ["type", "group"],
-  mixins: [Base],
+  mixins: [DashboardBase],
   components: {
     VueSlider,
-    SingleToggle
+    DashboardPopupToggle
   },
   directives: {
     ClickOutside

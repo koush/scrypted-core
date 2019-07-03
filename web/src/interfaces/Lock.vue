@@ -1,47 +1,42 @@
 <template>
-    <div class="form-group">
-        <div class="btn-group btn-group-toggle">
-            <label class="btn btn-outline-success" :class="{active: locked === true}">
-                <input :name='radio' type="radio" v-model='locked' :value="true" @change='onChange' @click="lock">Lock
-            </label>
-            <label class="btn btn-outline-success" :class="{active: locked === false}">
-                <input :name='radio' type="radio" v-model='locked' :value="false" @change='onChange' @click="unlock">Unlock
-            </label>
-            <br>
-        </div>
-    </div>
+  <v-flex>
+    <v-btn class="mx-2" fab @click="unlock" :color="value.lockState === 'Locked' ? '#a9afbb' : 'orange'" dark>
+      <v-icon >lock_open</v-icon>
+    </v-btn>
+    <v-btn class="mx-2" fab @click="lock" :color="value.lockState === 'Locked' ? 'green' : '#a9afbb'" dark>
+      <v-icon>lock</v-icon>
+    </v-btn>
+  </v-flex>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
-    data: function() {
-        return {
-            radio: Math.random(),
-            locked: this.value.lockState == 'Locked',
-        }
+  mixins: [RPCInterface],
+  data: function() {
+    return {
+      radio: Math.random(),
+      locked: this.value.lockState == "Locked"
+    };
+  },
+  methods: {
+    lock: function() {
+      this.locked = true;
+      this.onChange();
     },
-    methods: {
-        lock: function() {
-            this.rpc().lock();
-        },
-        unlock: function() {
-            this.rpc().unlock();
-        },
-        onChange: function() {
-            // prefer locked in case of error.
-            this.value.lockState = this.locked === false ? 'Unlocked' : 'Locked';
-            if (!this.device) {
-                if (this.locked)
-                    this.lock();
-                else
-                    this.unlock();
-            }
-            if (this.device)
-                this.lockState = undefined;
-        },
+    unlock: function() {
+      this.locked = false;
+      this.onChange();
+    },
+    onChange: function() {
+      // prefer locked in case of error.
+      if (this.locked) {
+        this.rpc().lock();
+      } else {
+        this.rpc().unlock();
+      }
     }
+  }
 };
 </script>

@@ -81,9 +81,9 @@ export default {
         },
         {
           id: "devices",
-          name: "All Devices",
+          name: "Devices",
           icon: "list",
-          path: "/devices",
+          path: "/device",
           active: false
         }
       ],

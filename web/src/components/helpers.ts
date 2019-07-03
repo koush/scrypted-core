@@ -40,6 +40,8 @@ export function getComponentName(id: string) {
             return "Incoming Mail";
         case "webpush":
             return "Web Push Notifier";
+        case "automation":
+            return "Automations";
     }
     return "Unknown Component";
 }

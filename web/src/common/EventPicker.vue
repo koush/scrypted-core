@@ -1,24 +1,33 @@
 <template>
   <v-card>
-    <v-card-title class="small-header red-gradient white--text font-weight-light subtitle-2">Action</v-card-title>
+    <v-card-title class="small-header red-gradient white--text font-weight-light subtitle-2">Trigger</v-card-title>
     <v-form>
       <v-container>
         <v-layout>
           <v-flex xs12>
             <Select2
               v-model="selected"
-              :options="actionableInterfaces"
+              :options="events"
               :unselected="unselected"
-              @input="onChange"
+              @change="onChange"
+              label="Event"
             ></Select2>
-
             <component
+              v-if="selected.component && selected.properties && selected.properties.event"
               :key="value.id"
               :is="selected.component"
-              :properties="selected.properties"
               v-model="value.model"
-              @input="onChange"
+              :events="events"
+              :interfaces="interfaces"
+              @change="onChange"
             ></component>
+            <v-text-field
+              label="Trigger Condition (optional)"
+              v-model="value.condition"
+              persistent-hint
+              hint="OnOff example: eventData === true"
+              @change="onChange"
+            ></v-text-field>
           </v-flex>
         </v-layout>
       </v-container>
@@ -27,28 +36,22 @@
 </template>
 
 <script>
-
-import Condition from '../interfaces/automation/Condition.vue';
-import Timer from '../interfaces/automation/Timer.vue';
-
-import OnOff from '../interfaces/OnOff.vue';
-
-
 import Select2 from "./Select2.vue";
+import Scheduler from '../interfaces/automation/Scheduler.vue'
+
 function unassigned() {
   return {
     id: "unassigned",
-    text: "Select Action",
+    text: "Select Event Trigger",
     component: "Unassigned",
     model: {}
   };
 }
 
 export default {
-
   props: {
-    name: String,
     value: Object,
+    events: Array,
     interfaces: Array,
     unselected: {
       type: Object,
@@ -62,29 +65,21 @@ export default {
     }
   },
   computed: {
-    actionableInterfaces: {
-      get: function() {
-        return this.interfaces.filter(iface => iface.action);
-      }
-    },
     selected: {
       get: function() {
         if (this.value.id == "unassigned") return unassigned();
-        return this.interfaces.find(e => e.id == this.value.id);
+        return this.events.find(e => e.id == this.value.id);
       },
       set: function(val) {
-        this.value.model = {};
+        this.value.condition = null;
         this.value.id = val.id;
+        this.value.model = {};
       }
     }
   },
   components: {
-    Condition,
-    
-    OnOff,
-    Timer,
-
-    Select2
+    Select2,
+    Scheduler
   },
   methods: {
     onChange: function() {

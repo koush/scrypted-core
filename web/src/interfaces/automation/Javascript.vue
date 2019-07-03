@@ -1,21 +1,18 @@
 <template>
-    <div class="form-group">
-        <label class="form-label">Script</label>
-        <textarea v-model='value.script' class="form-control" @input='onChange'/>
-    </div>
+  <v-textarea label="Script" v-model="value.script" outlined auto-grow></v-textarea>
 </template>
 
 <script>
-import RPCInterface from '../RPCInterface.vue'
+import RPCInterface from "../RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
-    methods: {
-        onChange: function() {
-            this.rpc({
-                varargs: true,
-            }).run(this.value.script);
-        },
+  mixins: [RPCInterface],
+  methods: {
+    onChange: function() {
+      this.rpc({
+        varargs: true
+      }).run(this.value.script);
     }
+  }
 };
 </script>

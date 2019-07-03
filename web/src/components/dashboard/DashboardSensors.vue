@@ -11,11 +11,11 @@
   </v-card-text>
 </template>
 <script lang="ts">
-import Base from "./Base.vue";
+import DashboardBase from "./DashboardBase.vue";
 
 export default {
   props: ["type", "group"],
-  mixins: [Base],
+  mixins: [DashboardBase],
   methods: {
     averageProperty(property, propertyInterface) {
       var propertyCount = 0;
