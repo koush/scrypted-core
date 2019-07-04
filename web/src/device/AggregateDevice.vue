@@ -13,8 +13,8 @@
           <v-container>
             <v-layout>
               <v-flex xs12>
-                <InterfaceMultiselect @input="onChange" v-model="device.deviceInterfaces" :devices="value.allDevices" name="Interfaces"></InterfaceMultiselect>
-                <InterfaceMultiselect @input="onChange" v-model="device.deviceEvents" :devices="value.allDevices" name="Events"></InterfaceMultiselect>
+                <InterfaceMultiselect @input="onChange" v-model="device.deviceInterfaces" :devices="deviceProps.allDevices" name="Interfaces"></InterfaceMultiselect>
+                <InterfaceMultiselect @input="onChange" v-model="device.deviceEvents" :devices="deviceProps.allDevices" name="Events"></InterfaceMultiselect>
 
               </v-flex>
             </v-layout>
@@ -25,20 +25,20 @@
   </v-flex>
 </template>
 <script>
-import Vue from "vue";
+import cloneDeep from "lodash.clonedeep";
 
 import InterfaceMultiselect from "./InterfaceMultiselect.vue";
 
 export default {
-  props: ["value", "id", "name"],
+  props: ["value", "id", "name", "deviceProps"],
   components: {
     InterfaceMultiselect,
   },
   data: function() {
     return {
       device: {
-        deviceInterfaces: Vue.util.extend(this.value.selectedInterfaces),
-        deviceEvents: Vue.util.extend(this.value.selectedEvents),
+        deviceInterfaces: cloneDeep(this.deviceProps.selectedInterfaces),
+        deviceEvents: cloneDeep(this.deviceProps.selectedEvents),
       }
     };
   },

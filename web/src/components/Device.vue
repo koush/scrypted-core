@@ -60,7 +60,7 @@ export default {
   data() {
     return {
       deviceProps: {},
-      device: {},
+      device: undefined,
       loading: true,
       name: undefined,
       type: undefined,
@@ -83,7 +83,7 @@ export default {
       this.name = this.$store.state.systemState[this.id].name.value;
       this.type = this.$store.state.systemState[this.id].type.value;
       this.syncWithIntegrations = this.$store.state.systemState[this.id].metadata.value.syncWithIntegrations;
-      this.device = {};
+      this.device = undefined;
       this.deviceProps = {};
       this.loading = true;
       axios.get(`/web/device/${this.id}.json`).then(response => {

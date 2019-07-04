@@ -2,15 +2,16 @@
   <div class="form-group row">
     <a :href="`https://developer.scrypted.app/#${name.toLowerCase()}`" target="developer">{{ name }}</a>
     <Select2
-      v-model="selectedInterfaces"
+      v-model="lazyValue"
       :options="mappedInterfaces"
       :multiple="true"
-      @input="onChange"
+      @input="onInput"
     ></Select2>
   </div>
 </template>
 <script>
 import Select2 from "../common/Select2.vue";
+import CustomValue from "../common/CustomValue.vue";
 
 export default {
   props: {
@@ -18,12 +19,19 @@ export default {
     value: Array,
     devices: Array
   },
+  mixins: [CustomValue],
   components: {
     Select2
   },
   methods: {
-    onChange() {
-      this.$emit("input", this.selectedInterfaces);
+    createLazyValue() {
+      var mapped = this.mapThem();
+      return this.value
+        .map(iface => mapped.find(e => e.id == iface))
+        .filter(e => e != null);
+    },
+    createInputValue() {
+      return this.lazyValue.map(iface => iface.id);
     },
     mapThem: function() {
       var name = this.name.toLowerCase();
@@ -36,14 +44,6 @@ export default {
         )
         .flat();
     }
-  },
-  data: function() {
-    var mapped = this.mapThem();
-    return {
-      selectedInterfaces: this.value
-        .map(iface => mapped.find(e => e.id == iface))
-        .filter(e => e != null)
-    };
   },
   computed: {
     mappedInterfaces: {
