@@ -1,58 +1,39 @@
 <template>
-  <div>
-    <v-flex>
-      <ScriptVariablePicker
-        v-for="(value, key) in vars"
-        v-model="vars[key]"
-        :key="key"
-        :selected="value"
-        :actions="actions"
-        :scriptType="scriptType"
-        @input="onChange"
-      ></ScriptVariablePicker>
-    </v-flex>
-    <v-tooltip bottom v-if="addButton" >
-      <template v-slot:activator="{ on }">
-        <v-btn v-on:click.stop.prevent="addVariable" color="info" outlined v-on="on">Add Variable</v-btn>
-      </template>
-      <span>Assign a device to a variable to use it within the script.</span>
-    </v-tooltip>
-  </div>
+  <Grower
+    v-model="lazyValue"
+    :component="ScriptVariablePicker"
+    :empty="unassigned"
+    @input="onInput"
+    :componentProps="componentProps"
+  ></Grower>
 </template>
 
 <script>
 import ScriptVariablePicker from "./ScriptVariablePicker.vue";
-import Vue from 'vue';
+import CustomValue from "../../common/CustomValue.vue";
+import Grower from "../../common/Grower.vue";
 
 export default {
   props: ["addButton", "value", "actions", "scriptType"],
-  data() {
-    return {
-      vars: Vue.util.extend(this.value.vars),
-    }
-  },
+  mixins: [CustomValue],
   components: {
-    ScriptVariablePicker
+    Grower
   },
   computed: {
-    keyedVars: function() {
-      return this.value.vars.map(v => ({ key: Math.random(), value: v }));
-    }
-  },
-  mounted: function() {
-    if (!this.value.vars.length) {
-      this.addVariable();
-    }
-  },
-  methods: {
-    onChange() {
-      this.$emit('input', this.value);
+    ScriptVariablePicker() {
+      return ScriptVariablePicker;
     },
-    addVariable() {
-      this.value.vars.push({
+    componentProps() {
+      return {
+        actions: this.actions,
+        scriptType: this.scryptType
+      };
+    },
+    unassigned() {
+      return {
         key: "",
         value: "unassigned"
-      });
+      };
     }
   }
 };

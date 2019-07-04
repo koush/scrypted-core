@@ -77,6 +77,7 @@ export default {
   },
   methods: {
     onChange() {
+      console.log(JSON.stringify(this.device));
     },
     reload() {
       this.name = this.$store.state.systemState[this.id].name.value;

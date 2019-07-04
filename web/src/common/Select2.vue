@@ -4,29 +4,25 @@
     :multiple="multiple"
     :chips="multiple"
     :items="sortedOptions"
-    v-model="selected"
+    v-model="lazyValue"
     :label="label"
     item-value="id"
     return-object
-    @input="onChange"
+    ref="autocomplete"
+    @input="onInput"
   ></v-autocomplete>
 </template>
 
 <script>
 import Vue from "vue";
+import CustomValue from "./CustomValue.vue";
 
 export default {
-  props: ["label", "options", "value", "unselected", "multiple"],
-  data: function() {
-    const selected = Vue.util.extend({}, this.value);
-    const sortedOptions = this.makeSortedOptions(selected);
-    return {
-      selected,
-      sortedOptions
-    };
-  },
-  methods: {
-    makeSortedOptions(selected) {
+  props: ["label", "options", "unselected", "multiple"],
+  mixins: [CustomValue],
+  computed: {
+    sortedOptions() {
+      var selected = this.lazyValue;
       if (!this.multiple) {
         selected = [selected];
       }
@@ -36,12 +32,11 @@ export default {
         .filter(item => !selectedIds.includes(item.id));
 
       sortedOptions.unshift(...selected);
+      if (this.unselected) {
+        sortedOptions.unshift(this.unselected);
+      }
       return sortedOptions;
-    },
-    onChange() {
-      this.sortedOptions = this.makeSortedOptions(this.selected);
-      this.$emit("input", this.selected);
     }
-  }
+  },
 };
 </script>

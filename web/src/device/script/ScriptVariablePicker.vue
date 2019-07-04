@@ -1,29 +1,32 @@
 <template>
-  <v-layout row>
-    <v-text-field
-      xs12
-      md6
-      outlined
-      v-model="variableName"
-      placeholder="variableName"
-      label="Variable Name"
-      @input="onChange"
-    ></v-text-field>
-    <Select2
-      xs12
-      md6
-      label="Variable"
-      v-model="variableValue"
-      :options="combinedActions"
-      :unselected="unselected"
-      @input="onChange"
-    ></Select2>
-  </v-layout>
+  <v-flex xs12>
+    <v-layout>
+      <v-text-field
+        xs6
+        md6
+        outlined
+        v-model="lazyValue.variableName"
+        placeholder="variableName"
+        label="Variable Name"
+        @input="onInput"
+      ></v-text-field>
+      <Select2
+        xs6
+        md6
+        label="Variable"
+        v-model="lazyValue.variableValue"
+        :options="combinedActions"
+        :unselected="unselected"
+        @input="onInput"
+      ></Select2>
+    </v-layout>
+  </v-flex>
 </template>
 
 <script>
 import Select2 from "../../common/Select2.vue";
-import Vue from 'vue';
+import Vue from "vue";
+import CustomValue from "../../common/CustomValue.vue";
 
 function unassigned() {
   return {
@@ -33,19 +36,13 @@ function unassigned() {
 }
 
 export default {
+  mixins: [CustomValue],
   props: {
-    value: Object,
     scriptType: String,
     actions: Array,
     unselected: {
       type: Object,
       default: unassigned
-    }
-  },
-  data() {
-    return {
-      variableName: this.value.key,
-      variableValue: Vue.util.extend(this.actions.find(e => e.id == this.value.value)) || unassigned(),
     }
   },
   computed: {
@@ -61,26 +58,25 @@ export default {
         actions = actions.concat(this.actions);
         return actions;
       }
-    },
-    selected: {
-      get: function() {
-        if (this.value.value == "unassigned") return unassigned();
-        return this.actions.find(e => e.id == this.value.value);
-      },
-      set: function(val) {
-        this.value.value = val.id;
-      }
     }
   },
   components: {
     Select2
   },
   methods: {
-    onChange: function() {
-      this.$emit("input", {
-        key: this.variableName,
-        value: this.variableValue.id,
-      });
+    createLazyValue() {
+      return {
+        variableName: this.value.key,
+        variableValue:
+          Vue.util.extend(this.actions.find(e => e.id == this.value.value)) ||
+          unassigned()
+      };
+    },
+    createInputValue() {
+      return {
+        key: this.lazyValue.variableName,
+        value: this.lazyValue.variableValue.id
+      };
     }
   }
 };

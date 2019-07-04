@@ -23,7 +23,7 @@
       <v-card raised class="header-card" style="margin-bottom: 60px">
         <v-card-title
           class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-        >{{ value.script.npmPackage ? "Plugin Managemnet" : "Edit Script" }}</v-card-title>
+        >{{ script.npmPackage ? "Plugin Managemnet" : "Edit Script" }}</v-card-title>
         <div class="header-card-spacer"></div>
 
         <v-form>
@@ -32,15 +32,16 @@
               <v-flex xs12>
                 <ScriptVariablesPicker
                   v-if="hasVars"
-                  v-model="script"
+                  v-model="script.vars"
                   :scriptType="script.type"
-                  :actions="value.actions"
-                  :addButton="!!!value.npmPackage"
+                  :actions="deviceProps.actions"
+                  :addButton="!!!deviceProps.npmPackage"
                   @input="onChange"
                 ></ScriptVariablesPicker>
 
                 <v-textarea
-                  v-if="!value.script.gistInSync && !script.npmPackage"
+                  style="margin-top: 16px;"
+                  v-if="!script.gistInSync && !script.npmPackage"
                   auto-grow
                   rows="10"
                   v-model="script.script"
@@ -50,9 +51,9 @@
                 ></v-textarea>
                 <div v-else-if="!script.npmPackage" xs12 ref="gist" style="margin-top: 16px;"></div>
 
-                <v-btn outlined color="blue" @click="reload">Reload</v-btn>
-                <v-btn outlined class="mx-2" color="blue" @click="showStorage = !showStorage">Storage</v-btn>
-                <v-btn outlined color="green" @click="debug">Debug</v-btn>
+                <v-btn outlined color="blue" @click="reload" xs4>Reload</v-btn>
+                <v-btn xs4 outlined color="blue" @click="showStorage = !showStorage">Storage</v-btn>
+                <v-btn outlined color="green" @click="debug" xs4>Debug</v-btn>
                 <v-alert
                   style="margin-top: 16px;"
                   outlined
@@ -76,23 +77,29 @@
           class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
         >Script Storage</v-card-title>
         <div class="header-card-spacer"></div>
-        <v-flex>
-          <Storage v-model="script.configuration" @input="onChange"></Storage>
-        </v-flex>
+        <v-form>
+          <v-container>
+            <v-layout>
+              <v-flex xs12>
+                <Storage v-model="script.configuration" @input="onChange"></Storage>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-form>
       </v-card>
     </v-flex>
   </v-flex>
 </template>
 <script>
+import cloneDeep from "lodash.clonedeep";
 import DeviceGroup from "../common/DeviceTable.vue";
 import ScriptVariablesPicker from "./script/ScriptVariablesPicker.vue";
 import axios from "axios";
 import qs from "query-string";
-import Vue from "vue";
 import Storage from "../common/Storage.vue";
 
 export default {
-  props: ["value", "id", "name", "componentWebPath"],
+  props: ["value", "id", "name", "componentWebPath", "deviceProps"],
   components: {
     DeviceGroup,
     ScriptVariablesPicker,
@@ -101,14 +108,15 @@ export default {
   data: function() {
     return {
       compilerResult: undefined,
-      script: Object.assign(Vue.util.extend(this.value.script), {
-        vars: Vue.util.extend(this.value.vars)
+      script: Object.assign(cloneDeep(this.deviceProps.script), {
+        vars: cloneDeep(this.deviceProps.vars)
       }),
-      showStorage: false,
+      showStorage: false
     };
   },
   mounted() {
     this.doGist();
+    this.$emit("input", this.script);
   },
   watch: {
     id() {
@@ -120,7 +128,7 @@ export default {
       this.$emit("input", this.script);
     },
     doGist() {
-      if (!this.value.gistEmbed) {
+      if (!this.deviceProps.gistEmbed) {
         return;
       }
 
@@ -130,7 +138,7 @@ export default {
         this.$refs.gist.innerHTML += str;
       };
       var tag = document.createElement("script");
-      tag.src = this.value.gistEmbed;
+      tag.src = this.deviceProps.gistEmbed;
       this.$refs.gist.appendChild(tag);
       tag.onload = () => {
         document.write = nativeWrite;
@@ -163,10 +171,10 @@ export default {
   computed: {
     hasVars() {
       return (
-        !this.value.script.npmPackage ||
-        !this.value.script.npmPackageJson ||
-        (this.value.script.npmPackageJson.scrypted &&
-          this.value.script.npmPackageJson.scrypted.variables)
+        !this.script.npmPackage ||
+        !this.script.npmPackageJson ||
+        (this.script.npmPackageJson.scrypted &&
+          this.script.npmPackageJson.scrypted.variables)
       );
     },
     showCompilerResult: {

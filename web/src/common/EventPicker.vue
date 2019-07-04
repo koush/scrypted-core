@@ -1,32 +1,31 @@
 <template>
-  <v-card>
+  <v-card style="margin-bottom: 16px;">
     <v-card-title class="small-header red-gradient white--text font-weight-light subtitle-2">Trigger</v-card-title>
     <v-form>
       <v-container>
         <v-layout>
           <v-flex xs12>
             <Select2
-              v-model="selected"
+              v-model="lazyValue.selected"
               :options="events"
               :unselected="unselected"
-              @change="onChange"
+              @input="onInput"
               label="Event"
             ></Select2>
             <component
-              v-if="selected.component && selected.properties && selected.properties.event"
-              :key="value.id"
-              :is="selected.component"
-              v-model="value.model"
+              v-if="lazyValue.selected.component && lazyValue.selected.properties && lazyValue.selected.properties.event"
+              :is="lazyValue.selected.component"
+              v-model="lazyValue.model"
               :events="events"
               :interfaces="interfaces"
-              @input="onChange"
+              @input="onInput"
             ></component>
             <v-text-field
               label="Trigger Condition (optional)"
-              v-model="value.condition"
+              v-model="lazyValue.condition"
               persistent-hint
               hint="OnOff example: eventData === true"
-              @input="onChange"
+              @input="onInput"
             ></v-text-field>
           </v-flex>
         </v-layout>
@@ -40,6 +39,7 @@ import cloneDeep from "lodash.clonedeep";
 
 import Select2 from "./Select2.vue";
 import Scheduler from "../interfaces/automation/Scheduler.vue";
+import CustomValue from "./CustomValue.vue";
 
 function unassigned() {
   return {
@@ -52,7 +52,6 @@ function unassigned() {
 
 export default {
   props: {
-    value: Object,
     events: Array,
     interfaces: Array,
     unselected: {
@@ -60,32 +59,31 @@ export default {
       default: unassigned
     }
   },
-  data() {
-    let selected =
-      this.value.id == "unassigned"
-        ? unassigned()
-        : this.events.find(e => e.id == this.value.id);
-    selected = cloneDeep(selected);
-    const condition = this.value.condition;
-    return {
-      selected,
-      condition,
-      model: cloneDeep(this.value.model),
-    };
-  },
-  mounted: function() {
-    if (!this.selected) {
-      this.selected = unassigned();
-      this.onChange();
-    }
-  },
+  mixins: [CustomValue],
   components: {
     Select2,
     Scheduler
   },
   methods: {
-    onChange: function() {
-      this.$emit("input", this.value);
+    createLazyValue() {
+      let selected =
+        this.value.id == "unassigned"
+          ? unassigned()
+          : this.events.find(e => e.id == this.value.id);
+      selected = cloneDeep(selected);
+      const condition = this.value.condition;
+      return {
+        selected,
+        condition,
+        model: cloneDeep(this.value.model)
+      };
+    },
+    createInputValue() {
+      return {
+        condition: this.lazyValue.condition,
+        id: this.lazyValue.selected.id,
+        model: this.lazyValue.model,
+      }
     }
   }
 };
