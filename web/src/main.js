@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import './plugins/icons';
 import vuetify from './plugins/vuetify';
 import './plugins/script2';
 import './plugins/clipboard';
