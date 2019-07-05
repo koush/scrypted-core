@@ -15,6 +15,7 @@ Vue.use(VueRouter)
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faCopy,
   faFolderPlus,
   faPlay,
   faLockOpen,
@@ -68,6 +69,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faCopy,
   faFolderPlus,
   faPlay,
   faUnlockAlt,

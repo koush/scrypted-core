@@ -1,0 +1,79 @@
+<template>
+  <v-layout wrap>
+    <v-flex xs12 md6 lg6 v-if="!loading">
+      <v-flex>
+        <v-card raised class="header-card">
+          <v-card-title
+            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+          >HomeKit Accessory Bridge</v-card-title>
+          <div class="header-card-spacer"></div>
+
+          <div>
+            <v-card-text>Enable the Scrypted HomeKit Accessory Bridge ands connect your iOS devices using the Home app.</v-card-text>
+            <v-card-text>HomeKit pairing code: 031-45-154</v-card-text>
+          </div>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn outlined color="orange" @click="disable" v-if="settings.enable">Disable</v-btn>
+            <v-btn outlined color="orange" @click="enable" v-if="!settings.enable">Enable</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-flex>
+  </v-layout>
+</template>
+<script>
+import BasicComponent from "./BasicComponent.vue";
+import axios from "axios";
+import qs from 'query-string';
+
+export default {
+  mixins: [BasicComponent],
+  data() {
+    return {
+      loading: true,
+      settings: {},
+    };
+  },
+  computed: {
+    componentWebPath() {
+      return this.getComponentWebPath("homekit");
+    },
+    settingsComponentWebPath() {
+      return this.getComponentWebPath("remote");
+    }
+  },
+  methods: {
+    refresh() {
+      axios.get(`${this.componentWebPath}/settings`).then(response => {
+        this.$data.settings = response.data;
+        this.loading = false;
+      });
+    },
+    disable() {
+      axios
+        .post(
+          `${this.componentWebPath}/`,
+          qs.stringify({
+            enable: ""
+          })
+        )
+        .then(() => this.refresh());
+    },
+    enable() {
+      axios
+        .post(
+          `${this.componentWebPath}/`,
+          qs.stringify({
+            enable: "true"
+          })
+        )
+        .then(() => this.refresh());
+    }
+  },
+  mounted() {
+    this.refresh();
+  }
+};
+</script>

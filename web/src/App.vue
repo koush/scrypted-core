@@ -40,11 +40,18 @@
 import Device from "./components/Device.vue";
 import AggregateComponent from "./components/builtin/AggregateComponent.vue";
 import AutomationComponent from "./components/builtin/AutomationComponent.vue";
+import WebPushComponent from "./components/builtin/WebPushComponent.vue";
 import ScriptComponent from "./components/builtin/ScriptComponent.vue";
+import RemoteManagementComponent from "./components/builtin/RemoteManagementComponent.vue";
+import GoogleHomeComponent from "./components/builtin/GoogleHomeComponent.vue";
+import AlexaComponent from "./components/builtin/AlexaComponent.vue";
+import HomeKitComponent from "./components/builtin/HomeKitComponent.vue";
 import Dashboard from "./components/dashboard/Dashboard.vue";
 import Drawer from "./components/Drawer.vue";
 import Devices from "./components/Devices.vue";
 import VueRouter from "vue-router";
+import client from "@scrypted/client";
+
 let router = new VueRouter({
   routes: [
     {
@@ -68,8 +75,28 @@ let router = new VueRouter({
       component: AggregateComponent
     },
     {
+      path: "/component/webpush",
+      component: WebPushComponent
+    },
+    {
+      path: "/component/remote",
+      component: RemoteManagementComponent
+    },
+    {
+      path: "/component/home",
+      component: GoogleHomeComponent
+    },
+    {
+      path: "/component/homekit",
+      component: HomeKitComponent
+    },
+    {
+      path: "/component/alexa",
+      component: AlexaComponent
+    },
+    {
       path: "/device/:id",
-      component: Device,
+      component: Device
     }
   ]
 });
@@ -115,9 +142,6 @@ Vue.prototype.$pushconnect = function() {
   return pushConnectionPromise;
 };
 
-import client from "@scrypted/client";
-
-
 export default {
   name: "App",
   components: {
@@ -128,7 +152,6 @@ export default {
       this.title = to.name || "Scrypted";
       next();
     });
-
 
     const clientPromise = client.connect(null);
     Vue.use(Vue => {
@@ -148,7 +171,7 @@ export default {
     return {
       title: "Scrypted",
       drawer: this.$vuetify.breakpoint.lgAndUp,
-      loading: true,
+      loading: true
     };
   }
 };

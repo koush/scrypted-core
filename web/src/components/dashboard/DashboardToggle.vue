@@ -43,14 +43,14 @@
                 <div class="slider-pad-bottom"></div>
               </div>
               <v-list color="green">
-                <SingleToggle
+                <DashboardPopupToggle
                   :light="true"
                   v-for="deviceId in type.ids"
                   :key="deviceId"
                   :type="type.type"
                   :ids="[deviceId]"
                   :name="$store.state.systemState[deviceId].name.value"
-                ></SingleToggle>
+                ></DashboardPopupToggle>
               </v-list>
               <v-btn rounded color="primary" dark x-small>Rounded Button</v-btn>
             </v-layout>

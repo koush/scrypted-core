@@ -23,6 +23,7 @@
     "query-string": "^6.8.1",
     "vue": "^2.6.10",
     "vue-click-outside": "^1.0.7",
+    "vue-clipboard2": "^0.3.0",
     "vue-feather": "^1.0.0",
     "vue-router": "^3.0.6",
     "vue-script2": "^2.1.0",

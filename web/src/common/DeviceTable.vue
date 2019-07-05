@@ -2,7 +2,7 @@
   <v-simple-table>
     <thead>
       <tr>
-        <th class="text-xs-left"></th>
+        <th style="width: 10px;" class="text-xs-left"></th>
         <th class="text-xs-left">Name</th>
         <th v-if="deviceGroup.ownerColumn" class="text-xs-left">{{ deviceGroup.ownerColumn }}</th>
         <th class="text-xs-left">Type</th>

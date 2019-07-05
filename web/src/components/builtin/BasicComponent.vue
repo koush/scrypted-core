@@ -2,13 +2,14 @@
   <v-layout wrap>
     <v-flex v-for="(card, cardIndex) in cards" :key="cardIndex" xs12 md6 lg4>
       <v-flex>
-        <v-card raised class="header-card">
+        <v-card v-if="!card.hide" raised class="header-card">
           <v-card-title
             class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
           >{{ card.title }}</v-card-title>
           <div class="header-card-spacer"></div>
 
           <v-card-text>{{ card.description }}</v-card-text>
+          <component v-if="card.body" :is="card.body" v-model="card.value"></component>
 
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -17,6 +18,7 @@
               color="orange"
               v-for="(cardButton, buttonIndex) in card.buttons"
               :key="buttonIndex"
+              @click="cardButton.click && cardButton.click(card.value)"
             >{{ cardButton.title }}</v-btn>
           </v-card-actions>
         </v-card>
@@ -42,15 +44,17 @@ import { typeToIcon } from "../helpers";
 import DeviceTable from "../../common/DeviceTable.vue";
 
 export default {
-  props: ["id", "index"],
   components: {
-    DeviceTable,
+    DeviceTable
   },
   methods: {
     typeToIcon,
     getOwnerColumn() {
       return null;
-    }
+    },
+    getComponentWebPath(id) {
+      return `/web/component/${id}`;
+    },
   },
   computed: {
     deviceGroups() {
