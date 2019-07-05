@@ -29,15 +29,6 @@ module.exports = {
           exclude: /(node_modules|bower_components)/,
           use: {
             loader: 'babel-loader',
-            options: {
-              "plugins": [
-                "@babel/plugin-transform-typescript",
-              ],
-              "presets": [
-                '@vue/app',
-                "@babel/typescript",
-              ]
-            }
           }
         }
       ]
