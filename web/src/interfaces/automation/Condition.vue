@@ -1,7 +1,7 @@
 <template>
   <v-text-field
     label="Condition Expression"
-    v-model="value.condition"
+    v-model="lazyValue.condition"
     persistent-hint
     hint="OnOff example: eventData === true"
     @input="onChange"
@@ -13,17 +13,12 @@ import RPCInterface from "../RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  data() {
-    return {
-      model: this.cloneValue(),
-    }
-  },
   methods: {
     onChange: function() {
       this.rpc({
         varargs: true
-      }).evaluate(this.model.condition);
+      }).evaluate(this.lazyValue.condition);
     }
-  }
+  },
 };
 </script>

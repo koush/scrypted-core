@@ -45,3 +45,15 @@ export function getComponentName(id: string) {
     }
     return "Unknown Component";
 }
+
+export function getComponentWebPath(id) {
+    return `/web/component/${id}`;
+}
+
+export function getDeviceViewPath(id) {
+    return `/device/${id}`;
+}
+
+export function getComponentViewPath(id) {
+    return `/component/${id}`;
+}

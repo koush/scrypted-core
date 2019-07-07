@@ -32,7 +32,7 @@
               class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
             >{{ deviceGroup.name }}</v-card-title>
             <div class="header-card-spacer"></div>
-            <DeviceTable :deviceGroup="deviceGroup" :getOwnerColumn="getOwnerColumn"></DeviceTable>
+            <DeviceTable :deviceGroup="deviceGroup" :getOwnerColumn="getOwnerColumn" :getOwnerLink="getOwnerLink"></DeviceTable>
           </v-card>
         </v-flex>
       </v-flex>
@@ -40,7 +40,7 @@
   </v-layout>
 </template>
 <script>
-import { typeToIcon } from "../helpers";
+import { typeToIcon, getComponentWebPath } from "../helpers";
 import DeviceTable from "../../common/DeviceTable.vue";
 
 export default {
@@ -52,22 +52,28 @@ export default {
     getOwnerColumn() {
       return null;
     },
-    getComponentWebPath(id) {
-      return `/web/component/${id}`;
+    getOwnerLink() {
+      return null;
     },
   },
   computed: {
+    componentWebPath() {
+      return getComponentWebPath(this.id);
+    },
+    id() {
+      return window.location.hash.replace('#/component/', '');
+    },
     deviceGroups() {
-      const ids = Object.keys(this.$store.state.systemState);
+      const ids = this.$store.state.scrypted.devices;
       const devices = ids
         .map(id => this.$scrypted.systemManager.getDeviceById(id))
         .filter(
-          device => device.component === this.component.id && !device.owner
+          device => device && device.component && device.component === this.component.id && !device.owner
         )
         .map(device => ({
           id: device.id,
-          name: this.$store.state.systemState[device.id].name.value,
-          type: this.$store.state.systemState[device.id].type.value
+          name: device.name,
+          type: device.type
         }));
       return [
         {

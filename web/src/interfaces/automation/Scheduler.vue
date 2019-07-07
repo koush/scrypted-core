@@ -7,7 +7,7 @@
         @click="toggleDay(day)"
         color="info"
         small
-        :text="!model[day]"
+        :text="!lazyValue[day]"
       >{{ day.substring(0, 3) }}</v-btn>
     </v-flex>
     <v-flex xs12>
@@ -23,7 +23,7 @@
             :items="clockTypes"
             solo
             item-value="id"
-            v-model="model.clockType"
+            v-model="lazyValue.clockType"
             @input="onChange"
           ></v-select>
         </v-flex>
@@ -88,7 +88,6 @@ export default {
   mixins: [RPCInterface],
   data: function() {
     return {
-      model: this.cloneValue(),
       clockTypes,
       days,
     };
@@ -96,29 +95,28 @@ export default {
   computed: {
     time: {
       get() {
-        return `${this.value.hour}:${this.value.minute}`;
+        return `${this.lazyValue.hour}:${this.lazyValue.minute}`;
       },
       set(value) {
-        this.model.hour = value.split(":")[0];
-        this.model.minute = value.split(":")[1];
+        this.lazyValue.hour = value.split(":")[0];
+        this.lazyValue.minute = value.split(":")[1];
         this.onChange();
       }
     }
   },
   methods: {
     toggleDay: function(day) {
-      this.model[day] = !this.model[day];
+      this.lazyValue[day] = !this.lazyValue[day];
       this.onChange();
     },
     onChange: function() {
-      const model = this.model;
       const schedule = {
-        hour: parseInt(model.hour) || 0,
-        minute: parseInt(model.minute) || 0,
-        clockType: model.clockType || "AM",
+        hour: parseInt(this.lazyValue.hour) || 0,
+        minute: parseInt(this.lazyValue.minute) || 0,
+        clockType: this.lazyValue.clockType || "AM",
       };
       days.forEach(day => {
-        schedule[day] = model[day] || false;
+        schedule[day] = this.lazyValue[day] || false;
       });
 
       this.rpc().schedule(schedule);

@@ -6,25 +6,25 @@
           <v-text-field
             label="Notification Title"
             outlined
-            v-model="model.notificationTitle"
+            v-model="lazyValue.notificationTitle"
             @input="onChange"
           ></v-text-field>
           <v-text-field
             label="Notification Body"
             outlined
-            v-model="model.notificationBody"
+            v-model="lazyValue.notificationBody"
             @input="onChange"
           ></v-text-field>
           <v-text-field
             label="Notification Media URL"
             outlined
-            v-model="model.notificationMediaUrl"
+            v-model="lazyValue.notificationMediaUrl"
             @input="onChange"
           ></v-text-field>
           <v-text-field
             label="Notification Media Mime Type"
             outlined
-            v-model="model.notificationMediaMime"
+            v-model="lazyValue.notificationMediaMime"
             @input="onChange"
           ></v-text-field>
         </v-flex>
@@ -38,24 +38,19 @@ import RPCInterface from "./RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  data: function() {
-    return {
-      model: this.cloneValue(),
-    };
-  },
   methods: {
     ensureString(str, def) {
       return str === undefined ? def : str;
     },
     update: function(modelUpdate) {
-      if (this.model.notificationMediaUrl.length) {
+      if (this.lazyValue.notificationMediaUrl.length) {
         this.rpc({
           modelUpdate,
         }).sendNotification(
-          this.model.notificationTitle,
-          this.model.notificationBody,
-          this.model.notificationMediaUrl,
-          this.model.notificationMediaMime
+          this.lazyValue.notificationTitle,
+          this.lazyValue.notificationBody,
+          this.lazyValue.notificationMediaUrl,
+          this.lazyValue.notificationMediaMime
         );
       } else {
         this.rpc({
@@ -64,10 +59,10 @@ export default {
       }
     },
     onChange: function() {
-      this.model.notificationTitle = this.ensureString(this.model.notificationTitle, "Scrypted Notification");
-      this.model.notificationBody = this.ensureString(this.model.notificationBody, "This is a message from Scrypted");
-      this.model.notificationMediaUrl = this.ensureString(this.model.notificationMediaUrl, "https://home.scrypted.app/_punch/web_hi_res_512.png");
-      this.model.notificationMediaMime = this.ensureString(this.model.notificationMediaMime, "image/png");
+      this.lazyValue.notificationTitle = this.ensureString(this.lazyValue.notificationTitle, "Scrypted Notification");
+      this.lazyValue.notificationBody = this.ensureString(this.lazyValue.notificationBody, "This is a message from Scrypted");
+      this.lazyValue.notificationMediaUrl = this.ensureString(this.lazyValue.notificationMediaUrl, "https://home.scrypted.app/_punch/web_hi_res_512.png");
+      this.lazyValue.notificationMediaMime = this.ensureString(this.lazyValue.notificationMediaMime, "image/png");
       this.update(true);
     },
     send: function() {

@@ -13,6 +13,7 @@ const proxyOpts = {
 
 module.exports = {
   configureWebpack: {
+    // devtool: 'source-map',
     resolve: {
       extensions: ['.js', '.ts', '.vue']
     },
@@ -37,6 +38,9 @@ module.exports = {
   chainWebpack: config => config.resolve.symlinks(false),
   runtimeCompiler: false,
   devServer: {
+    // port: 3000,
+    // disableHostCheck: true,
+    // public: 'home.koushikdutta.com',
     https: true,
     proxy: {
       '^/(login|static|endpoint|whitelist|web)': proxyOpts,

@@ -2,7 +2,7 @@
   <v-switch
     inset
     :label="label"
-    v-model="model.on"
+    v-model="lazyValue.on"
     color="indigo"
     @click.self="onClick"
     @change="onChange"
@@ -14,15 +14,9 @@ import RPCInterface from "./RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  data: function() {
-    return {
-      radio: Math.random(),
-      model: this.cloneValue(),
-    };
-  },
   computed: {
     label() {
-      return this.model.on ? "On" : "Off";
+      return this.lazyValue.on ? "On" : "Off";
     }
   },
   methods: {
@@ -34,7 +28,7 @@ export default {
     },
     onClick() {
       // click.self is fired only if it does not change.
-      if (this.model.on) {
+      if (this.lazyValue.on) {
         this.turnOn();
       } else {
         this.turnOff();
@@ -43,7 +37,7 @@ export default {
     onChange: function() {
       // guard with this.device as device calls are actually done in onClick
       if (!this.device) {
-        if (this.model.on) {
+        if (this.lazyValue.on) {
           this.turnOn();
         } else {
           this.turnOff();

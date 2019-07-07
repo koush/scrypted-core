@@ -26,25 +26,20 @@ import RPCInterface from "../RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  data() {
-    return {
-      model: this.cloneValue()
-    };
-  },
   methods: {
     update(hours, minutes, seconds) {
-      this.model.seconds = hours * 60 * 60 + minutes * 60 + seconds;
+      this.lazyValue.seconds = hours * 60 * 60 + minutes * 60 + seconds;
     },
     onChange() {
       this.rpc({
         varargs: true
-      }).create(parseInt((this.model.seconds || 0) * 1000));
+      }).create(parseInt((this.lazyValue.seconds || 0) * 1000));
     }
   },
   computed: {
     hours: {
       get() {
-        return Math.floor(this.value.seconds / 60 / 60);
+        return Math.floor(this.lazyValue.seconds / 60 / 60);
       },
       set(value) {
         this.update(value, this.minutes, this.seconds);
@@ -52,7 +47,7 @@ export default {
     },
     minutes: {
       get() {
-        return Math.floor(this.value.seconds / 60) % 60;
+        return Math.floor(this.lazyValue.seconds / 60) % 60;
       },
       set(value) {
         this.update(this.hours, value, this.seconds);
@@ -60,7 +55,7 @@ export default {
     },
     seconds: {
       get() {
-        return this.value.seconds % 60;
+        return this.lazyValue.seconds % 60;
       },
       set(value) {
         this.update(this.hours, this.minutes, value);

@@ -17,7 +17,7 @@ export default {
             }
           ],
           description:
-            "Combine multiple devices into a single virtual device.",
+            "Combine multiple devices into a single virtual device. Commands sent to the device group will be sent to all the devices in that group.",
           title: "New Device Group"
         },
       ],

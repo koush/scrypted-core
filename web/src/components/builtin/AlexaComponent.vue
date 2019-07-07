@@ -25,6 +25,7 @@
 import BasicComponent from "./BasicComponent.vue";
 import axios from "axios";
 import qs from "query-string";
+import { getComponentWebPath } from "../helpers";
 
 export default {
   mixins: [BasicComponent],
@@ -37,11 +38,8 @@ export default {
   },
   computed: {
     componentWebPath() {
-      return this.getComponentWebPath("home");
+      return getComponentWebPath("home");
     },
-    settingsComponentWebPath() {
-      return this.getComponentWebPath("remote");
-    }
   },
   methods: {
     refresh() {

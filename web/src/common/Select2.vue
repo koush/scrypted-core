@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import Vue from "vue";
 import CustomValue from "./CustomValue.vue";
+import cloneDeep from "lodash.clonedeep";
 
 export default {
   props: ["label", "options", "unselected", "multiple"],
@@ -27,8 +27,7 @@ export default {
         selected = [selected];
       }
       const selectedIds = selected.map(item => item.id);
-      const sortedOptions = Vue.util
-        .extend([], this.options)
+      const sortedOptions = cloneDeep(this.options)
         .filter(item => !selectedIds.includes(item.id));
 
       sortedOptions.unshift(...selected);

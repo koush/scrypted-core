@@ -3,7 +3,7 @@
     <v-container>
       <v-layout>
         <v-flex xs12>
-          <v-text-field outlined v-model="lazyValue.name" @input="onInput" persistent-hint label="Notification Recipient (friendly name)" hint='e.g. "Me" or "Alice" or "Bob"'></v-text-field>
+          <v-text-field outlined v-model="lazyValue.name" @input="onInput" persistent-hint label="Recipient Name" hint='e.g. "Me" or "Alice" or "Bob"'></v-text-field>
         </v-flex>
       </v-layout>
     </v-container>

@@ -6,6 +6,9 @@ export default {
   methods: {
     getOwnerColumn(device) {
       return device.metadata.npmPackage;
+    },
+    getOwnerLink(device) {
+      return `https://www.npmjs.com/package/${device.metadata.npmPackage}`;
     }
   },
   data() {

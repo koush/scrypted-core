@@ -1,6 +1,6 @@
 <template>
   <v-layout wrap>
-    <v-flex xs12>
+    <v-flex xs12 v-if="name">
       <v-flex xs12 md6 lg6>
         <v-card raised class="header-card">
           <v-card-title
@@ -67,7 +67,7 @@
       </v-flex>
     </v-flex>
 
-    <v-flex xs12 v-if="!loading">
+    <v-flex xs12 v-if="deviceProps">
       <component
         @input="onChange"
         :is="deviceProps.box"
@@ -76,7 +76,7 @@
         :id="id"
         :name="name"
         :type="type"
-        :componentWebPath="componentWebPath"
+        :componentWebPath="getComponentWebPath(id)"
       ></component>
     </v-flex>
   </v-layout>
@@ -88,6 +88,7 @@ import Script from "../device/Script.vue";
 import ScriptDevice from "../device/ScriptDevice.vue";
 import AggregateDevice from "../device/AggregateDevice.vue";
 import WebPushRegistration from "../device/WebPushRegistration.vue";
+import { getComponentWebPath, getDeviceViewPath } from "./helpers";
 
 export default {
   components: {
@@ -102,34 +103,49 @@ export default {
       showDelete: false,
       showSave: false,
       showSaveError: false,
-      deviceProps: {},
-      device: undefined,
-      loading: true,
+      deviceProps: undefined,
       name: undefined,
       type: undefined,
+      device: undefined,
+      loading: false,
       syncWithIntegrations: undefined
     };
   },
-  created() {
-    this.reload();
-  },
-  watch: {
-    id() {
+  mounted() {
+    if (this.needsLoad) {
       this.reload();
     }
   },
+  watch: {
+    devices() {
+      console.log('device cnage');
+    },
+    id() {
+      this.device = undefined;
+      this.name = undefined;
+      this.type = undefined;
+    },
+    needsLoad() {
+      if (this.needsLoad) {
+        this.reload();
+      }
+    }
+  },
   methods: {
+    getComponentWebPath,
     onChange() {
-      // console.log(JSON.stringify(this.device));
+      console.log(JSON.stringify(this.device));
+    },
+    getMetadata(prop) {
+      const metadata = this.$store.state.systemState[this.id].metadata;
+      return metadata && metadata.value && metadata.value[prop];
     },
     reload() {
       this.name = this.$store.state.systemState[this.id].name.value;
       this.type = this.$store.state.systemState[this.id].type.value;
-      this.syncWithIntegrations = this.$store.state.systemState[
-        this.id
-      ].metadata.value.syncWithIntegrations;
+      this.syncWithIntegrations = this.getMetadata("syncWithIntegrations");
       this.device = undefined;
-      this.deviceProps = {};
+      this.deviceProps = undefined;
       this.loading = true;
       axios.get(`/web/device/${this.id}.json`).then(response => {
         this.deviceProps = response.data;
@@ -138,10 +154,11 @@ export default {
       });
     },
     remove() {
-      // this.showDelete = true;
-      // axios
-      //   .delete(`/web/device/${this.id}/`)
-      //   .then(e => (window.location.hash = "#/device"));
+      this.showDelete = true;
+      axios.post(`/web/device/${this.id}/delete`).then(() => {
+        delete this.$store.state.systemState[this.id];
+        window.location.hash = "#/device";
+      });
     },
     save() {
       const post = {
@@ -155,16 +172,28 @@ export default {
       this.showSave = false;
       axios
         .post(`/web/device/${this.id}/`, post)
-        .then(() => (this.showSave = true))
+        .then(() => {
+          this.showSave = true;
+          this.device = undefined;
+        })
         .catch(() => (this.showSaveError = true));
     }
   },
   computed: {
+    devices() {
+      return this.$store.state.scrypted.devices;
+    },
     id() {
       return this.$route.params.id;
     },
-    componentWebPath() {
-      return `/web/component/${this.$store.state.systemState[this.id].component.value}`;
+    canLoad() {
+      return this.devices.includes(this.id);
+    },
+    needsLoad() {
+      return !this.deviceProps && this.canLoad && !this.loading;
+    },
+    systemDevice() {
+      return this.$scrypted.systemManager.getDeviceById(this.id);
     }
   }
 };

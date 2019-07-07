@@ -27,6 +27,7 @@
 import BasicComponent from "./BasicComponent.vue";
 import axios from "axios";
 import qs from 'query-string';
+import { getComponentWebPath } from "../helpers";
 
 export default {
   mixins: [BasicComponent],
@@ -38,11 +39,8 @@ export default {
   },
   computed: {
     componentWebPath() {
-      return this.getComponentWebPath("homekit");
+      return getComponentWebPath("homekit");
     },
-    settingsComponentWebPath() {
-      return this.getComponentWebPath("remote");
-    }
   },
   methods: {
     refresh() {

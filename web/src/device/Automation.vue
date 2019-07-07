@@ -68,7 +68,7 @@
       </v-form>
     </v-card>
 
-    <v-card raised class="header-card">
+    <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >
@@ -99,19 +99,31 @@
       </v-form>
     </v-card>
 
-    <div v-if="device.automationType === 'Scene'" class="card col-12 col-lg-6">
-      <div class="card-header">
+    <v-card raised class="header-card" v-if="device.automationType === 'Scene'">
+      <v-card-title
+        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+      >
+        <font-awesome-icon size="sm" icon="play" />
         <h5 class="card-title">Scene Dectivation Actions</h5>
-        <h6 class="card-subtitle text-muted">Specify action(s) to take when the scene deactivated.</h6>
-      </div>
+      </v-card-title>
+      <div class="header-card-spacer"></div>
+      <v-card-text>Specify action(s) to take when the scene deactivated.</v-card-text>
 
-      <InterfacesPicker
-        :name="device.deactivateActions.name"
-        :interfaces="contextualInterfaces"
-        v-model="device.deactivateActions.actions"
-        @input="onChange"
-      ></InterfacesPicker>
-    </div>
+      <v-form>
+        <v-container>
+          <v-layout>
+            <v-flex xs12>
+              <InterfacesPicker
+                :name="device.deactivateActions.name"
+                :interfaces="contextualInterfaces"
+                v-model="device.deactivateActions.actions"
+                @input="onChange"
+              ></InterfacesPicker>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-form>
+    </v-card>
   </v-flex>
 </template>
 <script lang="ts">
@@ -182,10 +194,10 @@ export default {
       }
     }
   },
-  mounted() {
-    // this is a hack until device is propertly send across from the java side.
-    this.onChange();
-  },
+  // mounted() {
+  //   // this is a hack until device is propertly send across from the java side.
+  //   this.onChange();
+  // },
   methods: {
     onChange() {
       this.$emit("input", this.device);

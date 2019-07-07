@@ -81,6 +81,11 @@ export default {
 
     Select2
   },
+  watch: {
+    'lazyValue.selected.component'() {
+      this.lazyValue.model = {};
+    }
+  },
   methods: {
     createLazyValue() {
       let selected =

@@ -26,7 +26,6 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     constructor() {
         super();
 
-        this.router.get('/api/components', this.handleComponents.bind(this));
         this.router.get('/api/devices', this.handleDevices.bind(this));
         this.router.get('/api/state', this.handleState.bind(this));
     }
@@ -207,16 +206,6 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 } : null,
             }
         }));
-    }
-
-    handleComponents(httpRequest: HttpRequest, response: HttpResponse) {
-        var components = toArray(__manager.getComponents());
-        this.sendJson(response, components.map(component => ({
-            id: component.id,
-            name: component.name,
-            icon: component.icon,
-            category: component.getCategory().toString(),
-        })));
     }
 }
 

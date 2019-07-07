@@ -1,9 +1,31 @@
 <script>
 import BasicComponent from "./BasicComponent.vue";
+import axios from "axios";
+import qs from "query-string";
+import { getDeviceViewPath } from "../helpers";
 
 export default {
   mixins: [BasicComponent],
+  methods: {
+    newAutomation(scene) {
+      var body = {};
+      // ugh legacy code smell
+      if (scene) {
+        body["card"] = "scene";
+      } else {
+        body["new"] = "new";
+      }
+
+      axios
+        .post(`${this.componentWebPath}/new`, qs.stringify(body))
+        .then(response => {
+          const { id } = response.data;
+          window.location.hash = '#' + getDeviceViewPath(id);
+        });
+    }
+  },
   data() {
+    var self = this;
     return {
       cards: [
         {
@@ -13,11 +35,14 @@ export default {
               method: "POST",
               path: "new",
               title: "Create Automation",
-              value: "automation"
+              value: "automation",
+              click() {
+                self.newAutomation(false);
+              }
             }
           ],
           description:
-            "Create custom smart home scenes that control multiple devices.",
+            "Create custom smart home actions that trigger on specific events.",
           title: "Create New Automation"
         },
         {
@@ -27,7 +52,10 @@ export default {
               method: "POST",
               path: "new",
               title: "Create Scene",
-              value: "scene"
+              value: "scene",
+              click() {
+                self.newAutomation(true);
+              }
             }
           ],
           description:

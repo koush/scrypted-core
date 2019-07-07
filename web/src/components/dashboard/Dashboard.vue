@@ -188,7 +188,7 @@ export default {
       var validTypes = this.validTypes;
 
       var ret = {};
-      Object.entries(this.$store.state.systemState)
+      this.$store.state.scrypted.devices.map(id => [id, this.$store.state.systemState[id]])
         // filter out devices we can't show in the ui
         .filter(([, device]) => {
           return device.type && validTypes[device.type.value];

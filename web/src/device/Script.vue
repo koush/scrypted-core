@@ -116,7 +116,6 @@ export default {
   },
   mounted() {
     this.doGist();
-    this.$emit("input", this.script);
   },
   watch: {
     id() {

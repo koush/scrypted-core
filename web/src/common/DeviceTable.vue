@@ -14,10 +14,13 @@
           <font-awesome-icon size="sm" :icon="typeToIcon(device.type)" color="#a9afbb" />
         </td>
         <td class="body-2 font-weight-light">
-          <a link :href="'#/device/' + device.id">{{ device.name }}</a>
+          <a link :href="'#' + getDeviceViewPath(device.id)">{{ device.name }}</a>
+        </td>
+        <td v-if="deviceGroup.ownerColumn && getOwnerLink(device)" class="body-2 font-weight-light">
+          <a :href="getOwnerLink(device)">{{ getOwnerColumn(device) }}</a>
         </td>
         <td
-          v-if="deviceGroup.ownerColumn"
+          v-else-if="deviceGroup.ownerColumn"
           class="body-2 font-weight-light"
         >{{ getOwnerColumn(device) }}</td>
         <td class="body-2 font-weight-light">{{ device.type }}</td>
@@ -27,12 +30,13 @@
 </template>
 
 <script>
-import { typeToIcon } from "../components/helpers";
+import { typeToIcon, getDeviceViewPath } from "../components/helpers";
 
 export default {
-    props: ['deviceGroup', 'getOwnerColumn'],
-    methods: {
-        typeToIcon,
-    }
-}
+  props: ["deviceGroup", "getOwnerColumn", "getOwnerLink"],
+  methods: {
+    getDeviceViewPath,
+    typeToIcon
+  }
+};
 </script>

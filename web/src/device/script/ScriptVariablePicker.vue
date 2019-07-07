@@ -24,8 +24,8 @@
 </template>
 
 <script>
+import cloneDeep from "lodash.clonedeep";
 import Select2 from "../../common/Select2.vue";
-import Vue from "vue";
 import CustomValue from "../../common/CustomValue.vue";
 
 function unassigned() {
@@ -68,7 +68,7 @@ export default {
       return {
         variableName: this.value.key,
         variableValue:
-          Vue.util.extend(this.actions.find(e => e.id == this.value.value)) ||
+          cloneDeep(this.actions.find(e => e.id == this.value.value)) ||
           unassigned()
       };
     },

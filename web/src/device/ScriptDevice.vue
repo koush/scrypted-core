@@ -30,17 +30,17 @@
   </v-flex>
 </template>
 <script>
-import Vue from 'vue';
 import Storage from "../common/Storage";
+import cloneDeep from "lodash.clonedeep";
 
 export default {
-  props: ["value", "id", "name"],
+  props: ["value", "id", "name", "deviceProps"],
   components: {
     Storage,
   },
   data: function() {
     return {
-      device: Vue.util.extend(this.value.device)
+      device: cloneDeep(this.deviceProps.device)
     };
   },
   methods: {

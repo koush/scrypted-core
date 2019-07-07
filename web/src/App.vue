@@ -43,6 +43,7 @@ import AutomationComponent from "./components/builtin/AutomationComponent.vue";
 import WebPushComponent from "./components/builtin/WebPushComponent.vue";
 import ScriptComponent from "./components/builtin/ScriptComponent.vue";
 import RemoteManagementComponent from "./components/builtin/RemoteManagementComponent.vue";
+import LogComponent from "./components/builtin/LogComponent.vue";
 import GoogleHomeComponent from "./components/builtin/GoogleHomeComponent.vue";
 import AlexaComponent from "./components/builtin/AlexaComponent.vue";
 import HomeKitComponent from "./components/builtin/HomeKitComponent.vue";
@@ -95,6 +96,14 @@ let router = new VueRouter({
       component: AlexaComponent
     },
     {
+      path: "/component/log",
+      component: LogComponent
+    },
+    {
+      path: "/component/log/:path*",
+      component: LogComponent
+    },
+    {
       path: "/device/:id",
       component: Device
     }
@@ -107,11 +116,27 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    systemState: {}
+    systemState: {},
+    scrypted: {
+      devices: []
+    }
   },
   mutations: {
     setSystemState: function(store, systemState) {
       store.systemState = systemState;
+    },
+    setDevices(store, devices) {
+      store.scrypted.devices = devices;
+    },
+    addDevice(store, id) {
+      var devices = store.scrypted.devices.filter(device => device !== id);
+      devices.push(id);
+      store.scrypted.devices = devices;
+    },
+    removeDevice(store, id) {
+      store.scrypted.devices = store.scrypted.devices.filter(
+        device => device !== id
+      );
     }
   }
 });
@@ -147,6 +172,20 @@ export default {
   components: {
     Drawer
   },
+  methods: {
+    hasValue(state, property) {
+      return state[property] && state[property].value;
+    },
+    isValidDevice(id) {
+      const state = this.$store.state.systemState[id];
+      for (var property of ['id', 'name', 'interfaces', 'component', 'events', 'metadata', 'type']) {
+        if (!this.hasValue(state, property)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  },
   created() {
     router.beforeEach((to, from, next) => {
       this.title = to.name || "Scrypted";
@@ -161,6 +200,28 @@ export default {
         // this is not the same behavior as on android. fix?
         const systemState = scrypted.systemManager.getSystemState();
         store.commit("setSystemState", systemState);
+        store.commit("setDevices", Object.keys(systemState));
+
+        scrypted.systemManager.listen(
+          (eventSource, eventDetails, eventData) => {
+            const id = eventSource.id;
+
+            if (eventDetails.property === "id" && !eventData) {
+              Vue.delete(systemState, id);
+              store.commit("removeDevice", id);
+              return;
+            }
+
+            // ensure the property is reactive
+            if (eventDetails.eventInterface == "ScryptedDevice") {
+              Vue.set(systemState, id, systemState[id]);
+              if (this.isValidDevice(id)) {
+              store.commit("addDevice", id);
+              }
+              return;
+            }
+          }
+        );
         this.loading = false;
       });
     });

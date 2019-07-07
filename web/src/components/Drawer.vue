@@ -28,7 +28,7 @@
           v-for="item in filterComponents(category)"
           :key="item.id"
           link
-          :to="'/component/' + item.id"
+          :to="getComponentViewPath(item.id)"
           :ripple="false"
           style="padding: 10px;"
           active-class="purple white--text tile"
@@ -48,21 +48,104 @@
 </template>
 
 <script>
+import { getComponentViewPath } from "./helpers";
+
 export default {
   props: {
-    value: Object
+    value: Object,
+    components: {
+      type: Array,
+      default() {
+        return [
+          {
+            id: "automation",
+            name: "Automations",
+            icon: "activity",
+            category: "Components"
+          },
+          {
+            id: "script",
+            name: "Plugins",
+            icon: "zap",
+            category: "Components"
+          },
+          {
+            id: "aggregate",
+            name: "Device Groups",
+            icon: "folder-plus",
+            category: "Components"
+          },
+          {
+            id: "webpush",
+            name: "Browser Notifications",
+            icon: "bell",
+            category: "Components"
+          },
+          {
+            id: "remote",
+            name: "Remote Management",
+            icon: "cloud",
+            category: "Integrations"
+          },
+          {
+            id: "home",
+            name: "Google Home",
+            icon: "home",
+            category: "Integrations"
+          },
+          {
+            id: "homekit",
+            name: "Apple HomeKit",
+            icon: "home",
+            category: "Integrations"
+          },
+          {
+            id: "alexa",
+            name: "Amazon Alexa",
+            icon: "home",
+            category: "Integrations"
+          },
+          {
+            id: "zwave",
+            name: "Z-Wave",
+            icon: "radio",
+            category: "Components"
+          },
+          {
+            id: "mail",
+            name: "Incoming Mail",
+            icon: "inbox",
+            category: "Components"
+          },
+          { id: "log", name: "Live Log", icon: "list", category: "Utilities" },
+          // {
+          //   id: "file",
+          //   name: "File Browser",
+          //   icon: "file-text",
+          //   category: "Utilities"
+          // },
+          {
+            id: "settings",
+            name: "Settings",
+            icon: "settings",
+            category: "Utilities"
+          }
+        ];
+      }
+    }
   },
-  created: async function() {
-    fetch("/endpoint/@scrypted/ui/api/components")
-      .then(response => response.json())
-      .then(json => {
-        this.$data.components.push(...json);
-      })
-      .catch();
-  },
+  // created: async function() {
+  //   fetch("/endpoint/@scrypted/ui/api/components")
+  //     .then(response => response.json())
+  //     .then(json => {
+  //       this.$data.components.push(...json);
+  //     })
+  //     .catch();
+  // },
   methods: {
+    getComponentViewPath,
     filterComponents: function(category) {
-      return this.$data.components.filter(
+      return this.components.filter(
         component => component.category == category
       );
     }
@@ -70,7 +153,7 @@ export default {
   data: function() {
     return {
       actives: {},
-      components: [],
+      // components: [],
       builtinComponents: [
         {
           id: "dashboard",

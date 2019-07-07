@@ -17,7 +17,7 @@
           <font-awesome-icon size="sm" :icon="typeToIcon(item.type)" :color="colors.blue.base" />
         </template>
         <template v-slot:item.name="{ item }">
-          <a link :href="'#/device/' + item.id">{{ item.name }}</a>
+          <a link :href="'#' + getDeviceViewPath(item.id)">{{ item.name }}</a>
         </template>
         <template v-slot:item.plugin="{ item }">
           <a link :href="item.plugin.link">{{ item.plugin.name }}</a>
@@ -28,10 +28,11 @@
 </template>
 <script>
 import colors from "vuetify/es5/util/colors";
-import { typeToIcon, getComponentName } from "./helpers";
+import { typeToIcon, getComponentName, getDeviceViewPath } from "./helpers";
 
 export default {
   methods: {
+    getDeviceViewPath,
     getOwner(owner) {
       if (!owner) {
         return undefined;
@@ -41,20 +42,26 @@ export default {
     getComponent(component) {
       return getComponentName(component);
     },
-    typeToIcon
+    typeToIcon,
+    getMetadata(device, prop) {
+      const metadata = device.metadata;
+      return metadata && metadata[prop];
+    }
   },
   computed: {
     devices() {
-      return Object.keys(this.$store.state.systemState)
+      return this.$store.state.scrypted.devices
         .map(id => this.$scrypted.systemManager.getDeviceById(id))
         .map(device => ({
           id: device.id,
           name: device.name,
           type: device.type,
-          owner: device.metadata.ownerPlugin ? {
-            name: this.getOwner(device.metadata.ownerPlugin),
-            link: `#/device/${device.metadata.ownerPlugin}`
-          } : undefined,
+          owner: this.getMetadata(device, "ownerPlugin")
+            ? {
+                name: this.getOwner(this.getMetadata(device, "ownerPlugin")),
+                link: `#/device/${this.getMetadata(device, "ownerPlugin")}`
+              }
+            : undefined,
           component: {
             name: this.getComponent(device.component),
             link: `#/component/${device.component}`

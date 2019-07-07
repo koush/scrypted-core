@@ -1,5 +1,6 @@
 <script>
 import cloneDeep from "lodash.clonedeep";
+import CustomValue from "../common/CustomValue.vue";
 
 export default {
   props: {
@@ -7,16 +8,14 @@ export default {
     value: Object,
     properties: Object
   },
+  mixins: [CustomValue],
   mounted() {
     // call onChange to guarantee sane values.
-    if (!this.device) {
+    if (!this.device && !this.lazyValue.rpc) {
       this.onChange();
     }
   },
   methods: {
-    cloneValue() {
-      return cloneDeep(this.value);
-    },
     rpc(options) {
       options = options || {};
       const { modelUpdate, varargs } = options;
@@ -28,12 +27,12 @@ export default {
             return function() {
               var parameters = Array.prototype.slice.call(arguments);
               if (!vm.device) {
-                vm.model.rpc = {
+                vm.lazyValue.rpc = {
                   method,
                   parameters,
                   varargs
                 };
-                vm.$emit("input", vm.model);
+                vm.onInput();
                 return;
               }
               if (modelUpdate) return;
