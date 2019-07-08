@@ -1,26 +1,24 @@
 <template>
-  <v-flex xs12>
-    <v-layout>
+  <v-layout row wrap>
+    <v-flex xs12 md5>
       <v-text-field
-        xs6
-        md6
         outlined
         v-model="lazyValue.variableName"
         placeholder="variableName"
         label="Variable Name"
         @input="onInput"
       ></v-text-field>
+    </v-flex>
+    <v-flex xs12 md7>
       <Select2
-        xs6
-        md6
         label="Variable"
         v-model="lazyValue.variableValue"
         :options="combinedActions"
         :unselected="unselected"
         @input="onInput"
       ></Select2>
-    </v-layout>
-  </v-flex>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>

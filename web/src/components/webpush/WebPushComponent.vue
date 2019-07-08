@@ -1,5 +1,5 @@
 <script>
-import BasicComponent from "./BasicComponent.vue";
+import BasicComponent from "../BasicComponent.vue";
 import WebPushSubscribe from "./WebPushSubscribe.vue";
 import WebPushInvite from "./WebPushInvite.vue";
 import axios from "axios";

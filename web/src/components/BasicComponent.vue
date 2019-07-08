@@ -40,8 +40,10 @@
   </v-layout>
 </template>
 <script>
-import { typeToIcon, getComponentWebPath } from "../helpers";
-import DeviceTable from "../../common/DeviceTable.vue";
+import { typeToIcon, getComponentWebPath, getDeviceViewPath, getComponentViewPath } from "./helpers";
+import DeviceTable from "../common/DeviceTable.vue"
+import axios from "axios";
+import qs from "query-string";
 
 export default {
   components: {
@@ -55,10 +57,21 @@ export default {
     getOwnerLink() {
       return null;
     },
+    newDevice(body) {
+      axios
+        .post(`${this.componentWebPath}/new`, body ? qs.stringify(body) : undefined)
+        .then(response => {
+          const { id } = response.data;
+          window.location.hash = '#' + getDeviceViewPath(id);
+        });
+    }
   },
   computed: {
     componentWebPath() {
       return getComponentWebPath(this.id);
+    },
+    componentViewPath() {
+      return getComponentViewPath(this.id);
     },
     id() {
       return window.location.hash.replace('#/component/', '');

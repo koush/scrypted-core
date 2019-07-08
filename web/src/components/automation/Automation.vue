@@ -127,8 +127,8 @@
   </v-flex>
 </template>
 <script lang="ts">
-import InterfacesPicker from "../common/InterfacesPicker.vue";
-import EventsPicker from "../common/EventsPicker.vue";
+import InterfacesPicker from "./InterfacesPicker.vue";
+import EventsPicker from "./EventsPicker.vue";
 import cloneDeep from "lodash.clonedeep";
 
 export default {

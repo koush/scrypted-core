@@ -27,21 +27,21 @@
 
 <script>
 import cloneDeep from "lodash.clonedeep";
-import CustomValue from "./CustomValue.vue";
+import CustomValue from "../../common/CustomValue.vue";
 
-import Unassigned from "./../interfaces/Unassigned.vue";
+import Unassigned from "../../interfaces/Unassigned.vue";
 
-import Condition from "../interfaces/automation/Condition.vue";
-import Timer from "../interfaces/automation/Timer.vue";
-import Javascript from "../interfaces/automation/Javascript.vue";
+import Condition from "../../interfaces/automation/Condition.vue";
+import Timer from "../../interfaces/automation/Timer.vue";
+import Javascript from "../../interfaces/automation/Javascript.vue";
 
-import EventListener from "../interfaces/EventListener.vue";
-import OnOff from "../interfaces/OnOff.vue";
-import Lock from "../interfaces/Lock.vue";
-import Notifier from "../interfaces/Notifier.vue";
-import SoftwareUpdate from "../interfaces/SoftwareUpdate.vue";
+import EventListener from "../../interfaces/EventListener.vue";
+import OnOff from "../../interfaces/OnOff.vue";
+import Lock from "../../interfaces/Lock.vue";
+import Notifier from "../../interfaces/Notifier.vue";
+import SoftwareUpdate from "../../interfaces/SoftwareUpdate.vue";
 
-import Select2 from "./Select2.vue";
+import Select2 from "../../common/Select2.vue";
 function unassigned() {
   return {
     id: "unassigned",

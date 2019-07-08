@@ -38,10 +38,11 @@
 
 <script>
 import Device from "./components/Device.vue";
-import AggregateComponent from "./components/builtin/AggregateComponent.vue";
-import AutomationComponent from "./components/builtin/AutomationComponent.vue";
-import WebPushComponent from "./components/builtin/WebPushComponent.vue";
-import ScriptComponent from "./components/builtin/ScriptComponent.vue";
+import AggregateComponent from "./components/aggregate/AggregateComponent.vue";
+import AutomationComponent from "./components/automation/AutomationComponent.vue";
+import WebPushComponent from "./components/webpush/WebPushComponent.vue";
+import ScriptComponent from "./components/script/ScriptComponent.vue";
+import InstallPlugin from "./components/script/InstallPlugin.vue";
 import RemoteManagementComponent from "./components/builtin/RemoteManagementComponent.vue";
 import LogComponent from "./components/builtin/LogComponent.vue";
 import GoogleHomeComponent from "./components/builtin/GoogleHomeComponent.vue";
@@ -70,6 +71,10 @@ let router = new VueRouter({
     {
       path: "/component/script",
       component: ScriptComponent
+    },
+    {
+      path: "/component/script/install",
+      component: InstallPlugin,
     },
     {
       path: "/component/aggregate",
@@ -129,11 +134,13 @@ const store = new Vuex.Store({
       store.scrypted.devices = devices;
     },
     addDevice(store, id) {
+      console.log('new device added');
       var devices = store.scrypted.devices.filter(device => device !== id);
       devices.push(id);
       store.scrypted.devices = devices;
     },
     removeDevice(store, id) {
+      console.log('device removed');
       store.scrypted.devices = store.scrypted.devices.filter(
         device => device !== id
       );
@@ -178,7 +185,15 @@ export default {
     },
     isValidDevice(id) {
       const state = this.$store.state.systemState[id];
-      for (var property of ['id', 'name', 'interfaces', 'component', 'events', 'metadata', 'type']) {
+      for (var property of [
+        "id",
+        "name",
+        "interfaces",
+        "component",
+        "events",
+        "metadata",
+        "type"
+      ]) {
         if (!this.hasValue(state, property)) {
           return false;
         }
@@ -216,12 +231,20 @@ export default {
             if (eventDetails.eventInterface == "ScryptedDevice") {
               Vue.set(systemState, id, systemState[id]);
               if (this.isValidDevice(id)) {
-              store.commit("addDevice", id);
+                store.commit("addDevice", id);
               }
               return;
             }
           }
         );
+
+        scrypted.rpc('alerts')
+        .then(alerts => console.log(alerts));
+
+        scrypted.systemManager.listen((eventSource, eventDetails, eventData) => {
+          console.log(eventData);
+        });
+
         this.loading = false;
       });
     });

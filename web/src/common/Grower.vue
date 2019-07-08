@@ -8,7 +8,7 @@
       :is="component"
       v-model="lazyValue[index]"
     ></component>
-    <v-btn @click="add">Add</v-btn>
+    <v-btn @click="add">{{ addButton }}</v-btn>
   </div>
 </template>
 <script>
@@ -16,7 +16,15 @@ import cloneDeep from "lodash.clonedeep";
 import CustomValue from "./CustomValue.vue";
 
 export default {
-  props: ["component", "empty", "componentProps"],
+  props: {
+    empty: undefined,
+    component: undefined,
+    componentProps: undefined,
+    addButton: {
+      default: "Add",
+      type: String
+    }
+  },
   mixins: [CustomValue],
   methods: {
     add() {

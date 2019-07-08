@@ -1,5 +1,6 @@
 <template>
   <Grower
+    addButton="Add Storage Entry"
     v-model="lazyValue"
     :component="StorageEntry"
     :empty="{ key: '', value:''}"

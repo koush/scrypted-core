@@ -37,9 +37,9 @@
 <script>
 import cloneDeep from "lodash.clonedeep";
 
-import Select2 from "./Select2.vue";
-import Scheduler from "../interfaces/automation/Scheduler.vue";
-import CustomValue from "./CustomValue.vue";
+import Select2 from "../../common/Select2.vue";
+import Scheduler from "../../interfaces/automation/Scheduler.vue";
+import CustomValue from "../../common/CustomValue.vue";
 
 function unassigned() {
   return {

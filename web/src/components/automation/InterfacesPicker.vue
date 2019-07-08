@@ -4,8 +4,8 @@
 
 <script>
 import InterfacePicker from "./InterfacePicker.vue";
-import CustomValue from "./CustomValue.vue";
-import Grower from "./Grower.vue";
+import CustomValue from "../../common/CustomValue.vue";
+import Grower from "../../common/Grower.vue";
 
 
 export default {

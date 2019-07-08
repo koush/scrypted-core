@@ -1,9 +1,10 @@
 <script>
-import BasicComponent from "./BasicComponent.vue";
+import BasicComponent from "../BasicComponent.vue";
 
 export default {
   mixins: [BasicComponent],
   data() {
+    var self = this;
     return {
       cards: [
         {
@@ -13,7 +14,10 @@ export default {
               method: "POST",
               path: "new",
               title: "Create Device Group",
-              value: "automation"
+              value: "automation",
+              click() {
+                self.newDevice();
+              }
             }
           ],
           description:

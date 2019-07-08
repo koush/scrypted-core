@@ -1,5 +1,5 @@
 <script>
-import BasicComponent from "./BasicComponent.vue";
+import BasicComponent from "../BasicComponent.vue";
 
 export default {
   mixins: [BasicComponent],
@@ -12,6 +12,7 @@ export default {
     }
   },
   data() {
+    var self = this;
     return {
       cards: [
         {
@@ -20,7 +21,10 @@ export default {
             {
               method: "GET",
               path: "install",
-              title: "Install Plugin"
+              title: "Install Plugin",
+              click() {
+                self.$router.push(`${self.componentViewPath}/install`);
+              }
             }
           ],
           description:
@@ -33,7 +37,10 @@ export default {
             {
               method: "POST",
               path: "new",
-              title: "Create Script"
+              title: "Create Script",
+              click() {
+                self.newDevice();
+              }
             }
           ],
           description:
@@ -62,11 +69,14 @@ export default {
         {
           name: "Plugins",
           ownerColumn: "Plugin Package",
-          devices: devices.filter(device => device.metadata.npmPackage),
+          devices: devices.filter(device => device.metadata.npmPackage)
         },
         {
           name: "Scripts",
-          devices: devices.filter(device => !device.metadata.npmPackage && !device.metadata.ownerPlugin),
+          devices: devices.filter(
+            device =>
+              !device.metadata.npmPackage && !device.metadata.ownerPlugin
+          )
         }
       ];
     }

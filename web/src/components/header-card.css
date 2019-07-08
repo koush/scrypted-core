@@ -13,6 +13,9 @@
 .green-gradient {
   background: linear-gradient(60deg, #66bb6a, #43a047);
 }
+.blue-gradient {
+  background: linear-gradient(60deg,#26c6da,#00acc1);
+}
 .header-card-gradient {
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
@@ -29,5 +32,5 @@
   padding-top: 40px;
 }
 .small-header {
-  padding: 4px 4px 4px 16px;
+  padding: 4px 4px 4px 8px;
 }

@@ -76,19 +76,18 @@
         :id="id"
         :name="name"
         :type="type"
-        :componentWebPath="getComponentWebPath(id)"
       ></component>
     </v-flex>
   </v-layout>
 </template>
 <script>
 import axios from "axios";
-import Automation from "../device/Automation.vue";
-import Script from "../device/Script.vue";
-import ScriptDevice from "../device/ScriptDevice.vue";
-import AggregateDevice from "../device/AggregateDevice.vue";
-import WebPushRegistration from "../device/WebPushRegistration.vue";
-import { getComponentWebPath, getDeviceViewPath } from "./helpers";
+import Automation from "./automation/Automation.vue";
+import Script from "./script/Script.vue";
+import ScriptDevice from "./script/ScriptDevice.vue";
+import AggregateDevice from "./aggregate/AggregateDevice.vue";
+import WebPushRegistration from "./webpush/WebPushRegistration.vue";
+import { getComponentWebPath } from "./helpers";
 
 export default {
   components: {
@@ -118,7 +117,7 @@ export default {
   },
   watch: {
     devices() {
-      console.log('device cnage');
+      console.log('device change detected.');
     },
     id() {
       this.device = undefined;

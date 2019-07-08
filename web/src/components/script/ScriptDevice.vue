@@ -30,7 +30,7 @@
   </v-flex>
 </template>
 <script>
-import Storage from "../common/Storage";
+import Storage from "../../common/Storage";
 import cloneDeep from "lodash.clonedeep";
 
 export default {

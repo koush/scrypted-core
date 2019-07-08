@@ -10,8 +10,8 @@
   </div>
 </template>
 <script>
-import Select2 from "../common/Select2.vue";
-import CustomValue from "../common/CustomValue.vue";
+import Select2 from "../../common/Select2.vue"
+import CustomValue from "../../common/CustomValue.vue";
 
 export default {
   props: {

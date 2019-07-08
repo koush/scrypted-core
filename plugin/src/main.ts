@@ -63,15 +63,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         };
 
         // this listener keeps the system state up to date on the other end.
-        const systemListener = systemManager.listen((eventSource: ScryptedDevice|null, eventDetails: EventDetails, eventData: object) => {
-            // no events for builtins
-            if (parseInt(eventSource.id) <= 0) {
-                return;
-            }
-            // no events if its not a property (ie, no events for face detect, zwave, etc).
-            if (!eventDetails.property) {
-                return;
-            }
+        const systemListener = systemManager.listen((eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: object) => {
             ws.send(JSON.stringify({
                 type: "sync",
                 id: eventSource.id,
@@ -88,6 +80,45 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
 
     handleIncomingMessage(message: any, session: WebSocketSession) {
         switch (message.type) {
+            case 'rpc': {
+                const { method, resultId } = message;
+                switch (method) {
+                    case 'alerts': {
+                        var alerts = toArray(__manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll())
+                            .map((alert: any) => {
+                                const {
+                                    id,
+                                    title,
+                                    message,
+                                    timestamp,
+                                    path,
+                                    icon,
+                                } = alert;
+
+                                return {
+                                    id,
+                                    title,
+                                    message,
+                                    timestamp,
+                                    path,
+                                    icon,
+                                };
+                            });
+                        this.sendOutgoingMessage({
+                            type: 'rpc',
+                            resultId,
+                            result: alerts,
+                        }, session.webSocket);
+                        break;
+                    }
+                }
+                this.sendOutgoingMessage({
+                    type: 'rpc',
+                    resultId,
+                    error: 'no rpc',
+                }, session.webSocket);
+                break;
+            }
             case 'listen': {
                 const { id, listenerId, options } = message;
                 const register = systemManager.getDeviceById(id).listen(options, (eventSource, eventDetails, eventData) => {
@@ -107,7 +138,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 break;
             }
             case 'systemListen': {
-                
+
             }
             case 'removeListener': {
                 let { listenerId } = message;
@@ -121,49 +152,49 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             case 'method': {
                 const { id, method, argArray } = message;
                 const device = systemManager.getDeviceById(id);
-                device[method](... argArray);
+                device[method](...argArray);
                 break;
             }
             case 'system': {
                 const { method, argArray, resultId } = message;
                 systemManager[method](...argArray || [])
-                .then(result => {
-                    this.sendOutgoingMessage({
-                        type: 'system',
-                        resultId,
-                        result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
-                    }, session.webSocket);
-                })
-                .catch(e => {
-                    this.sendOutgoingMessage({
-                        type: 'system',
-                        resultId,
-                        error: e.toString(),
-                    }, session.webSocket);
-                })
+                    .then(result => {
+                        this.sendOutgoingMessage({
+                            type: 'system',
+                            resultId,
+                            result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
+                        }, session.webSocket);
+                    })
+                    .catch(e => {
+                        this.sendOutgoingMessage({
+                            type: 'system',
+                            resultId,
+                            error: e.toString(),
+                        }, session.webSocket);
+                    })
                 break;
             }
             case 'media': {
-                const {method, toMimeType, mediaSource, resultId} = message;
-                const {id, method: sourceMethod} = mediaSource;
+                const { method, toMimeType, mediaSource, resultId } = message;
+                const { id, method: sourceMethod } = mediaSource;
                 const device = systemManager.getDeviceById(id);
                 const mediaObject = device[sourceMethod]();
-               
+
                 mediaManager[method](mediaObject, toMimeType)
-                .then(result => {
-                    this.sendOutgoingMessage({
-                        type: 'media',
-                        resultId,
-                        result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
-                    }, session.webSocket);
-                })
-                .catch(e => {
-                    this.sendOutgoingMessage({
-                        type: 'media',
-                        resultId,
-                        error: e.toString(),
-                    }, session.webSocket);
-                })
+                    .then(result => {
+                        this.sendOutgoingMessage({
+                            type: 'media',
+                            resultId,
+                            result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
+                        }, session.webSocket);
+                    })
+                    .catch(e => {
+                        this.sendOutgoingMessage({
+                            type: 'media',
+                            resultId,
+                            error: e.toString(),
+                        }, session.webSocket);
+                    })
                 break;
             }
         }

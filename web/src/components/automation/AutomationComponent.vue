@@ -1,8 +1,5 @@
 <script>
-import BasicComponent from "./BasicComponent.vue";
-import axios from "axios";
-import qs from "query-string";
-import { getDeviceViewPath } from "../helpers";
+import BasicComponent from "../BasicComponent.vue";
 
 export default {
   mixins: [BasicComponent],
@@ -16,12 +13,7 @@ export default {
         body["new"] = "new";
       }
 
-      axios
-        .post(`${this.componentWebPath}/new`, qs.stringify(body))
-        .then(response => {
-          const { id } = response.data;
-          window.location.hash = '#' + getDeviceViewPath(id);
-        });
+      this.newDevice(body);
     }
   },
   data() {

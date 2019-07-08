@@ -119,7 +119,7 @@ export default {
         case "lg":
           return 3;
         case "md":
-          return 3;
+          return 2;
         case "sm":
           return 2;
         case "xs":

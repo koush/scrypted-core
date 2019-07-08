@@ -20,7 +20,7 @@ module.exports = {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.js?$/,
           use: ["source-map-loader"],
           enforce: "pre"
         },

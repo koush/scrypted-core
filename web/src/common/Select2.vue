@@ -24,7 +24,12 @@ export default {
     sortedOptions() {
       var selected = this.lazyValue;
       if (!this.multiple) {
-        selected = [selected];
+        if (selected) {
+          selected = [selected];
+        }
+        else {
+          selected = [];
+        }
       }
       const selectedIds = selected.map(item => item.id);
       const sortedOptions = cloneDeep(this.options)

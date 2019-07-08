@@ -1,7 +1,7 @@
 <template>
   <Grower
     v-model="lazyValue"
-    :component="ScriptVariablePicker"
+    :component="EventPicker"
     :empty="unassigned"
     @input="onInput"
     :componentProps="componentProps"
@@ -9,32 +9,37 @@
 </template>
 
 <script>
-import ScriptVariablePicker from "./ScriptVariablePicker.vue";
+import EventPicker from "./EventPicker.vue";
 import CustomValue from "../../common/CustomValue.vue";
 import Grower from "../../common/Grower.vue";
 
 export default {
-  props: ["addButton", "value", "actions", "scriptType"],
+  props: {
+    name: String,
+    events: Array,
+    interfaces: Array,
+  },
   mixins: [CustomValue],
   components: {
-    Grower
+    Grower,
   },
   computed: {
-    ScriptVariablePicker() {
-      return ScriptVariablePicker;
+    EventPicker() {
+      return EventPicker;
     },
     componentProps() {
       return {
-        actions: this.actions,
-        scriptType: this.scryptType
+        events: this.events,
+        interfaces: this.interfaces,
       };
     },
     unassigned() {
       return {
-        key: "",
-        value: "unassigned"
+        id: "unassigned",
+        condition: null,
+        model: {}
       };
     }
-  }
+  },
 };
 </script>

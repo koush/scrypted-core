@@ -24,7 +24,7 @@
   </v-layout>
 </template>
 <script>
-import BasicComponent from "./BasicComponent.vue";
+import BasicComponent from "../BasicComponent.vue";
 import axios from "axios";
 import qs from 'query-string';
 import { getComponentWebPath } from "../helpers";
