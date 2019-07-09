@@ -4,7 +4,7 @@
       <v-text-field
         ref="variableName"
         outlined
-        label="Setting Name"
+        label="Storage Key"
         xs6
         v-model="lazyValue.key"
         @input="onInput"
@@ -12,7 +12,7 @@
       <v-text-field
         ref="variableValue"
         outlined
-        label="Setting Value"
+        label="Storage Value"
         xs6
         v-model="lazyValue.value"
         @input="onInput"

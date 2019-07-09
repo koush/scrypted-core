@@ -1,5 +1,4 @@
 <script>
-import cloneDeep from "lodash.clonedeep";
 import CustomValue from "../common/CustomValue.vue";
 
 export default {

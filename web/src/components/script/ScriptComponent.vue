@@ -1,5 +1,6 @@
 <script>
 import BasicComponent from "../BasicComponent.vue";
+import PluginUpdate from "./PluginUpdate.vue";
 
 export default {
   mixins: [BasicComponent],
@@ -71,6 +72,10 @@ export default {
           ownerColumn: "Plugin Package",
           devices: devices.filter(device => device.metadata.npmPackage),
           hideType: true,
+          tableProps: {
+            extraColumn0: "Version"
+          },
+          extraColumn0: PluginUpdate,
         },
         {
           name: "Scripts",

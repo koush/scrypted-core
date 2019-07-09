@@ -14,14 +14,14 @@ const proxyOpts = {
 
 module.exports = {
   configureWebpack: {
-    devtool: 'source-map',
+    // devtool: 'source-map',
     resolve: {
       extensions: ['.js', '.ts', '.vue'],
     },
     module: {
       rules: [
         {
-          test: /\.js?$/,
+          test: /\.(ts|js)?$/,
           use: ["source-map-loader"],
           enforce: "pre"
         },

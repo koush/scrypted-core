@@ -98,7 +98,7 @@ export default {
       this.watchClickOutside = false;
       setTimeout(() => {
         this.watchClickOutside = true;
-      }, 1000);
+      }, 300);
     },
     debounceSetBrightness: throttle(function(self) {
       self.type.ids

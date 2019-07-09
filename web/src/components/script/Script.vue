@@ -9,18 +9,17 @@
       <v-card-title
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >
-        <font-awesome-icon size="sm" icon="database" />
-        &nbsp;&nbsp;Managing Devices
+        <font-awesome-icon size="sm" icon="database" />&nbsp;&nbsp;Managing Devices
       </v-card-title>
       <div class="header-card-spacer"></div>
       <v-card-text>These devices were created by {{ name }}.</v-card-text>
       <DeviceGroup :deviceGroup="managedDevices"></DeviceGroup>
     </v-card>
 
-    <v-card raised class="header-card" style="margin-bottom: 60px">
+    <v-card raised class="header-card">
       <v-card-title
         class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-      >{{ script.npmPackage ? "Plugin Managemnet" : "Edit Script" }}</v-card-title>
+      >{{ script.npmPackage ? "Plugin Management" : "Edit Script" }}</v-card-title>
       <div class="header-card-spacer"></div>
 
       <v-form>
@@ -132,14 +131,13 @@
               ></v-textarea>
               <div v-else-if="!script.npmPackage" xs12 ref="gist" style="margin-top: 16px;"></div>
 
-              <v-btn v-if="script.npmPackage" outlined color="blue" @click="reload" xs4>Reload</v-btn>
-              <v-btn v-else outlined color="blue" @click="test" xs4>Test</v-btn>
-              <v-btn xs4 outlined color="blue" @click="showStorage = !showStorage">Storage</v-btn>
-              <v-btn outlined color="green" @click="debug" xs4>Debug</v-btn>
               <div class="caption mt-2" style v-if="!script.npmPackage">
                 <a href="https://developer.scrypted.app" target="developer">Developer Reference</a>
               </div>
-
+              <v-btn v-if="script.npmPackage" outlined color="blue" @click="reload" xs4>Reload</v-btn>
+              <v-btn v-else outlined color="blue" @click="test" xs4>Run Script</v-btn>
+              <v-btn outlined color="blue" @click="debug" xs4>Debug</v-btn>
+              <v-btn xs4 outlined color="blue" @click="showStorage = !showStorage">Storage</v-btn>
               <v-alert
                 style="margin-top: 16px;"
                 outlined
@@ -156,9 +154,26 @@
           </v-layout>
         </v-container>
       </v-form>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          v-if="script.npmPackage && !updateAvailable"
+          text
+          color="blue"
+          @click="openNpm"
+          xs4
+        >{{ script.npmPackage }}@{{ script.npmPackageVersion }}</v-btn>
+        <v-btn
+          v-else-if="script.npmPackage && updateAvailable"
+          color="orange"
+          @click="doInstall"
+          dark
+        >Install Update {{ updateAvailable }}</v-btn>
+      </v-card-actions>
     </v-card>
 
-    <v-card raised class="header-card" style="margin-bottom: 60px" v-if="showStorage">
+    <v-card raised class="header-card" v-if="showStorage" style="margin-top: 60px">
       <v-card-title
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >Script Storage</v-card-title>
@@ -182,20 +197,19 @@ import ScriptVariablesPicker from "./ScriptVariablesPicker.vue";
 import axios from "axios";
 import qs from "query-string";
 import Storage from "../../common/Storage.vue";
-import {
-  getComponentWebPath,
-  getComponentViewPath
-} from "../helpers";
+import { getComponentWebPath, getComponentViewPath } from "../helpers";
+import { checkUpdate, installNpm, getNpmPath } from "./plugin";
 
 export default {
   props: ["value", "id", "name", "deviceProps"],
   components: {
     DeviceGroup,
     ScriptVariablesPicker,
-    Storage,
+    Storage
   },
   data: function() {
     return {
+      updateAvailable: false,
       compilerResult: undefined,
       script: Object.assign(cloneDeep(this.deviceProps.script), {
         vars: cloneDeep(this.deviceProps.vars)
@@ -206,6 +220,10 @@ export default {
   },
   mounted() {
     this.doGist();
+
+    checkUpdate(this.script.npmPackage, this.script.npmPackageVersion).then(
+      updateAvailable => (this.updateAvailable = updateAvailable)
+    );
   },
   watch: {
     id() {
@@ -214,6 +232,14 @@ export default {
   },
   methods: {
     getComponentViewPath,
+    doInstall() {
+      installNpm(this.id, this.script.npmPackage).then(() =>
+        this.$emit("refresh")
+      );
+    },
+    openNpm() {
+      window.open(getNpmPath(this.script.npmPackage), "npm");
+    },
     openDeveloperReference(iface) {
       window.open("https://developer.scrypted.app/#" + iface.toLowerCase());
     },

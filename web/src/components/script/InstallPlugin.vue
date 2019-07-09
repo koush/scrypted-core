@@ -78,6 +78,7 @@ import debounce from "lodash/debounce";
 import md5 from "md5";
 import axios from "axios";
 import { getComponentWebPath, getDeviceViewPath } from "../helpers";
+import { installNpm } from "./plugin";
 
 export default {
   data: function() {
@@ -91,16 +92,8 @@ export default {
   },
   methods: {
     install(packageName) {
-        axios.post(`${getComponentWebPath('script')}/install/${packageName}`)
-        .then(response => {
-            const result = response.data;
-            if (result.success) {
-                this.$router.push((getDeviceViewPath(result.id)));
-            }
-            else {
-                console.log(response.data);
-            }
-        })
+      installNpm(undefined, packageName)
+      .then(id => this.$router.push(getDeviceViewPath(id)));
     },
     openLink(link) {
       window.open(link, "npm");

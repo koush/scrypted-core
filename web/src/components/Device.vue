@@ -41,9 +41,16 @@
               <v-layout>
                 <v-flex xs12>
                   <v-text-field v-model="name" label="Name" required></v-text-field>
-                  <v-select :items="[type]" label="Type" outlined v-model="type"></v-select>
-                  <v-combobox v-if="hasPhysicalLocation(type)" :items="existingRooms" outlined v-model="room" label="Room" required></v-combobox>
-                  <v-checkbox v-model="syncWithIntegrations" label="Sync with Integrations"></v-checkbox>
+                  <v-select v-if="inferredTypes.length > 1" :items="inferredTypes" label="Type" outlined v-model="type"></v-select>
+                  <v-combobox
+                    v-if="hasPhysicalLocation(type)"
+                    :items="existingRooms"
+                    outlined
+                    v-model="room"
+                    label="Room"
+                    required
+                  ></v-combobox>
+                  <v-checkbox v-if="syncable" v-model="syncWithIntegrations" label="Sync with Integrations"></v-checkbox>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -98,6 +105,7 @@
 
     <v-flex xs12 v-if="deviceProps">
       <component
+        @refresh="reload"
         @input="onChange"
         :is="deviceProps.box"
         :deviceProps="deviceProps"
@@ -117,7 +125,14 @@ import Script from "./script/Script.vue";
 import ScriptDevice from "./script/ScriptDevice.vue";
 import AggregateDevice from "./aggregate/AggregateDevice.vue";
 import WebPushRegistration from "./webpush/WebPushRegistration.vue";
-import { getComponentWebPath, getDeviceViewPath, removeAlert, hasPhysicalLocation } from "./helpers";
+import {
+  isSyncable,
+  inferTypesFromInterfaces,
+  getComponentWebPath,
+  getDeviceViewPath,
+  removeAlert,
+  hasPhysicalLocation
+} from "./helpers";
 
 export default {
   components: {
@@ -126,7 +141,7 @@ export default {
     ScriptDevice,
     AggregateDevice,
     WebPushRegistration,
-    Mail,
+    Mail
   },
   data() {
     return this.initialState();
@@ -216,8 +231,16 @@ export default {
     }
   },
   computed: {
+    syncable() {
+      return isSyncable(this.type);
+    },
+    inferredTypes() {
+      return inferTypesFromInterfaces(this.type, this.$store.state.systemState[this.id].interfaces.value);
+    },
     existingRooms() {
-      return this.$store.state.scrypted.devices.map(device => this.$scrypted.systemManager.getDeviceById(device).room).filter(room => room);
+      return this.$store.state.scrypted.devices
+        .map(device => this.$scrypted.systemManager.getDeviceById(device).room)
+        .filter(room => room);
     },
     deviceAlerts() {
       return this.$store.state.scrypted.alerts.filter(alert =>

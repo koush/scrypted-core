@@ -39,7 +39,12 @@
                   :deviceGroup="deviceGroup"
                   :getOwnerColumn="getOwnerColumn"
                   :getOwnerLink="getOwnerLink"
-                ></DeviceTable>
+                  v-bind="deviceGroup.tableProps"
+                >
+                <template v-slot:extra-column-0="device" v-if="deviceGroup.extraColumn0">
+                  <component :is="deviceGroup.extraColumn0" v-bind="device"></component>
+                </template>
+                </DeviceTable>
               </v-card>
             </v-flex>
           </v-flex>
