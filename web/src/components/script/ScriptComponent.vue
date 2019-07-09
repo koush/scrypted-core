@@ -69,7 +69,8 @@ export default {
         {
           name: "Plugins",
           ownerColumn: "Plugin Package",
-          devices: devices.filter(device => device.metadata.npmPackage)
+          devices: devices.filter(device => device.metadata.npmPackage),
+          hideType: true,
         },
         {
           name: "Scripts",

@@ -5,6 +5,7 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faInbox,
   faCopy,
   faFolderPlus,
   faPlay,
@@ -59,6 +60,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faInbox,
   faCopy,
   faFolderPlus,
   faPlay,

@@ -104,7 +104,7 @@
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >
         <font-awesome-icon size="sm" icon="play" />
-        <h5 class="card-title">Scene Dectivation Actions</h5>
+        <h5 class="card-title">&nbsp;&nbsp;Scene Deactivation Actions</h5>
       </v-card-title>
       <div class="header-card-spacer"></div>
       <v-card-text>Specify action(s) to take when the scene deactivated.</v-card-text>

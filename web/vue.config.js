@@ -1,4 +1,5 @@
 const scryptedServer = 'https://192.168.2.27:9443';
+const path = require('path');
 
 const proxyOpts = {
   changeOrigin: true,
@@ -13,9 +14,9 @@ const proxyOpts = {
 
 module.exports = {
   configureWebpack: {
-    // devtool: 'source-map',
+    devtool: 'source-map',
     resolve: {
-      extensions: ['.js', '.ts', '.vue']
+      extensions: ['.js', '.ts', '.vue'],
     },
     module: {
       rules: [

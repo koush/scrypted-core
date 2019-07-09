@@ -1,51 +1,71 @@
 <template>
-  <v-layout wrap>
-    <v-flex v-for="(card, cardIndex) in cards" :key="cardIndex" xs12 md6 lg4>
-      <v-flex>
-        <v-card v-if="!card.hide" raised class="header-card">
-          <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-          >{{ card.title }}</v-card-title>
-          <div class="header-card-spacer"></div>
-
-          <v-card-text>{{ card.description }}</v-card-text>
-          <component v-if="card.body" :is="card.body" v-model="card.value"></component>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              outlined
-              color="orange"
-              v-for="(cardButton, buttonIndex) in card.buttons"
-              :key="buttonIndex"
-              @click="cardButton.click && cardButton.click(card.value)"
-            >{{ cardButton.title }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-flex>
-    </v-flex>
-    <v-flex xs12>
-      <v-flex xs12 md6 lg8>
-        <v-flex v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
-          <v-card raised class="header-card">
+  <div>
+    <v-layout wrap v-if="!loading">
+      <v-flex v-for="(card, cardIndex) in cards" :key="cardIndex" xs12 md6 lg4>
+        <v-flex>
+          <v-card v-if="!card.hide" raised class="header-card">
             <v-card-title
-              class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-            >{{ deviceGroup.name }}</v-card-title>
+              class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            >{{ card.title }}</v-card-title>
             <div class="header-card-spacer"></div>
-            <DeviceTable :deviceGroup="deviceGroup" :getOwnerColumn="getOwnerColumn" :getOwnerLink="getOwnerLink"></DeviceTable>
+
+            <v-card-text>{{ card.description }}</v-card-text>
+            <component v-if="card.body" :is="card.body" v-model="card.value"></component>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                outlined
+                color="orange"
+                v-for="(cardButton, buttonIndex) in card.buttons"
+                :key="buttonIndex"
+                @click="cardButton.click && cardButton.click(card.value)"
+              >{{ cardButton.title }}</v-btn>
+            </v-card-actions>
           </v-card>
         </v-flex>
       </v-flex>
-    </v-flex>
-  </v-layout>
+      <v-flex xs12>
+        <v-layout>
+          <v-flex xs12 md6 lg8>
+            <v-flex v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
+              <v-card raised class="header-card">
+                <v-card-title
+                  class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+                >{{ deviceGroup.name }}</v-card-title>
+                <div class="header-card-spacer"></div>
+                <DeviceTable
+                  :hideType="deviceGroup.hideType"
+                  :deviceGroup="deviceGroup"
+                  :getOwnerColumn="getOwnerColumn"
+                  :getOwnerLink="getOwnerLink"
+                ></DeviceTable>
+              </v-card>
+            </v-flex>
+          </v-flex>
+        </v-layout>
+      </v-flex>
+    </v-layout>
+  </div>
 </template>
 <script>
-import { typeToIcon, getComponentWebPath, getDeviceViewPath, getComponentViewPath } from "./helpers";
-import DeviceTable from "../common/DeviceTable.vue"
+import {
+  typeToIcon,
+  getComponentWebPath,
+  getDeviceViewPath,
+  getComponentViewPath
+} from "./helpers";
+import DeviceTable from "../common/DeviceTable.vue";
 import axios from "axios";
 import qs from "query-string";
 
 export default {
+  data() {
+    return {
+      loading: false,
+      settings: {},
+    };
+  },
   components: {
     DeviceTable
   },
@@ -59,11 +79,21 @@ export default {
     },
     newDevice(body) {
       axios
-        .post(`${this.componentWebPath}/new`, body ? qs.stringify(body) : undefined)
+        .post(
+          `${this.componentWebPath}/new`,
+          body ? qs.stringify(body) : undefined
+        )
         .then(response => {
           const { id } = response.data;
-          window.location.hash = '#' + getDeviceViewPath(id);
+          window.location.hash = "#" + getDeviceViewPath(id);
         });
+    },
+    refresh() {
+      this.loading = true;
+      axios.get(`${this.componentWebPath}/settings`).then(response => {
+        this.$data.settings = response.data;
+        this.loading = false;
+      });
     }
   },
   computed: {
@@ -74,14 +104,18 @@ export default {
       return getComponentViewPath(this.id);
     },
     id() {
-      return window.location.hash.replace('#/component/', '');
+      return window.location.hash.replace("#/component/", "");
     },
     deviceGroups() {
       const ids = this.$store.state.scrypted.devices;
       const devices = ids
         .map(id => this.$scrypted.systemManager.getDeviceById(id))
         .filter(
-          device => device && device.component && device.component === this.component.id && !device.owner
+          device =>
+            device &&
+            device.component &&
+            device.component === this.component.id &&
+            !device.owner
         )
         .map(device => ({
           id: device.id,

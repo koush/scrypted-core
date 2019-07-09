@@ -10,7 +10,7 @@
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >
         <font-awesome-icon size="sm" icon="database" />
-        <span class="title font-weight-light">&nbsp;&nbsp;Managing Devices</span>
+        &nbsp;&nbsp;Managing Devices
       </v-card-title>
       <div class="header-card-spacer"></div>
       <v-card-text>These devices were created by {{ name }}.</v-card-text>
@@ -177,7 +177,6 @@
 </template>
 <script>
 import cloneDeep from "lodash.clonedeep";
-import Select2 from "../../common/Select2.vue";
 import DeviceGroup from "../../common/DeviceTable.vue";
 import ScriptVariablesPicker from "./ScriptVariablesPicker.vue";
 import axios from "axios";
@@ -195,7 +194,6 @@ export default {
     DeviceGroup,
     ScriptVariablesPicker,
     Storage,
-    Select2
   },
   data: function() {
     return {
@@ -307,7 +305,7 @@ export default {
       }
     },
     managedDevices() {
-      const devices = Object.keys(this.$store.state.systemState)
+      const devices = this.$store.state.scrypted.devices
         .filter(
           id =>
             this.$store.state.systemState[id].metadata.value.ownerPlugin ===

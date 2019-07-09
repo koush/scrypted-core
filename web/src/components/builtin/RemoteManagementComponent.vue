@@ -8,7 +8,8 @@
           >Remote Management</v-card-title>
           <div class="header-card-spacer"></div>
 
-          <v-card-text>Use your Google log in to manage Scrypted from anywhere.</v-card-text>
+          <v-card-text v-if="settings.loginEmail">Use your {{ settings.loginType }} log in to manage Scrypted from anywhere.</v-card-text>
+          <v-card-text v-else>Log in with Google or Amazon to manage Scrypted from anywhere.</v-card-text>
           <v-card-text>Remote Management must be enabled for Google Home and Amazon Alexa integrations.</v-card-text>
           <v-card-text v-if="settings.loginEmail && settings.environment">
             You can remotely log in to Scrypted using your login account, {{ settings.loginEmail }}, at this address:
@@ -23,6 +24,7 @@
               outlined
               color="orange"
               v-if="settings.environment"
+              @click="login"
             >{{ settings.loginEmail ? 'Update Login' : 'Login' }}</v-btn>
             <v-btn outlined color="orange" @click="disable" v-if="settings.environment">Disable</v-btn>
             <v-btn outlined color="orange" @click="enable" v-if="!settings.environment">Enable</v-btn>
@@ -33,13 +35,11 @@
   </v-layout>
 </template>
 <script>
-import BasicComponent from "../BasicComponent.vue";
 import axios from "axios";
 import qs from "query-string";
 import { getComponentWebPath } from "../helpers";
 
 export default {
-  mixins: [BasicComponent],
   data() {
     return {
       loading: true,
@@ -57,6 +57,9 @@ export default {
         this.$data.settings = response.data;
         this.loading = false;
       });
+    },
+    login() {
+      window.location = this.settings.loginLink;
     },
     disable() {
       axios

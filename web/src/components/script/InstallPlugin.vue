@@ -21,6 +21,7 @@
                 label="Search"
                 single-line
                 hide-details
+                @input="doSearch"
               ></v-text-field>
             </v-flex>
           </v-layout>

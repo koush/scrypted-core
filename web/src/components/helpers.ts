@@ -57,3 +57,9 @@ export function getDeviceViewPath(id) {
 export function getComponentViewPath(id) {
     return `/component/${id}`;
 }
+
+export function removeAlert(alert) {
+    this.$scrypted.rpc("removeAlerts", [alert.id]).then(() => {
+        this.$store.commit("removeAlert", alert.id);
+    });
+}

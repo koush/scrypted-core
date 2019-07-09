@@ -78,45 +78,74 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         webSocket.send(JSON.stringify(message));
     }
 
+    getAlerts(session: WebSocketSession, resultId: string) {
+        var alerts = toArray(__manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll())
+            .map((alert: any) => {
+                const {
+                    id,
+                    title,
+                    message,
+                    timestamp,
+                    path,
+                    icon,
+                } = alert;
+
+                return {
+                    id,
+                    title,
+                    message,
+                    timestamp,
+                    path,
+                    icon,
+                };
+            });
+        this.sendOutgoingMessage({
+            type: 'rpc',
+            resultId,
+            result: alerts,
+        }, session.webSocket);
+    }
+
+    removeAlerts(session: WebSocketSession, resultId: string, ids: Array<string>) {
+        if (!ids) {
+            __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").removeAll();
+        }
+        else {
+            for (var id of ids) {
+                __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").remove(id);
+            }
+        }
+        this.sendOutgoingMessage({
+            type: 'rpc',
+            resultId,
+            result: undefined,
+        }, session.webSocket);
+    }
+
     handleIncomingMessage(message: any, session: WebSocketSession) {
         switch (message.type) {
             case 'rpc': {
-                const { method, resultId } = message;
-                switch (method) {
-                    case 'alerts': {
-                        var alerts = toArray(__manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll())
-                            .map((alert: any) => {
-                                const {
-                                    id,
-                                    title,
-                                    message,
-                                    timestamp,
-                                    path,
-                                    icon,
-                                } = alert;
-
-                                return {
-                                    id,
-                                    title,
-                                    message,
-                                    timestamp,
-                                    path,
-                                    icon,
-                                };
-                            });
-                        this.sendOutgoingMessage({
-                            type: 'rpc',
-                            resultId,
-                            result: alerts,
-                        }, session.webSocket);
-                        break;
+                const { method, resultId, args } = message;
+                try {
+                    switch (method) {
+                        case 'alerts': {
+                            this.getAlerts(session, resultId);
+                            return;
+                        }
+                        case 'removeAlerts': {
+                            this.removeAlerts(session, resultId, args[0] as Array<string>);
+                            return;
+                        }
                     }
+                    throw new Error('rpc not found');
                 }
-                this.sendOutgoingMessage({
-                    type: 'rpc',
-                    resultId,
-                    error: 'no rpc',
-                }, session.webSocket);
+                catch (e) {
+                    this.sendOutgoingMessage({
+                        type: 'rpc',
+                        resultId,
+                        error: e.toString(),
+                    }, session.webSocket);
+                }
                 break;
             }
             case 'listen': {

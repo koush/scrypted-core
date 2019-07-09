@@ -2,6 +2,34 @@
   <v-layout wrap>
     <v-flex xs12 v-if="name">
       <v-flex xs12 md6 lg6>
+        <div v-if="deviceAlerts.length" class="mb-5">
+          <v-alert
+            dismissible
+            @input="removeAlert(alert)"
+            v-for="alert in deviceAlerts"
+            :key="alert.id"
+            xs12
+            md6
+            lg6
+            color="primary"
+            dark
+            icon="mdi-vuetify"
+            border="left"
+            prominent
+          >
+            <template v-slot:prepend>
+              <font-awesome-icon
+                class="white--text mr-3"
+                size="sm"
+                :icon="alert.icon"
+                color="#a9afbb"
+              />
+            </template>
+            <div class="caption">{{ alert.title }}</div>
+            <div>{{alert.message}}</div>
+          </v-alert>
+        </div>
+
         <v-card raised class="header-card">
           <v-card-title
             class="orange-gradient subtitle-1 header-card-gradient font-weight-light"
@@ -83,11 +111,12 @@
 <script>
 import axios from "axios";
 import Automation from "./automation/Automation.vue";
+import Mail from "./mail/Mail.vue";
 import Script from "./script/Script.vue";
 import ScriptDevice from "./script/ScriptDevice.vue";
 import AggregateDevice from "./aggregate/AggregateDevice.vue";
 import WebPushRegistration from "./webpush/WebPushRegistration.vue";
-import { getComponentWebPath } from "./helpers";
+import { getComponentWebPath, getDeviceViewPath, removeAlert } from "./helpers";
 
 export default {
   components: {
@@ -95,20 +124,11 @@ export default {
     Script,
     ScriptDevice,
     AggregateDevice,
-    WebPushRegistration
+    WebPushRegistration,
+    Mail,
   },
   data() {
-    return {
-      showDelete: false,
-      showSave: false,
-      showSaveError: false,
-      deviceProps: undefined,
-      name: undefined,
-      type: undefined,
-      device: undefined,
-      loading: false,
-      syncWithIntegrations: undefined
-    };
+    return this.initialState();
   },
   mounted() {
     if (this.needsLoad) {
@@ -117,12 +137,10 @@ export default {
   },
   watch: {
     devices() {
-      console.log('device change detected.');
+      // console.log('device change detected.');
     },
     id() {
-      this.device = undefined;
-      this.name = undefined;
-      this.type = undefined;
+      Object.assign(this.$data, this.initialState());
     },
     needsLoad() {
       if (this.needsLoad) {
@@ -132,8 +150,22 @@ export default {
   },
   methods: {
     getComponentWebPath,
+    removeAlert,
+    initialState() {
+      return {
+        showDelete: false,
+        showSave: false,
+        showSaveError: false,
+        deviceProps: undefined,
+        name: undefined,
+        type: undefined,
+        device: undefined,
+        loading: false,
+        syncWithIntegrations: undefined
+      };
+    },
     onChange() {
-      console.log(JSON.stringify(this.device));
+      // console.log(JSON.stringify(this.device));
     },
     getMetadata(prop) {
       const metadata = this.$store.state.systemState[this.id].metadata;
@@ -179,6 +211,11 @@ export default {
     }
   },
   computed: {
+    deviceAlerts() {
+      return this.$store.state.scrypted.alerts.filter(alert =>
+        alert.path.startsWith("/web" + getDeviceViewPath(this.id))
+      );
+    },
     devices() {
       return this.$store.state.scrypted.devices;
     },

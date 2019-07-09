@@ -51,30 +51,33 @@
             <v-btn outlined color="green" @click="updatePasscode">Update Passcode</v-btn>
           </v-card-actions>
         </v-card>
-        <v-alert v-model="showPasscodeSaved" dismissible dark color="green-gradient">Passcode updated.</v-alert>
+        <v-alert
+          v-model="showPasscodeSaved"
+          dismissible
+          dark
+          color="green-gradient"
+        >Passcode updated.</v-alert>
       </v-flex>
     </v-flex>
   </v-layout>
 </template>
 <script>
-import BasicComponent from "../BasicComponent.vue";
 import axios from "axios";
 import qs from "query-string";
 import { getComponentWebPath } from "../helpers";
 
 export default {
-  mixins: [BasicComponent],
   data() {
     return {
       loading: true,
       settings: {},
-      showPasscodeSaved: false,
+      showPasscodeSaved: false
     };
   },
   computed: {
     componentWebPath() {
       return getComponentWebPath("home");
-    },
+    }
   },
   methods: {
     refresh() {
@@ -84,13 +87,14 @@ export default {
       });
     },
     updatePasscode() {
-      axios.post(
-        `${this.componentWebPath}/`,
-        qs.stringify({
-          "default-passcode": this.settings["default-passcode"]
-        })
-      )
-      .then(() => this.showPasscodeSaved = true);
+      axios
+        .post(
+          `${this.componentWebPath}/`,
+          qs.stringify({
+            "default-passcode": this.settings["default-passcode"]
+          })
+        )
+        .then(() => (this.showPasscodeSaved = true));
     }
   },
   mounted() {
