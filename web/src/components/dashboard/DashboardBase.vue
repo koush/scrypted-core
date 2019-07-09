@@ -1,6 +1,6 @@
 <script lang="ts">
 import { ScryptedDeviceType } from "@scrypted/sdk";
-import {typeToIcon} from "../helpers";
+import { typeToIcon } from "../helpers";
 
 export default {
   methods: {
@@ -15,6 +15,8 @@ export default {
           return "Switches";
         case ScryptedDeviceType.Lock:
           return "Locks";
+        case ScryptedDeviceType.Camera:
+          return "Cameras";
       }
       return type;
     },

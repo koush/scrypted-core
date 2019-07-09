@@ -37,8 +37,13 @@
               <v-list-item-subtitle class="caption">{{ friendlyTime(alert.timestamp) }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item class="font-weight-light" @click="clearAlerts">
+          <v-divider v-if="$store.state.scrypted.alerts.length"></v-divider>
+          <v-list-item v-if="!$store.state.scrypted.alerts.length" class="font-weight-light">
+            <v-list-item-content>
+              <v-list-item-title class="caption">No notifications.</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item v-else class="font-weight-light" @click="clearAlerts">
             <v-list-item-icon>
               <font-awesome-icon size="sm" icon="trash" style="color: #a9afbb;" />
             </v-list-item-icon>

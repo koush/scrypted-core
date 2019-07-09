@@ -87,8 +87,8 @@ const sensors = {
 sensors[ScryptedInterface.Thermometer] = "Thermometer";
 sensors[ScryptedInterface.HumiditySensor] = "HumiditySensor";
 sensors[ScryptedInterface.EntrySensor] = "EntrySensor";
-validTypes[ScryptedDeviceType.Sensor] = sensors;
-validTypes[ScryptedDeviceType.Thermostat] = sensors;
+// validTypes[ScryptedDeviceType.Sensor] = sensors;
+// validTypes[ScryptedDeviceType.Thermostat] = sensors;
 
 const camera = {
   priority: 0,
@@ -191,7 +191,7 @@ export default {
       this.$store.state.scrypted.devices.map(id => [id, this.$store.state.systemState[id]])
         // filter out devices we can't show in the ui
         .filter(([, device]) => {
-          return device.type && validTypes[device.type.value];
+          return device.type && validTypes[device.type.value] && device.metadata.value.syncWithIntegrations;
         })
         // verify the interfaces we need exist on the devices we can use.
         .filter(([, device]) => {
@@ -219,10 +219,10 @@ export default {
           type.push(id);
         });
 
-      // find rooms that only have 1 device type, and merge them
+      // find rooms that only have a couple device types, and merge them
       const singles = [];
       Object.values(ret).forEach(room => {
-        if (Object.keys(room.types).length == 1) {
+        if (Object.keys(room.types).length <= 2) {
           delete ret[room.name];
           singles.push(room);
         }

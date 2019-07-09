@@ -15,9 +15,9 @@
       <v-switch color="indigo" inset v-model="on" @click.stop></v-switch>
     </v-list-item-action>
 
-    <v-overlay :value="showLightsDialog" color="blue" opacity=".8">
+    <v-overlay :value="showLightsDialog" opacity=".8">
       <v-container fluid>
-        <v-card v-click-outside="maybeHideDialog" dark color="green" raised>
+        <v-card v-click-outside="maybeHideDialog" dark color="blue" raised>
           <v-card-title>
             <font-awesome-icon
               size="sm"
@@ -42,7 +42,7 @@
                 ></vue-slider>
                 <div class="slider-pad-bottom"></div>
               </div>
-              <v-list color="green">
+              <v-list color="blue">
                 <DashboardPopupToggle
                   :light="true"
                   v-for="deviceId in type.ids"
@@ -52,7 +52,6 @@
                   :name="$store.state.systemState[deviceId].name.value"
                 ></DashboardPopupToggle>
               </v-list>
-              <v-btn rounded color="primary" dark x-small>Rounded Button</v-btn>
             </v-layout>
           </v-flex>
         </v-card>

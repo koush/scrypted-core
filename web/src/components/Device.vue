@@ -42,6 +42,7 @@
                 <v-flex xs12>
                   <v-text-field v-model="name" label="Name" required></v-text-field>
                   <v-select :items="[type]" label="Type" outlined v-model="type"></v-select>
+                  <v-combobox v-if="hasPhysicalLocation(type)" :items="existingRooms" outlined v-model="room" label="Room" required></v-combobox>
                   <v-checkbox v-model="syncWithIntegrations" label="Sync with Integrations"></v-checkbox>
                 </v-flex>
               </v-layout>
@@ -116,7 +117,7 @@ import Script from "./script/Script.vue";
 import ScriptDevice from "./script/ScriptDevice.vue";
 import AggregateDevice from "./aggregate/AggregateDevice.vue";
 import WebPushRegistration from "./webpush/WebPushRegistration.vue";
-import { getComponentWebPath, getDeviceViewPath, removeAlert } from "./helpers";
+import { getComponentWebPath, getDeviceViewPath, removeAlert, hasPhysicalLocation } from "./helpers";
 
 export default {
   components: {
@@ -149,6 +150,7 @@ export default {
     }
   },
   methods: {
+    hasPhysicalLocation,
     getComponentWebPath,
     removeAlert,
     initialState() {
@@ -158,6 +160,7 @@ export default {
         showSaveError: false,
         deviceProps: undefined,
         name: undefined,
+        room: undefined,
         type: undefined,
         device: undefined,
         loading: false,
@@ -173,6 +176,7 @@ export default {
     },
     reload() {
       this.name = this.$store.state.systemState[this.id].name.value;
+      this.room = this.$store.state.systemState[this.id].room.value;
       this.type = this.$store.state.systemState[this.id].type.value;
       this.syncWithIntegrations = this.getMetadata("syncWithIntegrations");
       this.device = undefined;
@@ -195,6 +199,7 @@ export default {
       const post = {
         type: this.type,
         name: this.name,
+        room: this.room,
         syncWithIntegrations: this.syncWithIntegrations,
         device: this.device
       };
@@ -211,6 +216,9 @@ export default {
     }
   },
   computed: {
+    existingRooms() {
+      return this.$store.state.scrypted.devices.map(device => this.$scrypted.systemManager.getDeviceById(device).room).filter(room => room);
+    },
     deviceAlerts() {
       return this.$store.state.scrypted.alerts.filter(alert =>
         alert.path.startsWith("/web" + getDeviceViewPath(this.id))

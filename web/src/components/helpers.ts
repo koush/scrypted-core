@@ -63,3 +63,22 @@ export function removeAlert(alert) {
         this.$store.commit("removeAlert", alert.id);
     });
 }
+
+export function hasPhysicalLocation(type: ScryptedDeviceType) {
+    switch (type) {
+        case ScryptedDeviceType.Light:
+        case ScryptedDeviceType.Outlet:
+        case ScryptedDeviceType.Switch:
+        case ScryptedDeviceType.Lock:
+        case ScryptedDeviceType.Fan:
+        case ScryptedDeviceType.Camera:
+        case ScryptedDeviceType.Entry:
+        case ScryptedDeviceType.Speaker:
+        case ScryptedDeviceType.Display:
+        case ScryptedDeviceType.Thermostat:
+        case ScryptedDeviceType.Vacuum:
+        case ScryptedDeviceType.Garage:
+            return true;
+    }
+    return false;
+}

@@ -184,7 +184,6 @@ import qs from "query-string";
 import Storage from "../../common/Storage.vue";
 import {
   getComponentWebPath,
-  getDeviceViewPath,
   getComponentViewPath
 } from "../helpers";
 
