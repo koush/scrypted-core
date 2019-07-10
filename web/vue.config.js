@@ -44,7 +44,7 @@ module.exports = {
     // public: 'home.koushikdutta.com',
     https: true,
     proxy: {
-      '^/(login|static|endpoint|whitelist|web)': proxyOpts,
+      '^/(login|logout|static|endpoint|whitelist|web)': proxyOpts,
     }
   }
 }

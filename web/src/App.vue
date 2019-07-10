@@ -13,7 +13,7 @@
 
       <v-menu left bottom>
         <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on" style="margin-right: 24px;">
+          <v-btn icon v-on="on">
             <v-badge :value="$store.state.scrypted.alerts.length" color="red" overlap>
               <template v-slot:badge>{{ $store.state.scrypted.alerts.length }}</template>
               <v-icon>notifications</v-icon>
@@ -53,12 +53,65 @@
           </v-list-item>
         </v-list>
       </v-menu>
+
+      <v-menu left bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" text style="margin-right: 24px;">{{$store.state.username}}</v-btn>
+        </template>
+        <v-list>
+          <v-list-item class="font-weight-light" @click="logout">
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
+
+    <v-dialog
+      :value="!$store.state.isLoggedIn && $store.state.isLoggedIn !== undefined"
+      persistent
+      max-width="600px"
+    >
+      <v-card dark color="purple">
+        <v-card-title>
+          <span class="headline">Scrypted Management Console</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12>
+                <v-text-field v-model="username" color="white" label="User Name"></v-text-field>
+                <v-text-field v-model="password" color="white" type="password" label="Password"></v-text-field>
+                <v-checkbox
+                  v-if="$store.state.hasLogin === true"
+                  v-model="changePassword"
+                  label="Change Password"
+                ></v-checkbox>
+                <v-text-field
+                  v-model="confirmPassword"
+                  v-if="changePassword || $store.state.hasLogin === false"
+                  color="white"
+                  type="password"
+                  label="Confirm Password"
+                  :rules="passwordRules"
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+            <div>{{ loginResult }}</div>
+          </v-container>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="doLogin">Log In</v-btn>
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <v-content elevation="-2">
       <v-container grid-list-xs grid-list-xl grid-list-md grid-list-sm grid-list-lg fluid>
         <v-fade-transition mode="out-in">
-          <router-view v-if="!loading"></router-view>
+          <router-view v-if="!$store.state.isConnecting"></router-view>
         </v-fade-transition>
       </v-container>
     </v-content>
@@ -66,6 +119,8 @@
 </template>
 
 <script>
+import qs from "query-string";
+import axios from "axios";
 import Device from "./components/Device.vue";
 import AggregateComponent from "./components/aggregate/AggregateComponent.vue";
 import AutomationComponent from "./components/automation/AutomationComponent.vue";
@@ -167,7 +222,11 @@ const store = new Vuex.Store({
     scrypted: {
       devices: [],
       alerts: []
-    }
+    },
+    username: undefined,
+    isLoggedIn: undefined,
+    isConnected: undefined,
+    hasLogin: undefined
   },
   mutations: {
     setSystemState: function(store, systemState) {
@@ -202,8 +261,86 @@ const store = new Vuex.Store({
       store.scrypted.devices = store.scrypted.devices.filter(
         device => device !== id
       );
+    },
+    setIsLoggedIn(store, isLoggedIn) {
+      store.isLoggedIn = isLoggedIn;
+    },
+    setUsername(store, username) {
+      store.username = username;
+    },
+    setIsConnected(store, isConnected) {
+      store.isConnected = isConnected;
+    },
+    setHasLogin(store, hasLogin) {
+      store.hasLogin = hasLogin;
     }
   }
+});
+
+const clientPromise = client.connect(null);
+Vue.use(Vue => {
+  axios
+    .get("/login", {
+      headers: {
+        Accept: "application/json"
+      }
+    })
+    .then(response => {
+      if (!response.data.expiration) {
+        store.commit("setHasLogin", response.data.hasLogin);
+        throw new Error("Login failed.");
+      }
+      store.commit("setHasLogin", true);
+      store.commit("setIsLoggedIn", true);
+      store.commit("setUsername", response.data.username);
+      setTimeout(() => {
+        store.commit("setIsLoggedIn", false);
+      }, response.data.expiration);
+      return clientPromise;
+    })
+    .catch(e => {
+      store.commit("setIsLoggedIn", false);
+      throw e;
+    })
+    .then(scrypted => {
+      Vue.prototype.$scrypted = scrypted;
+      // system state is returned as a reference and updated by the scrypted client, so passing it to vue allows direct model updates.
+      // this is not the same behavior as on android. fix?
+      const systemState = scrypted.systemManager.getSystemState();
+      store.commit("setSystemState", systemState);
+      store.commit("setDevices", Object.keys(systemState));
+      store.commit("setIsConnected", true);
+
+      scrypted.systemManager.listen((eventSource, eventDetails, eventData) => {
+        if (eventSource) {
+          const id = eventSource.id;
+
+          if (eventDetails.property === "id" && !eventData) {
+            Vue.delete(systemState, id);
+            store.commit("removeDevice", id);
+            return;
+          }
+
+          // ensure the property is reactive
+          if (eventDetails.eventInterface == "ScryptedDevice") {
+            Vue.set(systemState, id, systemState[id]);
+            if (this.isValidDevice(id)) {
+              store.commit("addDevice", id);
+            }
+            return;
+          }
+        } else if (eventDetails.eventInterface == "Logger") {
+          store.commit("addAlert", eventData);
+        }
+      });
+
+      scrypted.rpc("alerts").then(alerts => {
+        store.commit("setAlerts", alerts);
+      });
+    })
+    .catch(() => {
+      store.commit("setIsConnected", false);
+    });
 });
 
 const PushConnectionManager = window["pushconnect"].PushConnectionManager;
@@ -249,6 +386,35 @@ export default {
     clearInterval(this._timer);
   },
   methods: {
+    logout() {
+      axios.get("/logout").then(() => window.location.reload());
+    },
+    doLogin() {
+      const body = {
+        username: this.username,
+        password: this.password
+      };
+      if (this.changePassword || this.$store.state.hasLogin === false) {
+        if (this.password !== this.changePassword) {
+          return;
+        }
+        body.changePassword = this.changePassword;
+      }
+
+      axios
+        .post("/login", qs.stringify(body), {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        })
+        .then(response => {
+          if (response.data.error) {
+            this.loginResult = response.data.error;
+            return;
+          }
+          window.location.reload();
+        });
+    },
     clearAlerts() {
       this.$scrypted.rpc("removeAlerts").then(() => {
         this.$store.commit("setAlerts", []);
@@ -317,58 +483,28 @@ export default {
       this.title = to.name || "Scrypted";
       next();
     });
-
-    const clientPromise = client.connect(null);
-    Vue.use(Vue => {
-      clientPromise.then(scrypted => {
-        Vue.prototype.$scrypted = scrypted;
-        // system state is returned as a reference and updated by the scrypted client, so passing it to vue allows direct model updates.
-        // this is not the same behavior as on android. fix?
-        const systemState = scrypted.systemManager.getSystemState();
-        store.commit("setSystemState", systemState);
-        store.commit("setDevices", Object.keys(systemState));
-
-        scrypted.systemManager.listen(
-          (eventSource, eventDetails, eventData) => {
-            if (eventSource) {
-              const id = eventSource.id;
-
-              if (eventDetails.property === "id" && !eventData) {
-                Vue.delete(systemState, id);
-                store.commit("removeDevice", id);
-                return;
-              }
-
-              // ensure the property is reactive
-              if (eventDetails.eventInterface == "ScryptedDevice") {
-                Vue.set(systemState, id, systemState[id]);
-                if (this.isValidDevice(id)) {
-                  store.commit("addDevice", id);
-                }
-                return;
-              }
-            } else if (eventDetails.eventInterface == "Logger") {
-              store.commit("addAlert", eventData);
-            }
-          }
-        );
-
-        scrypted.rpc("alerts").then(alerts => {
-          store.commit("setAlerts", alerts);
-        });
-
-        this.loading = false;
-      });
-    });
   },
   store,
   router,
   data() {
+    const self = this;
     return {
       now: 0,
       title: "Scrypted",
       drawer: this.$vuetify.breakpoint.lgAndUp,
-      loading: true
+      changePassword: false,
+      username: null,
+      password: null,
+      confirmPassword: null,
+      loginResult: undefined,
+      passwordRules: [
+        () => {
+          if (self.password != self.confirmPassword && self.changePassword) {
+            return "Passwords do not match.";
+          }
+          return true;
+        }
+      ]
     };
   }
 };
