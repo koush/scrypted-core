@@ -27,8 +27,8 @@
       </v-flex>
       <v-flex xs12>
         <v-layout>
-          <v-flex xs12 md6 lg8>
-            <v-flex v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
+          <v-flex xs12 md6 lg4 v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
+            <v-flex >
               <v-card raised class="header-card">
                 <v-card-title
                   class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"

@@ -62,6 +62,35 @@ export default {
         name: "Automations"
       }
     };
+  },
+  computed: {
+    deviceGroups() {
+      const ids = this.$store.state.scrypted.devices;
+      const devices = ids
+        .map(id => this.$scrypted.systemManager.getDeviceById(id))
+        .filter(
+          device =>
+            device &&
+            device.component &&
+            device.component === this.component.id &&
+            !device.owner
+        )
+        .map(device => ({
+          id: device.id,
+          name: device.name,
+          type: device.type
+        }));
+      return [
+        {
+          name: "Automations",
+          devices: devices.filter(device => device.type !== "Scene")
+        },
+        {
+          name: "Scenes",
+          devices: devices.filter(device => device.type === "Scene")
+        }
+      ];
+    }
   }
 };
 </script>

@@ -13,8 +13,17 @@ const proxyOpts = {
 };
 
 module.exports = {
+  pwa: {
+    themeColor: '#424242',
+    msTileColor: '#9c27b0',
+    appleMobileWebAppStatusBarStyle: 'black',
+    workboxOptions: {
+      skipWaiting: true,
+      // clientsClaim: true,
+    }
+  },
+  publicPath: process.env.NODE_ENV === 'production' ? '/endpoint/@scrypted/core/public' : '/',
   configureWebpack: {
-    // devtool: 'source-map',
     resolve: {
       extensions: ['.js', '.ts', '.vue'],
     },
@@ -47,4 +56,8 @@ module.exports = {
       '^/(login|logout|static|endpoint|whitelist|web)': proxyOpts,
     }
   }
+}
+
+if (process.env['NODE_ENV'] == 'production') {
+  module.exports.configureWebpack.devtool = 'none';
 }

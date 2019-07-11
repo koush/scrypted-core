@@ -41,7 +41,13 @@
               <v-layout>
                 <v-flex xs12>
                   <v-text-field v-model="name" label="Name" required></v-text-field>
-                  <v-select v-if="inferredTypes.length > 1" :items="inferredTypes" label="Type" outlined v-model="type"></v-select>
+                  <v-select
+                    v-if="inferredTypes.length > 1"
+                    :items="inferredTypes"
+                    label="Type"
+                    outlined
+                    v-model="type"
+                  ></v-select>
                   <v-combobox
                     v-if="hasPhysicalLocation(type)"
                     :items="existingRooms"
@@ -50,7 +56,11 @@
                     label="Room"
                     required
                   ></v-combobox>
-                  <v-checkbox v-if="syncable" v-model="syncWithIntegrations" label="Sync with Integrations"></v-checkbox>
+                  <v-checkbox
+                    v-if="syncable"
+                    v-model="syncWithIntegrations"
+                    label="Sync with Integrations"
+                  ></v-checkbox>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -204,11 +214,9 @@ export default {
       });
     },
     remove() {
-      this.showDelete = true;
-      axios.post(`/web/device/${this.id}/delete`).then(() => {
-        delete this.$store.state.systemState[this.id];
-        window.location.hash = "#/device";
-      });
+      const id = this.id;
+      this.$router.replace("/device");
+      axios.post(`/web/device/${id}/delete`);
     },
     save() {
       const post = {
@@ -235,7 +243,10 @@ export default {
       return isSyncable(this.type);
     },
     inferredTypes() {
-      return inferTypesFromInterfaces(this.type, this.$store.state.systemState[this.id].interfaces.value);
+      return inferTypesFromInterfaces(
+        this.type,
+        this.$store.state.systemState[this.id].interfaces.value
+      );
     },
     existingRooms() {
       return this.$store.state.scrypted.devices

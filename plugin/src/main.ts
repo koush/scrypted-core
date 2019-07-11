@@ -3,8 +3,10 @@
 // under the "scrypted" key.
 import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister } from '@scrypted/sdk';
 import sdk from '@scrypted/sdk';
-const { systemManager, mediaManager } = sdk;
+const { systemManager, mediaManager, endpointManager } = sdk;
 import Router from 'router';
+import Url from 'url-parse';
+const indexHtml: string = require('raw-loader!../fs/dist/index.html');
 
 function toArray(arrayLike: any): object[] {
     const size = arrayLike.size ? arrayLike.size() : arrayLike.length;
@@ -31,7 +33,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 
     getEndpoint(): string {
-        return '@scrypted/ui';
+        return '@scrypted/core';
     }
 
     sendJson(response: HttpResponse, data: object) {
@@ -234,7 +236,40 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 
     handleFinal(request: HttpRequest, response: HttpResponse) {
-        response.sendFile("dist" + request.url);
+        // the web app static files are only served on the public endpoint.
+        if (!request.isPublicEndpoint) {
+            response.send({
+                code: 404,
+            }, 'Not Found');
+            return;
+        }
+
+        // need to strip off the query.
+        const incomingUrl = new Url(request.url);
+        if (request.url !== '/index.html') {
+            response.sendFile("dist" + incomingUrl.pathname);
+            return;
+        }
+        
+        // the rel hrefs (manifest, icons) are pulled out of process. need to attach
+        // auth info to them.
+        endpointManager.getPublicCloudEndpoint()
+        .then(endpoint => {
+            const u = new Url(endpoint);
+            const rewritten = indexHtml
+            .replace('href=/endpoint/@scrypted/core/public/manifest.json', `href="/endpoint/@scrypted/core/public/manifest.json${u.query}"`)
+            .replace('href=/endpoint/@scrypted/core/public/img/icons/apple-touch-icon-152x152.png', `href="/endpoint/@scrypted/core/public/img/icons/apple-touch-icon-152x152.png${u.query}"`)
+            .replace('href=/endpoint/@scrypted/core/public/img/icons/safari-pinned-tab.svg', `href="/endpoint/@scrypted/core/public/img/icons/safari-pinned-tab.svg${u.query}"`)
+            ;
+            response.send({
+                headers: {
+                    'Content-Type': 'text/html',
+                }
+            }, rewritten);
+        })
+        .catch(() => {
+            response.sendFile("dist" + incomingUrl.pathname);
+        });
     }
 
     onRequest(request: HttpRequest, response: HttpResponse) {

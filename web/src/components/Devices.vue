@@ -1,30 +1,38 @@
 <template>
-  <v-flex xs12 md8 lg6>
-    <v-card raised color="blue" dark>
-      <v-card-title>
-        All Devices
-        <v-spacer></v-spacer>
-        <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-      </v-card-title>
-      <v-data-table
-        light
-        :headers="headers"
-        :items="tableDevices"
-        :items-per-page="50"
-        :search="search"
-      >
-        <template v-slot:item.icon="{ item }">
-          <font-awesome-icon size="sm" :icon="typeToIcon(item.type)" :color="colors.blue.base" />
-        </template>
-        <template v-slot:item.name="{ item }">
-          <a link :href="'#' + getDeviceViewPath(item.id)">{{ item.name }}</a>
-        </template>
-        <template v-slot:item.plugin="{ item }">
-          <a link :href="item.plugin.link">{{ item.plugin.name }}</a>
-        </template>
-      </v-data-table>
-    </v-card>
-  </v-flex>
+  <v-layout>
+    <v-flex xs12 md8 lg6>
+      <v-card raised color="blue" dark>
+        <v-card-title>
+          All Devices
+          <v-spacer></v-spacer>
+          <v-text-field
+            v-model="search"
+            append-icon="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-card-title>
+        <v-data-table
+          light
+          :headers="headers"
+          :items="tableDevices"
+          :items-per-page="50"
+          :search="search"
+        >
+          <template v-slot:item.icon="{ item }">
+            <font-awesome-icon size="sm" :icon="typeToIcon(item.type)" :color="colors.blue.base" />
+          </template>
+          <template v-slot:item.name="{ item }">
+            <a link :href="'#' + getDeviceViewPath(item.id)">{{ item.name }}</a>
+          </template>
+          <template v-slot:item.plugin="{ item }">
+            <a link :href="item.plugin.link">{{ item.plugin.name }}</a>
+          </template>
+        </v-data-table>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import colors from "vuetify/es5/util/colors";
