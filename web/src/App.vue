@@ -10,10 +10,22 @@
         <!-- <span class="font-weight-light">Management Console</span> -->
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-menu left bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" text>{{$store.state.username}}</v-btn>
+        </template>
+        <v-list>
+          <v-list-item class="font-weight-light" @click="logout">
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
 
       <v-menu left bottom>
         <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on">
+          <v-btn icon v-on="on" style="margin-right: 24px;">
             <v-badge :value="$store.state.scrypted.alerts.length" color="red" overlap>
               <template v-slot:badge>{{ $store.state.scrypted.alerts.length }}</template>
               <v-icon>notifications</v-icon>
@@ -49,19 +61,6 @@
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title class="caption">Clear All Alerts</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <v-menu left bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn v-on="on" text style="margin-right: 24px;">{{$store.state.username}}</v-btn>
-        </template>
-        <v-list>
-          <v-list-item class="font-weight-light" @click="logout">
-            <v-list-item-content>
-              <v-list-item-title>Logout</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list>

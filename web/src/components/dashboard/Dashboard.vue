@@ -29,7 +29,7 @@
                 <div v-if="type.type != 'Sensor'">
                   <component
                     v-if="validTypes[type.type].collapse"
-                    :group="room.name"
+                    :group="type.name || (room.name || pluralize(type.type))"
                     :type="type"
                     :is="validTypes[type.type].component"
                   ></component>
@@ -37,7 +37,7 @@
                     v-else
                     v-for="deviceId in type.ids"
                     :key="deviceId"
-                    :group="room.name"
+                    :group="type.name || (room.name || pluralize(type.type))"
                     :deviceId="deviceId"
                     :is="validTypes[type.type].component"
                   ></component>

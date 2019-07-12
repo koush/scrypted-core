@@ -5,9 +5,11 @@
    "author": "Scrypted",
    "license": "Apache-2.0",
    "scripts": {
-      "prevue-and-scrypted-webpack": "cd ../web && npm run build",
-      "vue-and-scrypted-webpack": "NODE_ENV=production scrypted-webpack",
-      "prepublishOnly": "npm run vue-and-scrypted-webpack",
+      "prebuild": "cd ../web && npm run build",
+      "build": "NODE_ENV=production scrypted-webpack",
+      "prepack": "npm run build",
+      "asset": "rm -f *.tgz && npm pack && mkdir -p dist/scrypted-core-pack && rm -f dist/scrypted-core-pack/* && mv scrypted-core-*.tgz dist/scrypted-core-pack/scrypted-core.tgz",
+
       "prescrypted-vscode-launch": "scrypted-webpack",
       "scrypted-vscode-launch": "scrypted-deploy-debug",
       "scrypted-deploy-debug": "scrypted-deploy-debug",
@@ -16,7 +18,7 @@
       "scrypted-webpack": "scrypted-webpack"
    },
    "scrypted": {
-      "name": "Scrypted UI",
+      "name": "Scrypted Core",
       "type": "Device",
       "interfaces": [
          "HttpRequestHandler",

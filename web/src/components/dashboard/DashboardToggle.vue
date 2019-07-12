@@ -25,7 +25,7 @@
               color="white"
               style="margin-right: 20px"
             />
-            <span class="title font-weight-light">{{ group + ' ' + pluralize(type.type) }}</span>
+            <span class="title font-weight-light">{{ groupName }}</span>
           </v-card-title>
 
           <v-flex xs12>
