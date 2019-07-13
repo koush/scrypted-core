@@ -15,8 +15,8 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn outlined color="orange" @click="disable" v-if="settings.enable">Disable</v-btn>
-            <v-btn outlined color="orange" @click="enable" v-if="!settings.enable">Enable</v-btn>
+            <v-btn outlined color="orange" @click="disable" v-if="settings.enable === 'Enabled'">Disable</v-btn>
+            <v-btn outlined color="orange" @click="enable" v-if="settings.enable !== 'Enabled'">Enable</v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
@@ -52,7 +52,7 @@ export default {
         .post(
           `${this.componentWebPath}/`,
           qs.stringify({
-            enable: ""
+            enable: "Disabled"
           })
         )
         .then(() => this.refresh());
@@ -62,7 +62,7 @@ export default {
         .post(
           `${this.componentWebPath}/`,
           qs.stringify({
-            enable: "true"
+            enable: "Enabled"
           })
         )
         .then(() => this.refresh());

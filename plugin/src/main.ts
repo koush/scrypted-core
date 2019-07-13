@@ -24,12 +24,10 @@ class WebSocketSession {
 
 class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler {
     router = Router();
+    publicRouter = Router();
 
     constructor() {
         super();
-
-        this.router.get('/api/devices', this.handleDevices.bind(this));
-        this.router.get('/api/state', this.handleState.bind(this));
     }
 
     getEndpoint(): string {
@@ -101,11 +99,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                     icon,
                 };
             });
-        this.sendOutgoingMessage({
-            type: 'rpc',
-            resultId,
-            result: alerts,
-        }, session.webSocket);
+        this.returnResult(session, resultId, alerts);
     }
 
     removeAlerts(session: WebSocketSession, resultId: string, ids: Array<string>) {
@@ -117,10 +111,14 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").remove(id);
             }
         }
+        this.returnResult(session, resultId, undefined);
+    }
+
+    returnResult(session: WebSocketSession, resultId: string, result: any) {
         this.sendOutgoingMessage({
             type: 'rpc',
             resultId,
-            result: undefined,
+            result,
         }, session.webSocket);
     }
 
@@ -138,6 +136,10 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                             this.removeAlerts(session, resultId, args[0] as Array<string>);
                             return;
                         }
+                        // case 'getSystemState': {
+                        //     this.returnResult(session, resultId, systemManager.getSystemState());
+                        //     return;
+                        // }
                     }
                     throw new Error('rpc not found');
                 }
@@ -188,22 +190,34 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             }
             case 'system': {
                 const { method, argArray, resultId } = message;
-                systemManager[method](...argArray || [])
-                    .then(result => {
-                        this.sendOutgoingMessage({
-                            type: 'system',
-                            resultId,
-                            result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
-                        }, session.webSocket);
-                    })
-                    .catch(e => {
-                        this.sendOutgoingMessage({
-                            type: 'system',
-                            resultId,
-                            error: e.toString(),
-                        }, session.webSocket);
-                    })
-                break;
+                let result;
+                try {
+                    let value = systemManager[method](...argArray || []);
+                    if (value.then && value.catch) {
+                        result = value;
+                    }
+                    else {
+                        result = Promise.resolve(value);
+                    }
+                }
+                catch (e) {
+                    result = Promise.reject(e);
+                }
+                result.then(result => {
+                    this.sendOutgoingMessage({
+                        type: 'system',
+                        resultId,
+                        result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
+                    }, session.webSocket);
+                })
+                .catch(e => {
+                    this.sendOutgoingMessage({
+                        type: 'system',
+                        resultId,
+                        error: e.toString(),
+                    }, session.webSocket);
+                })
+            break;
             }
             case 'media': {
                 const { method, toMimeType, mediaSource, resultId } = message;
@@ -231,19 +245,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         }
     }
 
-    handleState(httpRequest: HttpRequest, response: HttpResponse) {
-        this.sendJson(response, systemManager.getSystemState());
-    }
-
-    handleFinal(request: HttpRequest, response: HttpResponse) {
-        // the web app static files are only served on the public endpoint.
-        if (!request.isPublicEndpoint) {
-            response.send({
-                code: 404,
-            }, 'Not Found');
-            return;
-        }
-
+    handlePublicFinal(request: HttpRequest, response: HttpResponse) {
         // need to strip off the query.
         const incomingUrl = new Url(request.url);
         if (request.url !== '/index.html') {
@@ -251,8 +253,8 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             return;
         }
         
-        // the rel hrefs (manifest, icons) are pulled out of process. need to attach
-        // auth info to them.
+        // the rel hrefs (manifest, icons) are pulled in a web worker which does not
+        // have cookies. need to attach auth info to them.
         endpointManager.getPublicCloudEndpoint()
         .then(endpoint => {
             const u = new Url(endpoint);
@@ -279,28 +281,16 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             normalizedRequest.url = '/index.html';
         }
 
-        this.router(normalizedRequest, response, () => this.handleFinal(normalizedRequest, response));
-    }
-
-    handleDevices(httpRequest: HttpRequest, response: HttpResponse) {
-        var devices = toArray(__manager.getAllThings());
-        this.sendJson(response, devices.map(device => {
-            const owner = device.owner;
-            return {
-                id: device.refId,
-                icon: device.icon,
-                type: device.type.toString(),
-                name: device.name,
-                owner: owner ? {
-                    id: owner.id,
-                    name: owner.name,
-                } : null,
-                component: device.component ? {
-                    id: device.component.id,
-                    name: device.component.name,
-                } : null,
-            }
-        }));
+        if (request.isPublicEndpoint) {
+            this.publicRouter(normalizedRequest, response, () => this.handlePublicFinal(normalizedRequest, response));
+        }
+        else {
+            this.router(normalizedRequest, response, () => {
+                response.send({
+                    code: 404,
+                }, 'Not Found');
+            });
+        }
     }
 }
 

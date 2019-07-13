@@ -26,7 +26,7 @@
         </v-flex>
       </v-flex>
       <v-flex xs12>
-        <v-layout>
+        <v-layout row wrap>
           <v-flex xs12 md6 lg4 v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
             <v-flex >
               <v-card raised class="header-card">

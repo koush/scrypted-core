@@ -1,32 +1,28 @@
 <template>
-  <v-flex xs12 md6 lg6>
-    <v-flex>
-      <v-card raised class="header-card" style="margin-bottom: 60px">
-        <v-card-title
-          class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-        >
-          <font-awesome-icon size="sm" icon="database" />
-          <span class="title font-weight-light">&nbsp;&nbsp;Managed Device</span>
-        </v-card-title>
-        <div class="header-card-spacer"></div>
-        <v-card-text>
-          {{ name }} was created by
-          <a :href="`#/device/${ownerDevice.id}`">{{ ownerDevice.name }}.</a>
-        </v-card-text>
-      </v-card>
-    </v-flex>
+  <v-flex>
+    <v-card raised class="header-card" style="margin-bottom: 60px">
+      <v-card-title
+        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+      >
+        <font-awesome-icon size="sm" icon="database" />
+        <span class="title font-weight-light">&nbsp;&nbsp;Managed Device</span>
+      </v-card-title>
+      <div class="header-card-spacer"></div>
+      <v-card-text>
+        {{ name }} was created by
+        <a :href="`#/device/${ownerDevice.id}`">{{ ownerDevice.name }}.</a>
+      </v-card-text>
+    </v-card>
 
-    <v-flex>
-      <v-card raised class="header-card" style="margin-bottom: 60px">
-        <v-card-title
-          class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-        >Script Storage</v-card-title>
-        <div class="header-card-spacer"></div>
-        <v-flex>
-          <Storage v-model="device.configuration" @input="onChange"></Storage>
-        </v-flex>
-      </v-card>
-    </v-flex>
+    <v-card raised class="header-card" style="margin-bottom: 60px">
+      <v-card-title
+        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+      >Script Storage</v-card-title>
+      <div class="header-card-spacer"></div>
+      <v-flex>
+        <Storage v-model="device.configuration" @input="onChange"></Storage>
+      </v-flex>
+    </v-card>
   </v-flex>
 </template>
 <script>
@@ -36,7 +32,7 @@ import cloneDeep from "lodash.clonedeep";
 export default {
   props: ["value", "id", "name", "deviceProps"],
   components: {
-    Storage,
+    Storage
   },
   data: function() {
     return {
@@ -45,8 +41,8 @@ export default {
   },
   methods: {
     onChange() {
-      this.$emit('input', this.device);
-    },
+      this.$emit("input", this.device);
+    }
   },
   computed: {
     ownerDevice() {

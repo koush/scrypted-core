@@ -55,7 +55,7 @@ export default {
       } else {
         this.rpc({
           modelUpdate
-        }).sendNotification(this.notificationTitle, this.notificationBody);
+        }).sendNotification(this.lazyValue.notificationTitle, this.lazyValue.notificationBody);
       }
     },
     onChange: function() {

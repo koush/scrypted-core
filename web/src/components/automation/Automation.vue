@@ -1,5 +1,5 @@
 <template>
-  <v-flex xs12 md6 lg6>
+  <v-flex>
     <v-card
       raised
       class="header-card"

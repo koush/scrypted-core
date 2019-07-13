@@ -1,5 +1,5 @@
 <template>
-  <v-flex xs12 md10 lg8 xl6>
+  <v-flex>
     <v-card
       v-if="managedDevices.devices.length"
       raised
@@ -221,9 +221,11 @@ export default {
   mounted() {
     this.doGist();
 
-    checkUpdate(this.script.npmPackage, this.script.npmPackageVersion).then(
-      updateAvailable => (this.updateAvailable = updateAvailable)
-    );
+    if (this.script.npmPackage) {
+      checkUpdate(this.script.npmPackage, this.script.npmPackageVersion).then(
+        updateAvailable => (this.updateAvailable = updateAvailable)
+      );
+    }
   },
   watch: {
     id() {

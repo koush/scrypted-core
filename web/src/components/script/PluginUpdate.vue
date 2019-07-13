@@ -12,7 +12,7 @@
       outlined
       v-else
       color="blue"
-    >Update to {{ updateAvailable }}</v-btn>
+    >Update</v-btn>
   </div>
 </template>
 <script>

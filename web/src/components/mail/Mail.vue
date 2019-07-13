@@ -1,5 +1,5 @@
 <template>
-  <v-flex xs12 md6 lg6>
+  <v-flex>
     <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"

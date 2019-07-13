@@ -1,134 +1,146 @@
 <template>
   <v-layout wrap>
-    <v-flex xs12 v-if="name">
-      <v-flex xs12 md6 lg6>
-        <div v-if="deviceAlerts.length" class="mb-5">
-          <v-alert
-            dismissible
-            @input="removeAlert(alert)"
-            v-for="alert in deviceAlerts"
-            :key="alert.id"
-            xs12
-            md6
-            lg6
-            color="primary"
-            dark
-            icon="mdi-vuetify"
-            border="left"
-            prominent
-          >
-            <template v-slot:prepend>
-              <font-awesome-icon
-                class="white--text mr-3"
-                size="sm"
-                :icon="alert.icon"
-                color="#a9afbb"
-              />
-            </template>
-            <div class="caption">{{ alert.title }}</div>
-            <div>{{alert.message}}</div>
-          </v-alert>
-        </div>
+    <v-flex xs12 lg6 v-if="name">
+      <v-layout row wrap>
+        <v-flex xs12>
+          <v-flex>
+            <div v-if="deviceAlerts.length" class="mb-5">
+              <v-alert
+                dismissible
+                @input="removeAlert(alert)"
+                v-for="alert in deviceAlerts"
+                :key="alert.id"
+                xs12
+                md6
+                lg6
+                color="primary"
+                dark
+                icon="mdi-vuetify"
+                border="left"
+                prominent
+              >
+                <template v-slot:prepend>
+                  <font-awesome-icon
+                    class="white--text mr-3"
+                    size="sm"
+                    :icon="alert.icon"
+                    color="#a9afbb"
+                  />
+                </template>
+                <div class="caption">{{ alert.title }}</div>
+                <div>{{alert.message}}</div>
+              </v-alert>
+            </div>
 
-        <v-card raised class="header-card">
-          <v-card-title
-            class="orange-gradient subtitle-1 header-card-gradient font-weight-light"
-          >{{name}}</v-card-title>
-          <div class="header-card-spacer"></div>
+            <v-card raised class="header-card">
+              <v-card-title
+                class="orange-gradient subtitle-1 header-card-gradient font-weight-light"
+              >{{name}}</v-card-title>
+              <div class="header-card-spacer"></div>
 
-          <v-form>
-            <v-container>
-              <v-layout>
-                <v-flex xs12>
-                  <v-text-field v-model="name" label="Name" required></v-text-field>
-                  <v-select
-                    v-if="inferredTypes.length > 1"
-                    :items="inferredTypes"
-                    label="Type"
-                    outlined
-                    v-model="type"
-                  ></v-select>
-                  <v-combobox
-                    v-if="hasPhysicalLocation(type)"
-                    :items="existingRooms"
-                    outlined
-                    v-model="room"
-                    label="Room"
-                    required
-                  ></v-combobox>
-                  <v-checkbox
-                    v-if="syncable"
-                    v-model="syncWithIntegrations"
-                    label="Sync with Integrations"
-                  ></v-checkbox>
-                </v-flex>
-              </v-layout>
-            </v-container>
-          </v-form>
+              <v-form>
+                <v-container>
+                  <v-layout>
+                    <v-flex xs12>
+                      <v-text-field v-model="name" label="Name" required></v-text-field>
+                      <v-select
+                        v-if="inferredTypes.length > 1"
+                        :items="inferredTypes"
+                        label="Type"
+                        outlined
+                        v-model="type"
+                      ></v-select>
+                      <v-combobox
+                        v-if="hasPhysicalLocation(type)"
+                        :items="existingRooms"
+                        outlined
+                        v-model="room"
+                        label="Room"
+                        required
+                      ></v-combobox>
+                      <v-checkbox
+                        v-if="syncable"
+                        v-model="syncWithIntegrations"
+                        label="Sync with Integrations"
+                      ></v-checkbox>
+                    </v-flex>
+                  </v-layout>
+                </v-container>
+              </v-form>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
+              <v-card-actions>
+                <v-spacer></v-spacer>
 
-            <v-dialog v-model="showDelete" width="500">
-              <template v-slot:activator="{ on }">
-                <v-btn color="error" v-if="!loading" text v-on="on">Delete</v-btn>
-              </template>
+                <v-btn color="info" text @click="openLogs" v-if="!loading">Logs</v-btn>
 
-              <v-card>
-                <v-card-title
-                  style="margin-bottom: 8px;"
-                  class="red font-weight-light white--text"
-                  primary-title
-                >Delete Device</v-card-title>
+                <v-dialog v-model="showDelete" width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-btn color="error" v-if="!loading" text v-on="on">Delete</v-btn>
+                  </template>
 
-                <v-card-text>This will permanently delete the device. It can not be undone.</v-card-text>
+                  <v-card>
+                    <v-card-title
+                      style="margin-bottom: 8px;"
+                      class="red font-weight-light white--text"
+                      primary-title
+                    >Delete Device</v-card-title>
 
-                <v-divider></v-divider>
+                    <v-card-text>This will permanently delete the device. It can not be undone.</v-card-text>
 
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="primary" text @click="showDelete = false">Cancel</v-btn>
-                  <v-btn color="red" text @click="remove">Delete Device</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
+                    <v-divider></v-divider>
 
-            <v-btn color="primary" v-if="!loading" text @click="save">Save</v-btn>
-          </v-card-actions>
-        </v-card>
-        <v-alert
-          outlined
-          v-model="showSave"
-          dismissible
-          close-text="Close Alert"
-          type="success"
-        >Saved.</v-alert>
-        <v-alert
-          outlined
-          v-model="showSaveError"
-          dismissible
-          close-text="Close Alert"
-          type="success"
-        >There was an error while saving. Please check the logs.</v-alert>
-      </v-flex>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="primary" text @click="showDelete = false">Cancel</v-btn>
+                      <v-btn color="red" text @click="remove">Delete Device</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+
+                <v-btn color="primary" v-if="!loading" text @click="save">Save</v-btn>
+              </v-card-actions>
+            </v-card>
+            <v-alert
+              outlined
+              v-model="showSave"
+              dismissible
+              close-text="Close Alert"
+              type="success"
+            >Saved.</v-alert>
+            <v-alert
+              outlined
+              v-model="showSaveError"
+              dismissible
+              close-text="Close Alert"
+              type="success"
+            >There was an error while saving. Please check the logs.</v-alert>
+          </v-flex>
+        </v-flex>
+
+        <v-flex xs12>
+          <component
+            v-if="deviceProps"
+            @refresh="reload"
+            @input="onChange"
+            :is="deviceProps.box"
+            :deviceProps="deviceProps"
+            v-model="device"
+            :id="id"
+            :name="name"
+            :type="type"
+          ></component>
+        </v-flex>
+      </v-layout>
     </v-flex>
 
-    <v-flex xs12 v-if="deviceProps">
-      <component
-        @refresh="reload"
-        @input="onChange"
-        :is="deviceProps.box"
-        :deviceProps="deviceProps"
-        v-model="device"
-        :id="id"
-        :name="name"
-        :type="type"
-      ></component>
+    <v-flex xs12 md6 lg6 ref="logsEl">
+      <LogCard v-if="component && showLogs" :rows="15" :logRoute="`/${component}/${id}/`"></LogCard>
     </v-flex>
   </v-layout>
 </template>
 <script>
 import axios from "axios";
+import LogCard from "./builtin/LogCard.vue";
 import Automation from "./automation/Automation.vue";
 import Mail from "./mail/Mail.vue";
 import Script from "./script/Script.vue";
@@ -146,6 +158,7 @@ import {
 
 export default {
   components: {
+    LogCard,
     Automation,
     Script,
     ScriptDevice,
@@ -180,6 +193,7 @@ export default {
     removeAlert,
     initialState() {
       return {
+        showLogs: false,
         showDelete: false,
         showSave: false,
         showSaveError: false,
@@ -188,9 +202,14 @@ export default {
         room: undefined,
         type: undefined,
         device: undefined,
+        component: undefined,
         loading: false,
         syncWithIntegrations: undefined
       };
+    },
+    openLogs() {
+      this.showLogs = true;
+      this.$vuetify.goTo(this.$refs.logsEl);
     },
     onChange() {
       // console.log(JSON.stringify(this.device));
@@ -203,6 +222,7 @@ export default {
       this.name = this.$store.state.systemState[this.id].name.value;
       this.room = this.$store.state.systemState[this.id].room.value;
       this.type = this.$store.state.systemState[this.id].type.value;
+      this.component = this.$store.state.systemState[this.id].component.value;
       this.syncWithIntegrations = this.getMetadata("syncWithIntegrations");
       this.device = undefined;
       this.deviceProps = undefined;
