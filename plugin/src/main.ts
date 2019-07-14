@@ -183,9 +183,9 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 break;
             }
             case 'method': {
-                const { id, method, argArray } = message;
+                const { id, method, argArray, resultId } = message;
                 const device = systemManager.getDeviceById(id);
-                device[method](...argArray);
+                this.returnResult(session, resultId, device[method](...argArray));
                 break;
             }
             case 'system': {
@@ -224,6 +224,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 const { id, method: sourceMethod } = mediaSource;
                 const device = systemManager.getDeviceById(id);
                 const mediaObject = device[sourceMethod]();
+                console.log(mediaObject);
 
                 mediaManager[method](mediaObject, toMimeType)
                     .then(result => {

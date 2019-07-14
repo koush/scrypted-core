@@ -1,6 +1,6 @@
 <template>
   <v-layout wrap>
-    <v-flex xs12 lg6 v-if="name">
+    <v-flex xs12 md6 v-if="name">
       <v-layout row wrap>
         <v-flex xs12>
           <v-flex>
@@ -35,7 +35,18 @@
             <v-card raised class="header-card">
               <v-card-title
                 class="orange-gradient subtitle-1 header-card-gradient font-weight-light"
-              >{{name}}</v-card-title>
+              >
+                {{name}}
+                <v-layout row justify-end align-center>
+                  <component
+                    :value="deviceState"
+                    :device="systemDevice"
+                    :is="iface"
+                    v-for="iface in cardHeaderInterfaces"
+                    :key="iface"
+                  ></component>
+                </v-layout>
+              </v-card-title>
               <div class="header-card-spacer"></div>
 
               <v-form>
@@ -69,6 +80,7 @@
               </v-form>
 
               <v-card-actions>
+                <component v-for="iface in cardButtonInterfaces" :key="iface" :value="deviceState" :device="systemDevice" :is="iface"></component>
                 <v-spacer></v-spacer>
 
                 <v-btn color="info" text @click="openLogs" v-if="!loading">Logs</v-btn>
@@ -133,12 +145,31 @@
       </v-layout>
     </v-flex>
 
-    <v-flex xs12 md6 lg6 ref="logsEl">
-      <LogCard v-if="component && showLogs" :rows="15" :logRoute="`/${component}/${id}/`"></LogCard>
+    <v-flex xs12 md6 lg6>
+      <v-layout row wrap>
+        <v-flex xs12 v-for="iface in cardInterfaces" :key="iface">
+          <v-flex v-if="name">
+            <v-card>
+              <v-card-title
+                class="red-gradient subtitle-1 header-card-gradient font-weight-light"
+              >{{ iface }}</v-card-title>
+              <div class="header-card-spacer"></div>
+              <component :value="deviceState" :device="systemDevice" :is="iface"></component>
+            </v-card>
+          </v-flex>
+        </v-flex>
+
+        <v-flex ref="logsEl">
+          <LogCard v-if="component && showLogs" :rows="15" :logRoute="`/${component}/${id}/`"></LogCard>
+        </v-flex>
+      </v-layout>
     </v-flex>
   </v-layout>
 </template>
 <script>
+import VueSlider from "vue-slider-component";
+import "vue-slider-component/theme/material.css";
+
 import axios from "axios";
 import LogCard from "./builtin/LogCard.vue";
 import Automation from "./automation/Automation.vue";
@@ -155,9 +186,47 @@ import {
   removeAlert,
   hasPhysicalLocation
 } from "./helpers";
+import { ScryptedInterface } from "@scrypted/sdk";
+import Notifier from "../interfaces/Notifier.vue";
+import OnOff from "../interfaces/OnOff.vue";
+import Brightness from "../interfaces/Brightness.vue";
+import Battery from "../interfaces/Battery.vue";
+import Lock from "../interfaces/Lock.vue";
+import ColorSettingHsv from "../interfaces/ColorSettingHsv.vue";
+import ColorSettingRgb from "../interfaces/ColorSettingRgb.vue";
+import OauthClient from "../interfaces/OauthClient.vue";
+
+const cardHeaderInterfaces = [
+  ScryptedInterface.Battery,
+  ScryptedInterface.Lock,
+  ScryptedInterface.OnOff
+];
+
+const cardInterfaces = [
+  ScryptedInterface.Brightness,
+  ScryptedInterface.Notifier,
+  ScryptedInterface.ColorSettingHsv,
+  ScryptedInterface.ColorSettingRgb
+];
+
+const cardButtonInterfaces = [
+  ScryptedInterface.OauthClient,
+];
 
 export default {
   components: {
+    Brightness,
+    ColorSettingRgb,
+    ColorSettingHsv,
+    Notifier,
+
+    Lock,
+    OnOff,
+    Battery,
+
+    OauthClient,
+
+    VueSlider,
     LogCard,
     Automation,
     Script,
@@ -204,6 +273,7 @@ export default {
         device: undefined,
         component: undefined,
         loading: false,
+        deviceState: {},
         syncWithIntegrations: undefined
       };
     },
@@ -219,6 +289,11 @@ export default {
       return metadata && metadata.value && metadata.value[prop];
     },
     reload() {
+      this.deviceState = {};
+      Object.entries(this.$store.state.systemState[this.id]).forEach(
+        ([key, property]) => (this.deviceState[key] = property.value)
+      );
+
       this.name = this.$store.state.systemState[this.id].name.value;
       this.room = this.$store.state.systemState[this.id].room.value;
       this.type = this.$store.state.systemState[this.id].type.value;
@@ -259,6 +334,27 @@ export default {
     }
   },
   computed: {
+    cardButtonInterfaces() {
+      if (!this.name) {
+        return [];
+      }
+      return this.$store.state.systemState[this.id].interfaces.value.filter(
+        iface => cardButtonInterfaces.includes(iface)
+      );
+    },
+    cardInterfaces() {
+      if (!this.name) {
+        return [];
+      }
+      return this.$store.state.systemState[this.id].interfaces.value.filter(
+        iface => cardInterfaces.includes(iface)
+      );
+    },
+    cardHeaderInterfaces() {
+      return this.$store.state.systemState[this.id].interfaces.value.filter(
+        iface => cardHeaderInterfaces.includes(iface)
+      );
+    },
     syncable() {
       return isSyncable(this.type);
     },

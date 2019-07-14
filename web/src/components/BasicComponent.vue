@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-layout wrap v-if="!loading">
-      <v-flex v-for="(card, cardIndex) in cards" :key="cardIndex" xs12 md6 lg4>
+      <v-flex v-for="(card, cardIndex) in cards" :key="cardIndex" xs12 md6>
         <v-flex>
           <v-card v-if="!card.hide" raised class="header-card">
             <v-card-title
@@ -27,7 +27,7 @@
       </v-flex>
       <v-flex xs12>
         <v-layout row wrap>
-          <v-flex xs12 md6 lg4 v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
+          <v-flex xs12 md6 v-for="deviceGroup in deviceGroups" :key="deviceGroup.name">
             <v-flex >
               <v-card raised class="header-card">
                 <v-card-title

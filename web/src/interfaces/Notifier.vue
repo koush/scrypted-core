@@ -30,11 +30,16 @@
         </v-flex>
       </v-layout>
     </v-container>
+    <v-card-actions v-if="device">
+      <v-spacer></v-spacer>
+      <v-btn text @click="send">Send</v-btn>
+    </v-card-actions>
   </v-form>
 </template>
 
 <script>
 import RPCInterface from "./RPCInterface.vue";
+import cloneDeep from "lodash.clonedeep";
 
 export default {
   mixins: [RPCInterface],
@@ -42,31 +47,49 @@ export default {
     ensureString(str, def) {
       return str === undefined ? def : str;
     },
-    update: function(modelUpdate) {
+    update() {
       if (this.lazyValue.notificationMediaUrl.length) {
-        this.rpc({
-          modelUpdate,
-        }).sendNotification(
+        this.rpc().sendNotification(
           this.lazyValue.notificationTitle,
           this.lazyValue.notificationBody,
           this.lazyValue.notificationMediaUrl,
           this.lazyValue.notificationMediaMime
         );
       } else {
-        this.rpc({
-          modelUpdate
-        }).sendNotification(this.lazyValue.notificationTitle, this.lazyValue.notificationBody);
+        this.rpc().sendNotification(
+          this.lazyValue.notificationTitle,
+          this.lazyValue.notificationBody
+        );
       }
     },
-    onChange: function() {
-      this.lazyValue.notificationTitle = this.ensureString(this.lazyValue.notificationTitle, "Scrypted Notification");
-      this.lazyValue.notificationBody = this.ensureString(this.lazyValue.notificationBody, "This is a message from Scrypted");
-      this.lazyValue.notificationMediaUrl = this.ensureString(this.lazyValue.notificationMediaUrl, "https://home.scrypted.app/_punch/web_hi_res_512.png");
-      this.lazyValue.notificationMediaMime = this.ensureString(this.lazyValue.notificationMediaMime, "image/png");
-      this.update(true);
+    createLazyValue() {
+      var ret = cloneDeep(this.value);
+      ret.notificationTitle = this.ensureString(
+        ret.notificationTitle,
+        "Scrypted Notification"
+      );
+      ret.notificationBody = this.ensureString(
+        ret.notificationBody,
+        "This is a message from Scrypted"
+      );
+      ret.notificationMediaUrl = this.ensureString(
+        ret.notificationMediaUrl,
+        "https://home.scrypted.app/_punch/web_hi_res_512.png"
+      );
+      ret.notificationMediaMime = this.ensureString(
+        ret.notificationMediaMime,
+        "image/png"
+      );
+      return ret;
     },
-    send: function() {
-      this.update(false);
+    onChange: function() {
+      if (this.device) {
+        return;
+      }
+      this.update();
+    },
+    send() {
+      this.update();
     }
   }
 };

@@ -1,5 +1,5 @@
 <template>
-  <v-list-item ripple>
+  <v-list-item ripple :to="getDeviceViewPath(deviceId)">
     <v-list-item-icon>
       <font-awesome-icon size="sm" :icon="locked ? 'lock' : 'lock-open'" :color="locked ? '#a9afbb' : 'orange'" />
     </v-list-item-icon>
@@ -9,14 +9,14 @@
       >{{ this.$store.state.systemState[this.deviceId].name.value }}</v-list-item-title>
     </v-list-item-content>
     <v-list-item-action>
-      <v-btn icon x-small @click="locked = false">
+      <v-btn icon x-small @click.prevent="locked = false">
         <v-icon
           :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? undefined : 'orange'"
         >lock_open</v-icon>
       </v-btn>
     </v-list-item-action>
     <v-list-item-action>
-      <v-btn icon x-small @click="locked = true">
+      <v-btn icon x-small @click.prevent="locked = true">
         <v-icon
           :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? 'green' : undefined"
         >lock</v-icon>
@@ -27,10 +27,14 @@
 
 <script lang="ts">
 import DashboardBase from "./DashboardBase.vue";
+import {getDeviceViewPath} from "../helpers";
 
 export default {
   mixins: [DashboardBase],
   props: ["type", "group", "deviceId"],
+  methods: {
+    getDeviceViewPath,
+  },
   computed: {
     locked: {
       get() {

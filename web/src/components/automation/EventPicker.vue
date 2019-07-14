@@ -40,6 +40,7 @@ import cloneDeep from "lodash.clonedeep";
 import Select2 from "../../common/Select2.vue";
 import Scheduler from "../../interfaces/automation/Scheduler.vue";
 import CustomValue from "../../common/CustomValue.vue";
+import Webhook from "../../interfaces/automation/Webhook.vue";
 
 function unassigned() {
   return {
@@ -62,7 +63,8 @@ export default {
   mixins: [CustomValue],
   components: {
     Select2,
-    Scheduler
+    Scheduler,
+    Webhook,
   },
   methods: {
     createLazyValue() {

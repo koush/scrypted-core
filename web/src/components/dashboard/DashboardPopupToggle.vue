@@ -1,5 +1,5 @@
 <template>
-  <v-list-item ripple>
+  <v-list-item ripple :to="getDeviceViewPath(id)">
     <v-list-item-icon>
       <font-awesome-icon
         size="sm"
@@ -17,21 +17,21 @@
   </v-list-item>
 </template>
 <script lang="ts">
+import {getDeviceViewPath} from "../helpers";
 import DashboardBase from "./DashboardBase.vue";
 export default {
-  props: ["ids", "type", "name", "light"],
+  props: ["id", "type", "name", "light"],
   mixins: [DashboardBase],
+  methods: {
+    getDeviceViewPath,
+  },
   computed: {
     on: {
       get() {
-        var on = false;
-        this.ids.forEach(
-          id => (on = on || this.$store.state.systemState[id].on.value)
-        );
-        return on;
+        return this.$store.state.systemState[this.id].on.value;
       },
       set(value) {
-        this.ids.forEach(id => this.setOnOff(id, value));
+        this.setOnOff(this.id, value);
       }
     }
   }

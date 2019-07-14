@@ -90,13 +90,14 @@ sensors[ScryptedInterface.EntrySensor] = "EntrySensor";
 // validTypes[ScryptedDeviceType.Sensor] = sensors;
 // validTypes[ScryptedDeviceType.Thermostat] = sensors;
 
-const camera = {
+const videoCamera = {
   priority: 0,
   component: "DashboardCamera",
   height: 4
 };
-camera[ScryptedInterface.VideoCamera] = "VideoCamera";
-validTypes[ScryptedDeviceType.Camera] = camera;
+videoCamera[ScryptedInterface.Camera] = "Camera";
+videoCamera[ScryptedInterface.VideoCamera] = "VideoCamera";
+validTypes[ScryptedDeviceType.Camera] = videoCamera;
 
 const randoms = [];
 for (var rrr = 0; rrr < 100; rrr++) {
@@ -191,7 +192,7 @@ export default {
       this.$store.state.scrypted.devices.map(id => [id, this.$store.state.systemState[id]])
         // filter out devices we can't show in the ui
         .filter(([, device]) => {
-          return device.type && validTypes[device.type.value] && device.metadata.value.syncWithIntegrations;
+          return device.type && validTypes[device.type.value];// && device.metadata.value.syncWithIntegrations;
         })
         // verify the interfaces we need exist on the devices we can use.
         .filter(([, device]) => {

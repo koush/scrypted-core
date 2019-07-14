@@ -3,7 +3,7 @@ import CustomValue from "../common/CustomValue.vue";
 
 export default {
   props: {
-    device: String,
+    device: undefined,
     value: Object,
     properties: Object
   },
@@ -16,8 +16,12 @@ export default {
   },
   methods: {
     rpc(options) {
+      if (this.device) {
+        return this.device;
+      }
+
       options = options || {};
-      const { modelUpdate, varargs } = options;
+      const { varargs } = options;
       var vm = this;
       return new Proxy(
         {},
@@ -34,19 +38,6 @@ export default {
                 vm.onInput();
                 return;
               }
-              if (modelUpdate) return;
-              return fetch(
-                `/web/device/${vm.device}/rpc/${vm.$options.name}/${method}`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({
-                    parameters: parameters
-                  })
-                }
-              );
             };
           }
         }

@@ -1,26 +1,24 @@
 <template>
-    <div class="row col-12 col-lg-6">
-        <div class="form-group">
-            <label>Brightness</label>
-            <input ref="brightness" type="number" class="form-control-range" v-model="value.brightness" :min="0" :max="100" @change="brightness">
-        </div>
-    </div>
+  <v-slider class="mx-5" thumb-label="always" v-model="lazyValue.brightness" @change="onChange"></v-slider>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
+import throttle from "lodash.throttle";
 
 export default {
-    mixins: [RPCInterface],
-    mounted: function() {
-        $(this.$refs.brightness).inputSpinner({
-            groupClass: "input-group-sm"
-        });
-    },
-    methods: {
-        brightness: function() {
-            this.rpc().setBrightness(parseInt(this.value.brightness));
-        },
+  mixins: [RPCInterface],
+  methods: {
+    debounceSetBrightness: throttle(function(self) {
+      this.rpc().setBrightness(this.lazyValue.brightness);
+    }, 500),
+    onChange() {
+      if (this.device) {
+        this.debounceSetBrightness();
+        return;
+      }
+      this.rpc().setBrightness(this.lazyValue.brightness);
     }
+  }
 };
 </script>

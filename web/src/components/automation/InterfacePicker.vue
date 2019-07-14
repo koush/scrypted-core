@@ -40,6 +40,7 @@ import OnOff from "../../interfaces/OnOff.vue";
 import Lock from "../../interfaces/Lock.vue";
 import Notifier from "../../interfaces/Notifier.vue";
 import SoftwareUpdate from "../../interfaces/SoftwareUpdate.vue";
+import ColorSettingHsv from "../../interfaces/ColorSettingHsv.vue";
 
 import Select2 from "../../common/Select2.vue";
 function unassigned() {
@@ -78,6 +79,7 @@ export default {
     Lock,
     Notifier,
     SoftwareUpdate,
+    ColorSettingHsv,
 
     Select2
   },

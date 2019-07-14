@@ -48,7 +48,7 @@
                   v-for="deviceId in type.ids"
                   :key="deviceId"
                   :type="type.type"
-                  :ids="[deviceId]"
+                  :id="deviceId"
                   :name="$store.state.systemState[deviceId].name.value"
                 ></DashboardPopupToggle>
               </v-list>

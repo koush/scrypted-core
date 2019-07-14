@@ -1,12 +1,12 @@
 <template>
-  <v-flex>
+  <span shrink>
     <v-btn class="mx-2" fab @click="unlock" :color="lazyValue.lockState === 'Locked' ? '#a9afbb' : 'orange'" dark>
       <v-icon >lock_open</v-icon>
     </v-btn>
     <v-btn class="mx-2" fab @click="lock" :color="lazyValue.lockState === 'Locked' ? 'green' : '#a9afbb'" dark>
       <v-icon>lock</v-icon>
     </v-btn>
-  </v-flex>
+  </span>
 </template>
 
 <script>

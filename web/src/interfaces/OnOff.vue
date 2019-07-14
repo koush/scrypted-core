@@ -1,9 +1,11 @@
 <template>
   <v-switch
+    class="mt-0"
+    style="margin-bottom: -20px;"
     inset
-    :label="label"
+    :label="device ? undefined : label"
     v-model="lazyValue.on"
-    color="indigo"
+    :color="device ? 'white' : 'indigo'"
     @click.self="onClick"
     @change="onChange"
   ></v-switch>
@@ -27,6 +29,9 @@ export default {
       this.rpc().turnOff();
     },
     onClick() {
+      if (!this.device) {
+        return;
+      }
       // click.self is fired only if it does not change.
       if (this.lazyValue.on) {
         this.turnOn();
@@ -35,13 +40,10 @@ export default {
       }
     },
     onChange: function() {
-      // guard with this.device as device calls are actually done in onClick
-      if (!this.device) {
-        if (this.lazyValue.on) {
-          this.turnOn();
-        } else {
-          this.turnOff();
-        }
+      if (this.lazyValue.on) {
+        this.turnOn();
+      } else {
+        this.turnOff();
       }
     }
   }

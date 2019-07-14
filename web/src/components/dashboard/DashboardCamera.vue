@@ -5,11 +5,20 @@
     </a>
 
     <v-dialog v-model="dialog" width="1024">
-      <video ref="video" width="100%" style="background-color: black;" playsinline autoplay></video>
+      <video
+        v-if="video"
+        ref="video"
+        width="100%"
+        style="background-color: black;"
+        playsinline
+        autoplay
+      ></video>
+      <v-img v-if="picture" contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
     </v-dialog>
   </div>
 </template>
 <script>
+import { ScryptedInterface } from "@scrypted/sdk";
 var currentStream;
 
 const scryptedServerVariables = {};
@@ -21,13 +30,19 @@ export default {
   props: ["type", "deviceId"],
   data() {
     return {
+      video: false,
+      picture: false,
       src: undefined,
       overlay: false,
-      dialog: false,
+      dialog: false
     };
   },
   watch: {
     dialog(val) {
+      if (!this.video) {
+        return;
+      }
+
       if (!val) {
         if (currentStream) {
           currentStream.then(connection => connection.destroy());
@@ -38,34 +53,44 @@ export default {
       this.$pushconnect().then(rtcManager => {
         const rtspUrl = `camera://${this.deviceId}`;
 
-        currentStream = rtcManager
-          .connect({
-            senderId: scryptedServerVariables.senderId,
-            registrationId: scryptedServerVariables.registrationId,
-            port: rtspUrl,
-            offerToReceiveAudio: 1,
-            offerToReceiveVideo: 1
-          });
+        currentStream = rtcManager.connect({
+          senderId: scryptedServerVariables.senderId,
+          registrationId: scryptedServerVariables.registrationId,
+          port: rtspUrl,
+          offerToReceiveAudio: 1,
+          offerToReceiveVideo: 1
+        });
 
-          currentStream
-          .then(conn => {
-            var video = this.$refs.video;
-            var mediaStream = new MediaStream();
-            mediaStream.addTrack(conn.peerConnection.getReceivers()[1].track);
-            video.srcObject = mediaStream;
-          });
+        currentStream.then(conn => {
+          var video = this.$refs.video;
+          var mediaStream = new MediaStream();
+          mediaStream.addTrack(conn.peerConnection.getReceivers()[1].track);
+          video.srcObject = mediaStream;
+        });
       });
     }
   },
   mounted() {
-      const device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
+    const device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
+    if (device.interfaces.includes(ScryptedInterface.VideoCamera)) {
       const videoStream = device.getVideoStream();
       this.$scrypted.mediaManager
-        .convertMediaObjectToLocalUri(videoStream, "image/png")
+        .convertMediaObjectToLocalUri(videoStream, "image/jpeg")
         .then(result => {
+          this.video = true;
           const url = new URL(result);
           this.src = url.pathname;
         });
+    } else {
+      const picture = device.takePicture();
+      this.$scrypted.mediaManager
+        .convertMediaObjectToLocalUri(picture, "image/jpeg")
+        .then(result => {
+          this.picture = true;
+          const url = new URL(result);
+          this.src = url.pathname;
+        });
+    }
   }
 };
 </script>
