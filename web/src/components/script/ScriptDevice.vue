@@ -12,9 +12,13 @@
         {{ name }} was created by
         <a :href="`#/device/${ownerDevice.id}`">{{ ownerDevice.name }}.</a>
       </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text color="primary" @click="showStorage = !showStorage">Storage</v-btn>
+      </v-card-actions>
     </v-card>
 
-    <v-card raised class="header-card" style="margin-bottom: 60px">
+    <v-card v-if="showStorage" raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
         class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
       >Script Storage</v-card-title>
@@ -36,7 +40,8 @@ export default {
   },
   data: function() {
     return {
-      device: cloneDeep(this.deviceProps.device)
+      device: cloneDeep(this.deviceProps.device),
+      showStorage: false
     };
   },
   methods: {

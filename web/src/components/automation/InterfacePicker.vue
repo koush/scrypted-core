@@ -41,6 +41,9 @@ import Lock from "../../interfaces/Lock.vue";
 import Notifier from "../../interfaces/Notifier.vue";
 import SoftwareUpdate from "../../interfaces/SoftwareUpdate.vue";
 import ColorSettingHsv from "../../interfaces/ColorSettingHsv.vue";
+import StartStop from "../../interfaces/StartStop.vue";
+import Dock from "../../interfaces/Dock.vue";
+import Pause from "../../interfaces/Pause.vue";
 
 import Select2 from "../../common/Select2.vue";
 function unassigned() {
@@ -80,6 +83,9 @@ export default {
     Notifier,
     SoftwareUpdate,
     ColorSettingHsv,
+    StartStop,
+    Dock,
+    Pause,
 
     Select2
   },

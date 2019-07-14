@@ -3,10 +3,10 @@
     <template v-slot:activator="{ on }">
       <font-awesome-icon
         v-on="on"
-        v-if="lazyValue.occupied"
+        v-if="lazyValue.entryOpen"
         class="white--text mr-2 ml-2"
         size="sm"
-        icon="user"
+        icon="door-open"
         color="#a9afbb"
       />
       <font-awesome-icon
@@ -14,11 +14,11 @@
         v-else
         class="white--text mr-2 ml-2"
         size="sm"
-        icon="user-alt-slash"
+        icon="door-closed"
         color="#a9afbb"
       />
     </template>
-    <span>{{ lazyValue.occupied ? 'Occupied' : 'Unoccupied' }}</span>
+    <span>Entry is {{ lazyValue.entryOpen ? 'Open' : 'Closed' }}</span>
   </v-tooltip>
 </template>
 

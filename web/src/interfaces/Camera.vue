@@ -1,7 +1,5 @@
 <template>
-    <div class="card form-group col-12">
-        <img :src="imageUrl" />
-    </div>
+    <v-img contain :src="src" lazy-src="images/cameraloading.jpg" />
 </template>
 
 <script>
@@ -9,12 +7,20 @@ import RPCInterface from './RPCInterface.vue'
 
 export default {
     mixins: [RPCInterface],
-    computed: {
-        imageUrl: {
-            get() {
-                return `/web/device/${this.device}/picture`;
-            }
-        }
+    data() {
+        return {
+            src: 'images/cameraloading.jpg',
+        };
+    },
+    mounted() {
+      const picture = this.device.takePicture();
+      this.$scrypted.mediaManager
+        .convertMediaObjectToLocalUri(picture, "image/jpeg")
+        .then(result => {
+          this.picture = true;
+          const url = new URL(result);
+          this.src = url.pathname;
+        });
     }
 };
 </script>

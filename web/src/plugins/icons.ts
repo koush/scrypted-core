@@ -5,6 +5,10 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faUser,
+  faUserAltSlash,
+  faDoorOpen,
+  faDoorClosed,
   faInbox,
   faCopy,
   faFolderPlus,
@@ -60,6 +64,10 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faUser,
+  faUserAltSlash,
+  faDoorOpen,
+  faDoorClosed,
   faInbox,
   faCopy,
   faFolderPlus,

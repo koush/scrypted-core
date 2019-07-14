@@ -49,6 +49,16 @@
               </v-card-title>
               <div class="header-card-spacer"></div>
 
+              <v-layout align-center justify-center>
+                <component
+                  v-for="iface in cardButtonInterfaces"
+                  :key="iface"
+                  :value="deviceState"
+                  :device="systemDevice"
+                  :is="iface"
+                ></component>
+              </v-layout>
+
               <v-form>
                 <v-container>
                   <v-layout>
@@ -80,7 +90,13 @@
               </v-form>
 
               <v-card-actions>
-                <component v-for="iface in cardButtonInterfaces" :key="iface" :value="deviceState" :device="systemDevice" :is="iface"></component>
+                <component
+                  v-for="iface in cardActionInterfaces"
+                  :key="iface"
+                  :value="deviceState"
+                  :device="systemDevice"
+                  :is="iface"
+                ></component>
                 <v-spacer></v-spacer>
 
                 <v-btn color="info" text @click="openLogs" v-if="!loading">Logs</v-btn>
@@ -195,8 +211,22 @@ import Lock from "../interfaces/Lock.vue";
 import ColorSettingHsv from "../interfaces/ColorSettingHsv.vue";
 import ColorSettingRgb from "../interfaces/ColorSettingRgb.vue";
 import OauthClient from "../interfaces/OauthClient.vue";
+import Camera from "../interfaces/Camera.vue";
+import VideoCamera from "../interfaces/VideoCamera.vue";
+import Thermometer from "../interfaces/sensors/Thermometer.vue";
+import HumiditySensor from "../interfaces/sensors/HumiditySensor.vue";
+import EntrySensor from "../interfaces/sensors/EntrySensor.vue";
+import OccupancySensor from "../interfaces/sensors/OccupancySensor.vue";
+import Settings from "../interfaces/Settings.vue";
+import StartStop from "../interfaces/StartStop.vue";
+import Dock from "../interfaces/Dock.vue";
+import Pause from "../interfaces/Pause.vue";
 
 const cardHeaderInterfaces = [
+  ScryptedInterface.OccupancySensor,
+  ScryptedInterface.EntrySensor,
+  ScryptedInterface.HumiditySensor,
+  ScryptedInterface.Thermometer,
   ScryptedInterface.Battery,
   ScryptedInterface.Lock,
   ScryptedInterface.OnOff
@@ -206,23 +236,53 @@ const cardInterfaces = [
   ScryptedInterface.Brightness,
   ScryptedInterface.Notifier,
   ScryptedInterface.ColorSettingHsv,
-  ScryptedInterface.ColorSettingRgb
+  ScryptedInterface.ColorSettingRgb,
+  ScryptedInterface.Camera,
+  ScryptedInterface.VideoCamera,
+  ScryptedInterface.Settings
 ];
 
+const cardActionInterfaces = [ScryptedInterface.OauthClient];
+
 const cardButtonInterfaces = [
-  ScryptedInterface.OauthClient,
+  ScryptedInterface.Dock,
+  ScryptedInterface.Pause,
+  ScryptedInterface.StartStop,
 ];
+
+function filterInterfaces(interfaces) {
+  return function() {
+    if (!this.name) {
+      return [];
+    }
+    return interfaces.filter(iface =>
+      this.$store.state.systemState[this.id].interfaces.value.includes(iface)
+    );
+    console.log(ret);
+  };
+}
 
 export default {
   components: {
+    StartStop,
+    Dock,
+    Pause,
+
     Brightness,
     ColorSettingRgb,
     ColorSettingHsv,
     Notifier,
+    Camera,
+    VideoCamera,
+    Settings,
 
     Lock,
     OnOff,
     Battery,
+    Thermometer,
+    HumiditySensor,
+    EntrySensor,
+    OccupancySensor,
 
     OauthClient,
 
@@ -273,13 +333,15 @@ export default {
         device: undefined,
         component: undefined,
         loading: false,
-        deviceState: {},
+        // deviceState: {},
         syncWithIntegrations: undefined
       };
     },
     openLogs() {
-      this.showLogs = true;
-      this.$vuetify.goTo(this.$refs.logsEl);
+      this.showLogs = !this.showLogs;
+      if (this.showLogs) {
+        this.$vuetify.goTo(this.$refs.logsEl);
+      }
     },
     onChange() {
       // console.log(JSON.stringify(this.device));
@@ -289,10 +351,10 @@ export default {
       return metadata && metadata.value && metadata.value[prop];
     },
     reload() {
-      this.deviceState = {};
-      Object.entries(this.$store.state.systemState[this.id]).forEach(
-        ([key, property]) => (this.deviceState[key] = property.value)
-      );
+      // this.deviceState = {};
+      // Object.entries(this.$store.state.systemState[this.id]).forEach(
+      //   ([key, property]) => (this.deviceState[key] = property.value)
+      // );
 
       this.name = this.$store.state.systemState[this.id].name.value;
       this.room = this.$store.state.systemState[this.id].room.value;
@@ -306,6 +368,12 @@ export default {
         this.deviceProps = response.data;
 
         this.loading = false;
+
+        if (this.systemDevice.interfaces.includes('Refresh')) {
+          this.systemDevice.listen('Refresh', (eventSource, eventData, eventDetails) => {
+            console.log(arguments);
+          })
+        }
       });
     },
     remove() {
@@ -334,27 +402,17 @@ export default {
     }
   },
   computed: {
-    cardButtonInterfaces() {
-      if (!this.name) {
-        return [];
-      }
-      return this.$store.state.systemState[this.id].interfaces.value.filter(
-        iface => cardButtonInterfaces.includes(iface)
+    deviceState() {
+      var ret = {};
+      Object.entries(this.$store.state.systemState[this.id]).forEach(
+        ([key, property]) => (ret[key] = property.value)
       );
+      return ret;
     },
-    cardInterfaces() {
-      if (!this.name) {
-        return [];
-      }
-      return this.$store.state.systemState[this.id].interfaces.value.filter(
-        iface => cardInterfaces.includes(iface)
-      );
-    },
-    cardHeaderInterfaces() {
-      return this.$store.state.systemState[this.id].interfaces.value.filter(
-        iface => cardHeaderInterfaces.includes(iface)
-      );
-    },
+    cardButtonInterfaces: filterInterfaces(cardButtonInterfaces),
+    cardActionInterfaces: filterInterfaces(cardActionInterfaces),
+    cardInterfaces: filterInterfaces(cardInterfaces),
+    cardHeaderInterfaces: filterInterfaces(cardHeaderInterfaces),
     syncable() {
       return isSyncable(this.type);
     },

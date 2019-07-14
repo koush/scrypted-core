@@ -1,24 +1,21 @@
 <template>
-    <div class="form-group">
-        <button v-if='device' type="button" class='btn btn-outline-secondary' @click='onClick'>Dock</button>
-    </div>
+  <span>
+    <v-btn depressed dark tile :outlined="!value.docked" color="blue" @click="dock">Dock</v-btn>
+  </span>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
-    mounted: function() {
-        // this is an implicit command, so immediately trigger the change.
-        if (!this.device) {
-            this.onClick();
-        }
+  mixins: [RPCInterface],
+  methods: {
+    dock() {
+      this.rpc().dock();
     },
-    methods: {
-        onClick: function() {
-            this.rpc().dock();
-        },
+    onChange() {
+      this.rpc().dock();
     }
+  }
 };
 </script>
