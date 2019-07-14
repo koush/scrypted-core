@@ -1,49 +1,31 @@
 <template>
-    <div class="form-group row col-2">
-        <div class="btn-group btn-group-toggle">
-            <label class="btn btn-outline-success" :class="{active: entryOpen === true}">
-                <input :name='radio' type="radio" v-model='entryOpen' :value="true" @change='onChange' @click='openEntry'> Open
-            </label>
-            <label class="btn btn-outline-success" :class="{active: entryOpen === false}">
-                <input :name='radio' type="radio" v-model='entryOpen' :value="false" @change='onChange' @click='closeEntry'> Close
-            </label>
-            <br>
-        </div>
-    </div>
+  <span>
+    <span>
+      <v-btn depressed dark tile :outlined="!value.entryOpen" color="green" @click="openEntry">Open</v-btn>
+    </span>
+    <span>
+      <v-btn depressed dark tile :outlined="value.entryOpen" color="red" @click="closeEntry">Close</v-btn>
+    </span>
+  </span>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
-    data: function() {
-        return {
-            radio: Math.random(),
-            entryOpen: this.value.entryOpen,
-        }
+  mixins: [RPCInterface],
+  methods: {
+    openEntry() {
+      this.lazyValue.entryOpen = true;
+      this.rpc().openEntry();
     },
-    methods: {
-        openEntry: function() {
-            this.rpc().openEntry();
-        },
-        closeEntry: function() {
-            this.rpc().closeEntry();
-        },
-        onChange: function() {
-            this.value.entryOpen = this.entryOpen;
-            if (!this.device) {
-                if (this.entryOpen) {
-                    this.openEntry();
-                }
-                else {
-                    this.closeEntry();
-                }
-            }
-            else {
-                this.entryOpen = undefined;
-            }
-        },
+    closeEntry() {
+      this.lazyValue.entryOpen = false;
+      this.rpc().closeEntry();
+    },
+    onChange() {
+      this.rpc().closeEntry();
     }
+  }
 };
 </script>

@@ -221,6 +221,8 @@ import Settings from "../interfaces/Settings.vue";
 import StartStop from "../interfaces/StartStop.vue";
 import Dock from "../interfaces/Dock.vue";
 import Pause from "../interfaces/Pause.vue";
+import ColorSettingTemperature from "../interfaces/ColorSettingTemperature.vue";
+import Entry from "../interfaces/Entry.vue";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -234,6 +236,7 @@ const cardHeaderInterfaces = [
 
 const cardInterfaces = [
   ScryptedInterface.Brightness,
+  ScryptedInterface.ColorSettingTemperature,
   ScryptedInterface.Notifier,
   ScryptedInterface.ColorSettingHsv,
   ScryptedInterface.ColorSettingRgb,
@@ -248,6 +251,7 @@ const cardButtonInterfaces = [
   ScryptedInterface.Dock,
   ScryptedInterface.Pause,
   ScryptedInterface.StartStop,
+  ScryptedInterface.Entry,
 ];
 
 function filterInterfaces(interfaces) {
@@ -267,6 +271,7 @@ export default {
     StartStop,
     Dock,
     Pause,
+    Entry,
 
     Brightness,
     ColorSettingRgb,
@@ -275,6 +280,7 @@ export default {
     Camera,
     VideoCamera,
     Settings,
+    ColorSettingTemperature,
 
     Lock,
     OnOff,

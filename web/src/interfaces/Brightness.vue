@@ -1,5 +1,9 @@
 <template>
-  <v-slider class="mx-5" thumb-label="always" v-model="lazyValue.brightness" @change="onChange"></v-slider>
+  <v-slider class="mx-5" thumb-label="always" v-model="lazyValue.brightness" @change="onChange"
+  
+        append-icon="brightness_high"
+        prepend-icon="brightness_low"
+  ></v-slider>
 </template>
 
 <script>
