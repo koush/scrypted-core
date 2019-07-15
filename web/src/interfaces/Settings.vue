@@ -28,6 +28,11 @@ export default {
       settings: []
     };
   },
+  watch: {
+    device() {
+      this.refresh();
+    }
+  },
   mounted() {
     this.refresh();
   },

@@ -12,7 +12,7 @@
     ></v-checkbox>
     <v-select
       :readonly="lazyValue.readonly"
-      v-if="lazyValue.choices"
+      v-else-if="lazyValue.choices"
       :items="lazyValue.choices"
       v-model="lazyValue.value"
       outlined

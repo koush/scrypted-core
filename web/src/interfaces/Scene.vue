@@ -1,39 +1,53 @@
 <template>
-    <div class="form-group col-2">
-        <div class="btn-group btn-group-toggle">
-            <label class="btn btn-outline-success" :class="{active: activate === true}">
-                <input :name='radio' type="radio" v-model='activate' :value="true" @change='onChange'> Activate
-            </label>
-            <label v-if='properties.reversible' class="btn btn-outline-success" :class="{active: activate === false}">
-                <input :name='radio' type="radio" v-model='activate' :value="false" @change='onChange'> Deactivate
-            </label>
-            <br>
-        </div>
-    </div>
+  <span>
+    <span>
+      <v-btn
+        depressed
+        dark
+        tile
+        :outlined="lazyValue.activate === undefined || lazyValue.activate === false"
+        color="green"
+        @click="activate"
+      >Activate</v-btn>
+    </span>
+    <span>
+      <v-btn
+        depressed
+        dark
+        tile
+        
+        :outlined="lazyValue.activate === undefined || lazyValue.activate === true"
+        color="red"
+        @click="deactivate"
+      >Deactivate</v-btn>
+    </span>
+  </span>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
-    data: function() {
-        return {
-            radio: Math.random(),
-            activate: this.value.activate,
-        }
+  mixins: [RPCInterface],
+  mounted() {
+      console.log(this.value);
+  },
+  methods: {
+    activate() {
+      if (!this.device) {
+        this.lazyValue.activate = true;
+      }
+      this.rpc().activate();
     },
-    methods: {
-        onChange: function() {
-            this.value.activate = this.activate;
-            if (this.value.activate)
-                this.rpc().activate();
-            else
-                this.rpc().deactivate();
-
-            if (this.device)
-                this.activate = undefined;
-        },
+    deactivate() {
+      if (!this.device) {
+        this.lazyValue.activate = false;
+      }
+      this.rpc().deactivate();
+    },
+    onChange() {
+      this.rpc().activate();
     }
+  }
 };
 </script>

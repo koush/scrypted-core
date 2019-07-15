@@ -225,6 +225,7 @@ import ColorSettingTemperature from "../interfaces/ColorSettingTemperature.vue";
 import Entry from "../interfaces/Entry.vue";
 import HttpRequestHandler from "../interfaces/HttpRequestHandler.vue";
 import PasswordStore from "../interfaces/PasswordStore.vue";
+import Scene from "../interfaces/Scene.vue";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -255,6 +256,7 @@ const cardButtonInterfaces = [
   ScryptedInterface.Pause,
   ScryptedInterface.StartStop,
   ScryptedInterface.Entry,
+  ScryptedInterface.Scene,
 ];
 
 function filterInterfaces(interfaces) {
@@ -275,6 +277,7 @@ export default {
     Dock,
     Pause,
     Entry,
+    Scene,
 
     Brightness,
     ColorSettingRgb,

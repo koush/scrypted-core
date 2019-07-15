@@ -44,6 +44,7 @@ import ColorSettingHsv from "../../interfaces/ColorSettingHsv.vue";
 import StartStop from "../../interfaces/StartStop.vue";
 import Dock from "../../interfaces/Dock.vue";
 import Pause from "../../interfaces/Pause.vue";
+import Scene from "../../interfaces/Scene.vue";
 
 import Select2 from "../../common/Select2.vue";
 function unassigned() {
@@ -86,6 +87,7 @@ export default {
     StartStop,
     Dock,
     Pause,
+    Scene,
 
     Select2
   },
