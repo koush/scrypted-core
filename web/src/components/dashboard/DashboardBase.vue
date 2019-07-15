@@ -9,6 +9,8 @@ export default {
       switch (type) {
         case ScryptedDeviceType.Light:
           return "Lights";
+        case ScryptedDeviceType.Fan:
+          return "Fans";
         case ScryptedDeviceType.Outlet:
           return "Outlets";
         case ScryptedDeviceType.Switch:

@@ -5,6 +5,7 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faUserSecret,
   faSnowflake,
   faUser,
   faUserAltSlash,
@@ -59,12 +60,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
+  faChrome,
   faGithub,
 } from '@fortawesome/free-brands-svg-icons'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faUserSecret,
+  faChrome,
   faSnowflake,
   faUser,
   faUserAltSlash,

@@ -30,7 +30,7 @@
 
           <v-flex xs12>
             <v-layout align-center justify-center column>
-              <div v-if="brightness !== undefined">
+              <div v-if="type.type == 'Light'">
                 <div class="slider-pad-bottom"></div>
                 <vue-slider
                   :width="40"
@@ -91,7 +91,7 @@ export default {
       }
     },
     showDevices(type) {
-      if (this.showLightsDialog || type.type != "Light") {
+      if (this.showLightsDialog) {
         return;
       }
       this.showLightsDialog = true;

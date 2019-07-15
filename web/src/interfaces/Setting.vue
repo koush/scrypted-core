@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-checkbox
+      :readonly="lazyValue.readonly"
       v-if="lazyValue.type === 'Boolean'"
       v-model="lazyValue.value"
       :label="lazyValue.title"
@@ -10,6 +11,7 @@
       @change="save"
     ></v-checkbox>
     <v-select
+      :readonly="lazyValue.readonly"
       v-if="lazyValue.choices"
       :items="lazyValue.choices"
       v-model="lazyValue.value"
@@ -27,6 +29,7 @@
       </template>
     </v-select>
     <v-text-field
+      :readonly="lazyValue.readonly"
       v-else
       outlined
       solo
@@ -51,7 +54,6 @@ import RPCInterface from "./RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  props: ["device"],
   computed: {
     dirty() {
       return this.lazyValue.value !== this.value.value;

@@ -12,7 +12,7 @@
     </v-list-item-content>
 
     <v-list-item-action>
-      <v-switch inset v-model="on" color="white" :light="light"></v-switch>
+      <v-switch inset v-model="on" color="white" @click.native.stop.prevent :light="light"></v-switch>
     </v-list-item-action>
   </v-list-item>
 </template>

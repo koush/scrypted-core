@@ -41,6 +41,7 @@ import Select2 from "../../common/Select2.vue";
 import Scheduler from "../../interfaces/automation/Scheduler.vue";
 import CustomValue from "../../common/CustomValue.vue";
 import Webhook from "../../interfaces/automation/Webhook.vue";
+import FaceDetector from "../../interfaces/automation/FaceDetector.vue";
 
 function unassigned() {
   return {
@@ -65,13 +66,14 @@ export default {
     Select2,
     Scheduler,
     Webhook,
+    FaceDetector,
   },
   methods: {
     createLazyValue() {
       let selected =
-        this.value.id == "unassigned"
+        (!this.value.id || this.value.id === "unassigned")
           ? unassigned()
-          : this.events.find(e => e.id == this.value.id);
+          : this.events.find(e => e.id === this.value.id);
       selected = cloneDeep(selected);
       const condition = this.value.condition;
       return {
@@ -86,7 +88,7 @@ export default {
         id: this.lazyValue.selected.id,
         model: this.lazyValue.model,
       }
-    }
+    },
   }
 };
 </script>

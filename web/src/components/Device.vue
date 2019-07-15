@@ -202,7 +202,7 @@ import {
   removeAlert,
   hasPhysicalLocation
 } from "./helpers";
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface, ScryptedInterfaceDescriptors } from "@scrypted/sdk";
 import Notifier from "../interfaces/Notifier.vue";
 import OnOff from "../interfaces/OnOff.vue";
 import Brightness from "../interfaces/Brightness.vue";
@@ -223,6 +223,8 @@ import Dock from "../interfaces/Dock.vue";
 import Pause from "../interfaces/Pause.vue";
 import ColorSettingTemperature from "../interfaces/ColorSettingTemperature.vue";
 import Entry from "../interfaces/Entry.vue";
+import HttpRequestHandler from "../interfaces/HttpRequestHandler.vue";
+import PasswordStore from "../interfaces/PasswordStore.vue";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -242,10 +244,11 @@ const cardInterfaces = [
   ScryptedInterface.ColorSettingRgb,
   ScryptedInterface.Camera,
   ScryptedInterface.VideoCamera,
+  ScryptedInterface.PasswordStore,
   ScryptedInterface.Settings
 ];
 
-const cardActionInterfaces = [ScryptedInterface.OauthClient];
+const cardActionInterfaces = [ScryptedInterface.OauthClient, ScryptedInterface.HttpRequestHandler];
 
 const cardButtonInterfaces = [
   ScryptedInterface.Dock,
@@ -279,6 +282,7 @@ export default {
     Notifier,
     Camera,
     VideoCamera,
+    PasswordStore,
     Settings,
     ColorSettingTemperature,
 
@@ -291,6 +295,7 @@ export default {
     OccupancySensor,
 
     OauthClient,
+    HttpRequestHandler,
 
     VueSlider,
     LogCard,

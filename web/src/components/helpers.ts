@@ -92,14 +92,14 @@ function addInference(iface: ScryptedInterface, ...types: ScryptedDeviceType[]) 
     inference[iface] = types;
 }
 
-addInference(ScryptedInterface.Lock, ScryptedDeviceType.Light);
+addInference(ScryptedInterface.Lock, ScryptedDeviceType.Lock);
 addInference(ScryptedInterface.PasswordStore, ScryptedDeviceType.PasswordControl);
 addInference(ScryptedInterface.VideoCamera, ScryptedDeviceType.Camera);
 addInference(ScryptedInterface.Camera, ScryptedDeviceType.Camera);
 addInference(ScryptedInterface.TemperatureSetting, ScryptedDeviceType.Thermostat);
 addInference(ScryptedInterface.Entry, ScryptedDeviceType.Garage, ScryptedDeviceType.Entry);
 
-addInference(ScryptedInterface.OnOff, ScryptedDeviceType.Outlet, ScryptedDeviceType.Light, ScryptedDeviceType.Switch);
+addInference(ScryptedInterface.OnOff, ScryptedDeviceType.Outlet, ScryptedDeviceType.Light, ScryptedDeviceType.Switch, ScryptedDeviceType.Fan);
 addInference(ScryptedInterface.Brightness, ScryptedDeviceType.Light);
 
 export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, interfaces: ScryptedInterface[]): ScryptedDeviceType[] {

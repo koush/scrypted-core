@@ -69,7 +69,9 @@ const toggles = {
 toggles[ScryptedInterface.OnOff] = "Toggle";
 validTypes[ScryptedDeviceType.Outlet] = validTypes[
   ScryptedDeviceType.Switch
-] = validTypes[ScryptedDeviceType.Light] = toggles;
+] = validTypes[ScryptedDeviceType.Light] = validTypes[
+  ScryptedDeviceType.Fan
+] = toggles;
 
 const lock = {
   priority: 20,
@@ -189,10 +191,11 @@ export default {
       var validTypes = this.validTypes;
 
       var ret = {};
-      this.$store.state.scrypted.devices.map(id => [id, this.$store.state.systemState[id]])
+      this.$store.state.scrypted.devices
+        .map(id => [id, this.$store.state.systemState[id]])
         // filter out devices we can't show in the ui
         .filter(([, device]) => {
-          return device.type && validTypes[device.type.value];// && device.metadata.value.syncWithIntegrations;
+          return device.type && validTypes[device.type.value]; // && device.metadata.value.syncWithIntegrations;
         })
         // verify the interfaces we need exist on the devices we can use.
         .filter(([, device]) => {
@@ -246,12 +249,14 @@ export default {
 
       Object.assign(ret, merged);
 
+      // single.types[type].length === 1 ? this.$store.state.systemState[single.types[type][0]].name.value : 
+
       // massage the room types into array which is easier to use
       // sort by priority.
       Object.values(ret).forEach(room => {
         room.types = Object.entries(room.types)
           .map(([type, ids]) => ({
-            name: room.type ? type : undefined,
+            name: ids.length === 1 ? this.$store.state.systemState[ids[0]].name.value : room.type ? type : undefined,
             type: room.type || type,
             ids
           }))

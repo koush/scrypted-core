@@ -14,9 +14,6 @@ import RPCInterface from "./RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  mounted() {
-    console.log(this.lazyValue);
-  },
   methods: {
     pause() {
       this.lazyValue.paused = true;
