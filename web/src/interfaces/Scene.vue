@@ -15,7 +15,6 @@
         depressed
         dark
         tile
-        
         :outlined="lazyValue.activate === undefined || lazyValue.activate === true"
         color="red"
         @click="deactivate"
@@ -29,9 +28,6 @@ import RPCInterface from "./RPCInterface.vue";
 
 export default {
   mixins: [RPCInterface],
-  mounted() {
-      console.log(this.value);
-  },
   methods: {
     activate() {
       if (!this.device) {
