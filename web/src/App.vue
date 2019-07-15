@@ -137,7 +137,7 @@
         <v-card-text></v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn text @click="$connectScrypted">Reconnect</v-btn>
+          <v-btn text @click="reconnect">Reconnect</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -346,7 +346,7 @@ Vue.use(Vue => {
     store.commit("setIsConnected", undefined);
     store.commit("setIsLoggedIntoCloud", undefined);
 
-    axios
+    return axios
       .get("/login", {
         headers: {
           Accept: "application/json"
@@ -414,8 +414,9 @@ Vue.use(Vue => {
           store.commit("setAlerts", alerts);
         });
       })
-      .catch(() => {
+      .catch(e => {
         store.commit("setIsConnected", false);
+        throw e;
       });
   };
 
@@ -465,6 +466,9 @@ export default {
     clearInterval(this._timer);
   },
   methods: {
+    reconnect() {
+      this.$connectScrypted().catch(e => (this.loginResult = e.toString()));
+    },
     logout() {
       axios.get("/logout").then(() => window.location.reload());
     },
@@ -487,6 +491,7 @@ export default {
         body.confirm_password = this.confirmPassword;
       }
 
+      this.loginResult = "";
       axios
         .post("/login", qs.stringify(body), {
           headers: {
@@ -499,6 +504,9 @@ export default {
             return;
           }
           window.location.reload();
+        })
+        .catch(e => {
+          this.loginResult = e.toString();
         });
     },
     clearAlerts() {
