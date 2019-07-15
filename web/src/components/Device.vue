@@ -28,7 +28,11 @@
                   />
                 </template>
                 <div class="caption">{{ alert.title }}</div>
-                <div>{{alert.message}}</div>
+                <div
+                  v-linkified:options="{ className: 'alert-link' }"
+                  v-html="alert.message"
+                  style="color: white;"
+                ></div>
               </v-alert>
             </div>
 
@@ -202,7 +206,7 @@ import {
   removeAlert,
   hasPhysicalLocation
 } from "./helpers";
-import { ScryptedInterface, ScryptedInterfaceDescriptors } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk";
 import Notifier from "../interfaces/Notifier.vue";
 import OnOff from "../interfaces/OnOff.vue";
 import Brightness from "../interfaces/Brightness.vue";
@@ -270,7 +274,6 @@ function filterInterfaces(interfaces) {
     return interfaces.filter(iface =>
       this.$store.state.systemState[this.id].interfaces.value.includes(iface)
     );
-    console.log(ret);
   };
 }
 
@@ -354,6 +357,12 @@ export default {
         syncWithIntegrations: undefined
       };
     },
+    escapeHtml(html) {
+      return html
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    },
     openLogs() {
       this.showLogs = !this.showLogs;
       if (this.showLogs) {
@@ -387,12 +396,7 @@ export default {
         this.loading = false;
 
         if (this.systemDevice.interfaces.includes("Refresh")) {
-          this.systemDevice.listen(
-            "Refresh",
-            (eventSource, eventData, eventDetails) => {
-              console.log(arguments);
-            }
-          );
+          this.systemDevice.listen("Refresh", () => {});
         }
       });
     },
@@ -470,3 +474,8 @@ export default {
   }
 };
 </script>
+<style>
+a.alert-link {
+  color: white;
+}
+</style>

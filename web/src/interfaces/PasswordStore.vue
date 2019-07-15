@@ -25,7 +25,6 @@ export default {
   mixins: [RPCInterface],
   components: {
     Grower,
-    PasswordEntry
   },
   data() {
     return {

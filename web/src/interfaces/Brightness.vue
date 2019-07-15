@@ -13,7 +13,7 @@ import throttle from "lodash.throttle";
 export default {
   mixins: [RPCInterface],
   methods: {
-    debounceSetBrightness: throttle(function(self) {
+    debounceSetBrightness: throttle(function() {
       this.rpc().setBrightness(this.lazyValue.brightness);
     }, 500),
     onChange() {

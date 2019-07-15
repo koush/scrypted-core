@@ -286,13 +286,11 @@ const store = new Vuex.Store({
       store.scrypted.alerts = alerts;
     },
     addDevice(store, id) {
-      console.log("new device added");
       var devices = store.scrypted.devices.filter(device => device !== id);
       devices.push(id);
       store.scrypted.devices = devices;
     },
     removeDevice(store, id) {
-      console.log("device removed");
       store.scrypted.devices = store.scrypted.devices.filter(
         device => device !== id
       );

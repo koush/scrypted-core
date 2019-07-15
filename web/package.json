@@ -29,6 +29,7 @@
     "vue-click-outside": "^1.0.7",
     "vue-clipboard2": "^0.3.0",
     "vue-feather": "^1.0.0",
+    "vue-linkify": "^1.0.1",
     "vue-router": "^3.0.6",
     "vue-script2": "^2.1.0",
     "vue-slider-component": "^3.0.33",

@@ -22,7 +22,7 @@ export default {
       }
   },
   methods: {
-    debounceSetColorTemperature: throttle(function(self) {
+    debounceSetColorTemperature: throttle(function() {
       this.rpc().setColorTemperature(this.lazyValue.colorTemperature);
     }, 500),
     onChange() {

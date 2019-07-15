@@ -1,5 +1,5 @@
 <template>
-  <v-list-item ripple @click="showDevices(type)">
+  <v-list-item ripple @click="showDevices()">
     <v-list-item-icon>
       <font-awesome-icon
         size="sm"
@@ -90,7 +90,7 @@ export default {
         this.showLightsDialog = false;
       }
     },
-    showDevices(type) {
+    showDevices() {
       if (this.showLightsDialog) {
         return;
       }

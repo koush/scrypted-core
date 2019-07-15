@@ -5,6 +5,9 @@ import './plugins/script2';
 import './plugins/clipboard';
 import App from './App.vue'
 import './registerServiceWorker'
+import linkify from 'vue-linkify'
+
+Vue.directive('linkified', linkify)
 
 Vue.config.productionTip = false
 
