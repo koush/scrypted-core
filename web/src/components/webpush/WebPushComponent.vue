@@ -18,7 +18,7 @@ export default {
       buttons: [
         {
           click(invite) {
-            window.open(invite.inviteDirect, "scrypted-invite");
+            window.open(invite.invite, "scrypted-invite");
           },
           title: "Notify This Device"
         }
