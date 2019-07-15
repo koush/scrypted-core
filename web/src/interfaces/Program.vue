@@ -1,7 +1,8 @@
 <template>
-    <div class="form-group col-2">
-        <button v-if='device' type="button" class='btn btn-success' @click='onClick'>Run Program</button>
-    </div>
+    <span>
+          <v-btn text color="primary" @click="onClick">Login</v-btn>
+        <v-btn v-if='device' text color="green" @click='run'>Run Program</v-btn>
+    </span>
 </template>
 
 <script>
@@ -9,17 +10,14 @@ import RPCInterface from './RPCInterface.vue'
 
 export default {
     mixins: [RPCInterface],
-    mounted: function() {
-        // this is an implicit command, so immediately trigger the change.
-        if (!this.device) {
-            this.onClick();
-        }
-    },
     methods: {
-        onClick: function() {
+        onChange() {
+            this.run();
+        },
+        run: function() {
             this.rpc({
                 varargs: true,
-            }).runAsync();
+            }).run();
         },
     }
 };

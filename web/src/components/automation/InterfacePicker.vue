@@ -45,6 +45,10 @@ import StartStop from "../../interfaces/StartStop.vue";
 import Dock from "../../interfaces/Dock.vue";
 import Pause from "../../interfaces/Pause.vue";
 import Scene from "../../interfaces/Scene.vue";
+import Program from "../../interfaces/Program.vue";
+import ColorSettingRgb from "../../interfaces/ColorSettingRgb.vue";
+import ColorSettingTemperature from "../../interfaces/ColorSettingTemperature.vue";
+import Brightness from "../../interfaces/Brightness.vue";
 
 import Select2 from "../../common/Select2.vue";
 function unassigned() {
@@ -80,14 +84,18 @@ export default {
 
     EventListener,
     OnOff,
+    Brightness,
     Lock,
     Notifier,
     SoftwareUpdate,
     ColorSettingHsv,
+    ColorSettingRgb,
+    ColorSettingTemperature,
     StartStop,
     Dock,
     Pause,
     Scene,
+    Program,
 
     Select2
   },

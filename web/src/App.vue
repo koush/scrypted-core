@@ -481,10 +481,10 @@ export default {
         password: this.password
       };
       if (this.changePassword || this.$store.state.hasLogin === false) {
-        if (this.password !== this.changePassword) {
+        if (this.password !== this.confirmPassword) {
           return;
         }
-        body.changePassword = this.changePassword;
+        body.confirm_password = this.confirmPassword;
       }
 
       axios

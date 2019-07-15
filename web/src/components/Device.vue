@@ -249,14 +249,17 @@ const cardInterfaces = [
   ScryptedInterface.Settings
 ];
 
-const cardActionInterfaces = [ScryptedInterface.OauthClient, ScryptedInterface.HttpRequestHandler];
+const cardActionInterfaces = [
+  ScryptedInterface.OauthClient,
+  ScryptedInterface.HttpRequestHandler
+];
 
 const cardButtonInterfaces = [
   ScryptedInterface.Dock,
   ScryptedInterface.Pause,
   ScryptedInterface.StartStop,
   ScryptedInterface.Entry,
-  ScryptedInterface.Scene,
+  ScryptedInterface.Scene
 ];
 
 function filterInterfaces(interfaces) {
@@ -383,10 +386,13 @@ export default {
 
         this.loading = false;
 
-        if (this.systemDevice.interfaces.includes('Refresh')) {
-          this.systemDevice.listen('Refresh', (eventSource, eventData, eventDetails) => {
-            console.log(arguments);
-          })
+        if (this.systemDevice.interfaces.includes("Refresh")) {
+          this.systemDevice.listen(
+            "Refresh",
+            (eventSource, eventData, eventDetails) => {
+              console.log(arguments);
+            }
+          );
         }
       });
     },

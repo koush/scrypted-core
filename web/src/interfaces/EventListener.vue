@@ -1,12 +1,18 @@
 <template>
-    <div class='d-none'>
-    </div>
+  <div></div>
 </template>
 
 <script>
-import RPCInterface from './RPCInterface.vue'
+import RPCInterface from "./RPCInterface.vue";
 
 export default {
-    mixins: [RPCInterface],
+  mixins: [RPCInterface],
+  methods: {
+    onChange() {
+      this.rpc({
+        varargs: true
+      }).onEvent();
+    }
+  }
 };
 </script>

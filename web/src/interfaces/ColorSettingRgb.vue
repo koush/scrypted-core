@@ -44,14 +44,20 @@ export default {
     }, 500),
     onChange() {
       const { r, g, b } = this.getRgb();
+      if (
+        this.value.rgb &&
+        this.value.rgb.r == r &&
+        this.value.rgb.g == g &&
+        this.value.rgb.b == b
+      ) {
+        return;
+      }
+
       if (this.device) {
         if (
-          (this.lazyValue.rgb.r === 0 &&
-            this.lazyValue.rgb.g === 0 &&
-            this.lazyValue.rgb.b === 0) ||
-          (this.value.rgb && this.value.rgb.r == r &&
-            this.value.rgb.g == g &&
-            this.value.rgb.b == b)
+          this.lazyValue.rgb.r === 0 &&
+          this.lazyValue.rgb.g === 0 &&
+          this.lazyValue.rgb.b === 0
         ) {
           // there is no change event on this control, so watch to see if this
           // is a round trip value change from the parent component, and bail.
