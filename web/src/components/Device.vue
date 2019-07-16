@@ -323,6 +323,9 @@ export default {
       this.reload();
     }
   },
+  destroyed() {
+    this.cleanupListener();
+  },
   watch: {
     devices() {
       // console.log('device change detected.');
@@ -372,6 +375,12 @@ export default {
     onChange() {
       // console.log(JSON.stringify(this.device));
     },
+    cleanupListener() {
+      if (this.listener) {
+        this.listener.removeListener();
+        return;
+      }
+    },
     getMetadata(prop) {
       const metadata = this.$store.state.systemState[this.id].metadata;
       return metadata && metadata.value && metadata.value[prop];
@@ -396,7 +405,7 @@ export default {
         this.loading = false;
 
         if (this.systemDevice.interfaces.includes("Refresh")) {
-          this.systemDevice.listen("Refresh", () => {});
+          this.listener = this.systemDevice.listen("Refresh", () => {});
         }
       });
     },
