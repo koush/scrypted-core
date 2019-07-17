@@ -1,6 +1,29 @@
 <template>
-  <v-layout wrap>
-    <v-flex v-bind="stylesForBreakpoints" v-for="(roomColumn, index) in roomColumns" :key="index">
+  <v-layout>
+    <v-flex v-if="!roomColumns.length" xs12 md6 lg4>
+      <v-card raised class="header-card">
+        <v-card-title
+          class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        >No Devices Found</v-card-title>
+        <div class="header-card-spacer"></div>
+        <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="primary" dark text to="/component/script/install">
+            Install Plugins
+            <v-icon right color="primary">cloud_download</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-flex>
+
+    <v-flex
+      v-else
+      v-bind="stylesForBreakpoints"
+      v-for="(roomColumn, index) in roomColumns"
+      :key="index"
+    >
       <v-flex v-for="(room, roomIndex) in roomColumn" :key="room.name">
         <v-card raised class="header-card">
           <v-card-title
@@ -249,14 +272,19 @@ export default {
 
       Object.assign(ret, merged);
 
-      // single.types[type].length === 1 ? this.$store.state.systemState[single.types[type][0]].name.value : 
+      // single.types[type].length === 1 ? this.$store.state.systemState[single.types[type][0]].name.value :
 
       // massage the room types into array which is easier to use
       // sort by priority.
       Object.values(ret).forEach(room => {
         room.types = Object.entries(room.types)
           .map(([type, ids]) => ({
-            name: ids.length === 1 ? this.$store.state.systemState[ids[0]].name.value : room.type ? type : undefined,
+            name:
+              ids.length === 1
+                ? this.$store.state.systemState[ids[0]].name.value
+                : room.type
+                ? type
+                : undefined,
             type: room.type || type,
             ids
           }))

@@ -23,6 +23,11 @@ export default {
   components: {
     Grower,
   },
+  methods: {
+    createInputValue() {
+      return this.lazyValue.slice().filter(e => e.id != "unassigned");
+    }
+  },
   computed: {
     EventPicker() {
       return EventPicker;

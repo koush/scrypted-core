@@ -66,15 +66,15 @@ export default {
     Select2,
     Scheduler,
     Webhook,
-    FaceDetector,
+    FaceDetector
   },
   methods: {
     createLazyValue() {
       let selected =
-        (!this.value.id || this.value.id === "unassigned")
+        !this.value.id || this.value.id === "unassigned"
           ? unassigned()
           : this.events.find(e => e.id === this.value.id);
-      selected = cloneDeep(selected);
+      selected = cloneDeep(selected) || unassigned();
       const condition = this.value.condition;
       return {
         selected,
@@ -86,9 +86,9 @@ export default {
       return {
         condition: this.lazyValue.condition,
         id: this.lazyValue.selected.id,
-        model: this.lazyValue.model,
-      }
-    },
+        model: this.lazyValue.model
+      };
+    }
   }
 };
 </script>

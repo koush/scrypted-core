@@ -2,6 +2,10 @@
   <v-layout>
     <v-flex xs12 md6 lg4>
       <v-flex>
+        <v-btn color="primary" @click="goLegacy" outlined dark block>Legacy Management Console</v-btn>
+      </v-flex>
+
+      <v-flex>
         <form method="POST" action="/web/component/settings/backup">
           <v-btn color="green" type="submit" outlined dark block>Download Backup</v-btn>
         </form>
@@ -55,6 +59,9 @@ export default {
   },
   methods: {
     getComponentWebPath,
+    goLegacy() {
+      window.open("/web/dashboard");
+    },
     doRestart() {
       this.restartStatus = "Restarting...";
       axios.post(`${this.componentWebPath}/restart`);
@@ -64,17 +71,15 @@ export default {
     },
     doRestore() {
       let formData = new FormData();
-      formData.append('file', this.$refs.restoreInput.files[0]);
+      formData.append("file", this.$refs.restoreInput.files[0]);
       axios
         .post("/web/component/settings/restore", formData, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
         })
-        .then(function() {
-        })
-        .catch(function() {
-        });
+        .then(function() {})
+        .catch(function() {});
     }
   }
 };
