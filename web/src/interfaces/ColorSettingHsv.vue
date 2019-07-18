@@ -1,12 +1,6 @@
 <template>
   <v-layout align-center justify-center>
-    <v-color-picker
-      v-model="lazyValue.hsv"
-      mode="hsla"
-      class="ma-2"
-      show-swatches
-      @input="onChange"
-    ></v-color-picker>
+    <ColorPicker variant="persistent" v-bind="color" @input="onInputValue" />
   </v-layout>
 </template>
 
@@ -14,32 +8,58 @@
 import RPCInterface from "./RPCInterface.vue";
 import throttle from "lodash.throttle";
 import cloneDeep from "lodash.clonedeep";
+import ColorPicker from "@radial-color-picker/vue-color-picker";
 
 export default {
   mixins: [RPCInterface],
+  components: {
+    ColorPicker
+  },
   methods: {
-    createInputValue() {
-      var ret = cloneDeep(this.lazyValue);
-      delete ret.hsv.a;
-      return ret;
-    },
     createLazyValue() {
       var ret = cloneDeep(this.value);
-      ret.hsv = Object.assign({ a: 1 }, ret.hsv);
+      ret.hsv = Object.assign(
+        {
+          h: 360,
+          s: 1,
+          v: 1
+        },
+        {
+          h: this.value.hsv && this.value.hsv.h,
+        }
+      );
       return ret;
     },
     debounceSetHsv: throttle(function() {
       const { h, s, v } = this.lazyValue.hsv;
-      this.rpc().setHsv(h || 360, s || 1, v || 1);
+      this.rpc().setHsv(h, s, v);
     }, 500),
     onChange() {
       if (this.device) {
         this.debounceSetHsv();
         return;
       }
+
       const { h, s, v } = this.lazyValue.hsv;
-      this.rpc().setHsv(h || 360, s || 1, v || 1);
+      this.rpc().setHsv(h, s, v);
+    },
+    onInputValue(h) {
+      this.lazyValue.hsv.h = h;
+
+      this.onChange();
+    }
+  },
+  computed: {
+    color() {
+      return {
+        hue: this.lazyValue.hsv.h,
+        // saturation: 100,
+        // luminosity: 100,
+      }
     }
   }
 };
 </script>
+<style>
+@import "~@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css";
+</style>

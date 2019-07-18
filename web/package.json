@@ -13,6 +13,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.9.0",
     "@fortawesome/free-solid-svg-icons": "^5.9.0",
     "@fortawesome/vue-fontawesome": "^0.1.6",
+    "@radial-color-picker/vue-color-picker": "^2.3.0",
     "@scrypted/client": "0.0.3",
     "@scrypted/sdk": "0.0.38",
     "axios": "^0.19.0",
