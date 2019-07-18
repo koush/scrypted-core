@@ -1,6 +1,6 @@
 {
    "name": "@scrypted/core",
-   "version": "0.0.8",
+   "version": "0.0.9",
    "description": "Scrypted Core plugin. Provides the UI, websocket, and engine.io APIs.",
    "author": "Scrypted",
    "license": "Apache-2.0",
@@ -9,7 +9,6 @@
       "build": "NODE_ENV=production scrypted-webpack",
       "prepack": "npm run build",
       "asset": "rm -rf *.tgz && npm pack && mkdir -p dist/scrypted-core-pack && rm -rf dist/scrypted-core-pack/* && mv scrypted-core-*.tgz dist/scrypted-core-pack/scrypted-core.tgz",
-
       "prescrypted-vscode-launch": "scrypted-webpack",
       "scrypted-vscode-launch": "scrypted-deploy-debug",
       "scrypted-deploy-debug": "scrypted-deploy-debug",
