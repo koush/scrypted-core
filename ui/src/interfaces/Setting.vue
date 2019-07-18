@@ -16,14 +16,12 @@
       :items="lazyValue.choices"
       v-model="lazyValue.value"
       outlined
-      solo
-      flat
       :label="lazyValue.title"
       :hint="lazyValue.description"
       persistent-hint
     >
       <template v-slot:append>
-        <v-btn v-if="dirty" color="green" dark tile @click="save">
+        <v-btn v-if="dirty" color="green" dark tile @click="save"  class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
       </template>
@@ -32,8 +30,6 @@
       :readonly="lazyValue.readonly"
       v-else
       outlined
-      solo
-      flat
       v-model="lazyValue.value"
       :placeholder="lazyValue.placeholder"
       :label="lazyValue.title"
@@ -42,7 +38,7 @@
       :type="lazyValue.type === 'Password' ? 'password' : undefined"
     >
       <template v-slot:append>
-        <v-btn v-if="dirty" color="green" dark tile @click="save">
+        <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
       </template>
@@ -67,3 +63,8 @@ export default {
   }
 };
 </script>
+<style>
+.shift-up {
+  margin-top: -8px;
+}
+</style>
