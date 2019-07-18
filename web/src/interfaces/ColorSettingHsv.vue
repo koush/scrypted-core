@@ -1,6 +1,6 @@
 <template>
   <v-layout align-center justify-center>
-    <ColorPicker variant="persistent" v-bind="color" @input="onInputValue" />
+    <ColorPicker style="margin-bottom: 16px;" variant="persistent" v-bind="color" @input="onInputValue" />
   </v-layout>
 </template>
 
