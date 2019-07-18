@@ -15,6 +15,11 @@
           <v-btn v-on="on" text>{{$store.state.username}}</v-btn>
         </template>
         <v-list>
+                    <v-list-item class="font-weight-light" @click="reload">
+            <v-list-item-content>
+              <v-list-item-title>Reload</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-item class="font-weight-light" @click="logout">
             <v-list-item-content>
               <v-list-item-title>Logout</v-list-item-title>
@@ -466,6 +471,9 @@ export default {
   methods: {
     reconnect() {
       this.$connectScrypted().catch(e => (this.loginResult = e.toString()));
+    },
+    reload() {
+      window.location.reload();
     },
     logout() {
       axios.get("/logout").then(() => window.location.reload());
