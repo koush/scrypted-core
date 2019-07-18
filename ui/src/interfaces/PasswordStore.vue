@@ -6,7 +6,7 @@
           <Grower
             :componentProps="componentProps"
             addButton="Add Password"
-            v-model="lazyValue"
+            v-model="passwords"
             :component="PasswordEntry"
             :empty="{ key: '', value:''}"
             @input="onInput"
@@ -29,8 +29,13 @@ export default {
   data() {
     return {
       PasswordEntry,
-      lazyValue: []
+      passwords: []
     };
+  },
+  watch: {
+    value() {
+      this.refresh();
+    }
   },
   computed: {
     componentProps() {
@@ -41,7 +46,7 @@ export default {
   },
   methods: {
     async refresh() {
-      this.lazyValue = (await this.rpc().getPasswords()).map(
+      this.passwords = (await this.rpc().getPasswords()).map(
         (password, index) => ({
           key: index,
           value: password
