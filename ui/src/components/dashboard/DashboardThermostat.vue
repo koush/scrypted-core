@@ -18,6 +18,7 @@
 import { getDeviceViewPath } from "../helpers";
 import { ThermostatMode } from "@scrypted/sdk";
 import DashboardBase from "./DashboardBase";
+import colors from "vuetify/es5/util/colors";
 
 export default {
   props: ["type", "group", "deviceId"],
@@ -33,6 +34,8 @@ export default {
           return "fire-alt";
         case ThermostatMode.Cool:
           return "snowflake";
+        case ThermostatMode.Eco:
+          return "leaf";
       }
       return "thermometer-three-quarters";
     },
@@ -43,11 +46,13 @@ export default {
       }
 
       if (device.thermostatMode == ThermostatMode.Heat) {
-        return "orange";
+        return colors.orange.base;
       } else if (device.thermostatMode == ThermostatMode.Cool) {
-        return "blue";
+        return colors.blue.base;
+      } else if (device.thermostatMode == ThermostatMode.Eco) {
+        return colors.green.base;
       }
-      return "orange";
+      return colors.orange.base;
     },
     on: {
       get() {
