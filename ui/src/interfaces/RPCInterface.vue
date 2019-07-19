@@ -21,7 +21,7 @@ export default {
       }
 
       options = options || {};
-      const { varargs } = options;
+      const { varargs, append } = options;
       var vm = this;
       return new Proxy(
         {},
@@ -30,11 +30,19 @@ export default {
             return function() {
               var parameters = Array.prototype.slice.call(arguments);
               if (!vm.device) {
-                vm.lazyValue.rpc = {
-                  method,
-                  parameters,
-                  varargs
-                };
+                if (append) {
+                  vm.lazyValue.rpc.push({
+                    method,
+                    parameters,
+                    varargs
+                  });
+                } else {
+                  vm.lazyValue.rpc = {
+                    method,
+                    parameters,
+                    varargs
+                  };
+                }
                 vm.onInput();
                 return;
               }

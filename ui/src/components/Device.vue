@@ -230,6 +230,7 @@ import Entry from "../interfaces/Entry.vue";
 import HttpRequestHandler from "../interfaces/HttpRequestHandler.vue";
 import PasswordStore from "../interfaces/PasswordStore.vue";
 import Scene from "../interfaces/Scene.vue";
+import TemperatureSetting from "../interfaces/TemperatureSetting.vue";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -249,6 +250,7 @@ const cardInterfaces = [
   ScryptedInterface.ColorSettingRgb,
   ScryptedInterface.Camera,
   ScryptedInterface.VideoCamera,
+  ScryptedInterface.TemperatureSetting,
   ScryptedInterface.PasswordStore,
   ScryptedInterface.Settings
 ];
@@ -294,6 +296,7 @@ export default {
     PasswordStore,
     Settings,
     ColorSettingTemperature,
+    TemperatureSetting,
 
     Lock,
     OnOff,
