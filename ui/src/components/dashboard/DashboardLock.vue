@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import DashboardBase from "./DashboardBase.vue";
+import DashboardBase from "./DashboardBase";
 import {getDeviceViewPath} from "../helpers";
 
 export default {

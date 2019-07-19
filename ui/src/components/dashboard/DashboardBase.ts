@@ -1,5 +1,4 @@
-<script lang="ts">
-import { ScryptedDeviceType } from "@scrypted/sdk";
+import { ScryptedDeviceType, ScryptedDeviceBase } from "@scrypted/sdk";
 import { typeToIcon } from "../helpers";
 
 export default {
@@ -19,10 +18,12 @@ export default {
           return "Locks";
         case ScryptedDeviceType.Camera:
           return "Cameras";
+        case ScryptedDeviceType.Thermostat:
+          return "Thermostats";
       }
       return type;
     },
-    getDevice(id) {
+    getDevice(id): ScryptedDeviceBase {
       return this.$scrypted.systemManager.getDeviceById(id);
     },
     setOnOff(id, value) {
@@ -35,4 +36,3 @@ export default {
     }
   }
 };
-</script>

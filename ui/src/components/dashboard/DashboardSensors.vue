@@ -11,7 +11,7 @@
   </v-card-text>
 </template>
 <script lang="ts">
-import DashboardBase from "./DashboardBase.vue";
+import DashboardBase from "./DashboardBase";
 
 export default {
   props: ["type", "group"],

@@ -78,8 +78,9 @@ import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
 import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
 import DashboardLock from "./DashboardLock.vue";
+import DashboardThermostat from "./DashboardThermostat.vue";
 import DashboardSensors from "./DashboardSensors.vue";
-import DashboardBase from "./DashboardBase.vue";
+import DashboardBase from "./DashboardBase";
 import "../header-card.css";
 
 const validTypes = [];
@@ -102,6 +103,13 @@ const lock = {
 };
 lock[ScryptedInterface.Lock] = "Lock";
 validTypes[ScryptedDeviceType.Lock] = lock;
+
+const thermostat = {
+  priority: 20,
+  component: "DashboardThermostat"
+};
+thermostat[ScryptedInterface.TemperatureSetting] = "TemperatureSetting";
+validTypes[ScryptedDeviceType.Thermostat] = thermostat;
 
 const sensors = {
   priority: 10,
@@ -135,7 +143,8 @@ export default {
     DashboardToggle,
     DashboardCamera,
     DashboardLock,
-    DashboardSensors
+    DashboardSensors,
+    DashboardThermostat,
   },
   methods: {
     getColumnsForBreakpoint(bp) {

@@ -9,7 +9,7 @@
       :max="90"
       :min="0"
       v-model="range"
-      @input="setThermostatSetpointRange"
+      @change="setThermostatSetpointRange"
     ></v-range-slider>
     <v-slider
       color="purple"
@@ -19,14 +19,14 @@
       v-model="lazyValue.thermostatSetpoint"
       :max="90"
       :min="0"
-      @input="setThermostatSetpoint"
+      @change="setThermostatSetpoint"
     ></v-slider>
     <v-select
       outlined
       v-model="lazyValue.thermostatMode"
       :items="lazyValue.thermostatAvailableModes"
       label="Mode"
-      @input="onChangeMode"
+      @change="onChangeMode"
     ></v-select>
   </v-flex>
 </template>

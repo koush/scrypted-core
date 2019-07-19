@@ -18,7 +18,7 @@
 </template>
 <script lang="ts">
 import {getDeviceViewPath} from "../helpers";
-import DashboardBase from "./DashboardBase.vue";
+import DashboardBase from "./DashboardBase";
 export default {
   props: ["id", "type", "name", "light"],
   mixins: [DashboardBase],

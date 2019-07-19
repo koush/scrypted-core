@@ -60,7 +60,7 @@
   </v-list-item>
 </template>
 <script lang="ts">
-import DashboardBase from "./DashboardBase.vue";
+import DashboardBase from "./DashboardBase";
 import DashboardPopupToggle from "./DashboardPopupToggle.vue";
 import ClickOutside from "vue-click-outside";
 import VueSlider from "vue-slider-component";
