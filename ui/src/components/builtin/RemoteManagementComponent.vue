@@ -8,7 +8,9 @@
           >Remote Management</v-card-title>
           <div class="header-card-spacer"></div>
 
-          <v-card-text v-if="settings.loginEmail">Use your {{ settings.loginType }} log in to manage Scrypted from anywhere.</v-card-text>
+          <v-card-text
+            v-if="settings.loginEmail"
+          >Use your {{ settings.loginType }} log in to manage Scrypted from anywhere.</v-card-text>
           <v-card-text v-else>Log in with Google or Amazon to manage Scrypted from anywhere.</v-card-text>
           <v-card-text>Remote Management must be enabled for Google Home and Amazon Alexa integrations.</v-card-text>
           <v-card-text v-if="settings.loginEmail && settings.environment">
@@ -17,6 +19,17 @@
               :href="`https://${settings.environment}`"
             >{{ `https://${settings.environment}` }}</a>
           </v-card-text>
+          <v-form v-if="settings.loginEmail && settings.environment">
+            <v-flex>
+              <v-checkbox
+              v-model="requireLocalLogin"
+                label="Require Local Login"
+                persistent-hint
+                :hint="`Require a local sign in as well as a ${settings.loginType} sign in when logging in remotely.`"
+                @change="enable"
+              ></v-checkbox>
+            </v-flex>
+          </v-form>
 
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -35,6 +48,7 @@
   </v-layout>
 </template>
 <script>
+import Vue from 'vue';
 import axios from "axios";
 import qs from "query-string";
 import { getComponentWebPath } from "../helpers";
@@ -47,6 +61,14 @@ export default {
     };
   },
   computed: {
+    requireLocalLogin: {
+      get() {
+        return this.settings.requireLocalLogin !== 'false';
+      },
+      set(val) {
+        Vue.set(this.settings, 'requireLocalLogin', val.toString());
+      }
+    },
     componentWebPath() {
       return getComponentWebPath("remote");
     }
@@ -76,6 +98,7 @@ export default {
         .post(
           `${this.componentWebPath}/`,
           qs.stringify({
+            requireLocalLogin: this.settings.requireLocalLogin,
             environment: "home.scrypted.app"
           })
         )
