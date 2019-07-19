@@ -20,7 +20,7 @@
       :hint="lazyValue.description"
       persistent-hint
     >
-      <template v-slot:append>
+      <template v-slot:append-outer>
         <v-btn v-if="dirty" color="green" dark tile @click="save"  class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
@@ -37,7 +37,7 @@
       persistent-hint
       :type="lazyValue.type === 'Password' ? 'password' : undefined"
     >
-      <template v-slot:append>
+      <template v-slot:append-outer>
         <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
