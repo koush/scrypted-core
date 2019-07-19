@@ -1,4 +1,5 @@
 import axios from 'axios';
+import semver from 'semver';
 
 import { getComponentWebPath } from "../helpers";
 const componentPath = getComponentWebPath('script');
@@ -10,7 +11,7 @@ export async function checkUpdate(npmPackage, npmPackageVersion): Promise<string
         const data = response.data;
         if (data["dist-tags"]) {
             var latest = data["dist-tags"].latest;
-            if (latest != npmPackageVersion) {
+            if (semver.gt(latest, npmPackageVersion)) {
                 return latest;
             }
         }
