@@ -20,6 +20,7 @@
         <v-flex xs12 md8 lg6 xl4>
           <v-select
             xs3
+            reverse
             :items="clockTypes"
             solo
             item-value="id"
@@ -33,6 +34,7 @@
 </template>
 <script>
 import RPCInterface from "../RPCInterface.vue";
+import cloneDeep from "lodash.clonedeep";
 const days = [
   "sunday",
   "monday",
@@ -108,6 +110,12 @@ export default {
     toggleDay: function(day) {
       this.lazyValue[day] = !this.lazyValue[day];
       this.onChange();
+    },
+    createLazyValue() {
+      var ret = cloneDeep(this.value);
+      ret.hour = ret.hour || 0;
+      ret.minute = ret.minute || 0;
+      return ret;
     },
     onChange: function() {
       const schedule = {

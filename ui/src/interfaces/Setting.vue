@@ -21,7 +21,22 @@
       persistent-hint
     >
       <template v-slot:append-outer>
-        <v-btn v-if="dirty" color="green" dark tile @click="save"  class="shift-up">
+        <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
+          <v-icon>check</v-icon>
+        </v-btn>
+      </template>
+    </v-select>
+    <v-select
+      v-else-if="lazyValue.type && lazyValue.type.startsWith('device')"
+      v-model="lazyValue.value"
+      :items="devices"
+      outlined
+      :label="lazyValue.title"
+      :hint="lazyValue.description"
+      persistent-hint
+    >
+      <template v-slot:append-outer>
+        <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
       </template>
@@ -53,6 +68,28 @@ export default {
   computed: {
     dirty() {
       return this.lazyValue.value !== this.value.value;
+    },
+    devices() {
+      var expression;
+      try {
+        expression = this.lazyValue.type.split(":")[1];
+        // var interfaces = this.$scrypted.systemManager.getDeviceById(id).interfaces.map(iface => `var ${iface} = true`);
+      } catch (e) {
+        expression = 'true;';
+      }
+      return this.$store.state.scrypted.devices.map(id => this.$scrypted.systemManager.getDeviceById(id))
+      .filter(device => {
+        try {
+          return eval(`(function() { var interfaces = ${JSON.stringify(device.interfaces)}; var type='${device.type}'; return ${expression} })`)();
+        }
+        catch (e) {
+          return true;
+        }
+      })
+      .map(device => ({
+        id: device.id,
+        text: device.name,
+      }));
     }
   },
   methods: {

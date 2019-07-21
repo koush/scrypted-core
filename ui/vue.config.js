@@ -1,4 +1,4 @@
-const scryptedServer = 'https://192.168.2.27:9443';
+const scryptedServer = 'https://192.168.2.44:9443';
 const path = require('path');
 
 const proxyOpts = {
@@ -48,7 +48,7 @@ module.exports = {
   chainWebpack: config => config.resolve.symlinks(false),
   runtimeCompiler: false,
   devServer: {
-    // port: 3000,
+    port: 8081,
     // disableHostCheck: true,
     // public: 'home.koushikdutta.com',
     https: true,

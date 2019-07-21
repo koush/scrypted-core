@@ -75,7 +75,7 @@ export default {
       if (!ret.length) {
         return "Adjust the sliders to set the timer.";
       }
-      return "Timer will trigger after: " + ret.join(", ");
+      return "Timer: " + ret.join(", ");
     }
   }
 };
