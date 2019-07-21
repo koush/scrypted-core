@@ -150,7 +150,7 @@
     <v-content elevation="-2">
       <v-container grid-list-xs grid-list-xl grid-list-md grid-list-sm grid-list-lg fluid>
         <v-fade-transition mode="out-in">
-          <router-view v-if="!$store.state.isConnecting"></router-view>
+          <router-view v-if="$store.state.isConnected"></router-view>
         </v-fade-transition>
       </v-container>
     </v-content>

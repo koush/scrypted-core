@@ -126,10 +126,20 @@
     </v-card>
   </v-flex>
 </template>
-<script lang="ts">
+<script>
 import InterfacesPicker from "./InterfacesPicker.vue";
 import EventsPicker from "./EventsPicker.vue";
 import cloneDeep from "lodash.clonedeep";
+import { ScryptedInterface } from "@scrypted/sdk";
+
+const includeContextual = [
+  ScryptedInterface.OnOff,
+  ScryptedInterface.Lock,
+  ScryptedInterface.StartStop,
+  ScryptedInterface.Scene,
+  ScryptedInterface.Entry,
+  ScryptedInterface.TemperatureSetting
+];
 
 export default {
   data() {
@@ -178,7 +188,9 @@ export default {
           if (!trigger || !trigger.component) continue;
           triggeredEvents[trigger.component] = trigger.component;
         }
-        var contextual = Object.values(triggeredEvents).map(component => ({
+        var contextual = Object.values(triggeredEvents)
+        .filter(component => includeContextual.includes(component))
+        .map(component => ({
           component: component,
           id: `AutomationTrigger#${component}`,
           properties: {},

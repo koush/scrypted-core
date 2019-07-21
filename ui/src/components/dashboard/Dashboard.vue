@@ -1,21 +1,23 @@
 <template>
   <v-layout>
     <v-flex v-if="!roomColumns.length" xs12 md6 lg4>
-      <v-card raised class="header-card">
-        <v-card-title
-          class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-        >No Devices Found</v-card-title>
-        <div class="header-card-spacer"></div>
-        <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
+      <v-flex>
+        <v-card raised class="header-card">
+          <v-card-title
+            class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+          >No Devices Found</v-card-title>
+          <div class="header-card-spacer"></div>
+          <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
 
-          <v-btn color="primary" dark text to="/component/script/install">
-            Install Plugins
-            <v-icon right color="primary">cloud_download</v-icon>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+            <v-btn color="primary" dark text to="/component/script/install">
+              Install Plugins
+              <v-icon right color="primary">cloud_download</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
     </v-flex>
 
     <v-flex
@@ -144,7 +146,7 @@ export default {
     DashboardCamera,
     DashboardLock,
     DashboardSensors,
-    DashboardThermostat,
+    DashboardThermostat
   },
   methods: {
     getColumnsForBreakpoint(bp) {

@@ -6,6 +6,7 @@
 </template>
 <script>
 import RPCInterface from "../RPCInterface.vue";
+import cloneDeep from "lodash.clonedeep";
 
 function makeid(length) {
   var result = "";
@@ -30,8 +31,15 @@ export default {
     }
   },
   methods: {
+    createLazyValue() {
+      var ret = cloneDeep(this.value);
+      if (!ret.webhookId) {
+        ret.rpc = undefined;
+        ret.webhookId = makeid(16);
+      }
+      return ret;
+    },
     onChange() {
-      this.lazyValue.webhookId = this.lazyValue.webhookId || makeid(16);
       this.rpc().listenWebhook(this.lazyValue.webhookId);
     }
   }
