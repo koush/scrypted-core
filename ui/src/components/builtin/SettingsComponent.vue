@@ -2,6 +2,17 @@
   <v-layout>
     <v-flex xs12 md6 lg4>
       <v-flex>
+        <v-text-field
+          ref="locationAutocomplete"
+          autocomplete="off"
+          outlined
+          label="Set Location (Maps, Timezone)"
+          placeholder="Set Location"
+          v-model="location"
+        ></v-text-field>
+      </v-flex>
+
+      <v-flex>
         <v-btn color="primary" @click="goLegacy" outlined dark block>Legacy Management Console</v-btn>
       </v-flex>
 
@@ -44,12 +55,15 @@
 <script>
 import { getComponentWebPath } from "../helpers";
 import axios from "axios";
+import throttle from "lodash.throttle";
+import qs from "query-string";
 
 export default {
   data() {
     return {
       restart: false,
-      restartStatus: undefined
+      restartStatus: undefined,
+      location: ""
     };
   },
   computed: {
@@ -57,8 +71,43 @@ export default {
       return getComponentWebPath("settings");
     }
   },
+  mounted() {
+    let element = this.$refs.locationAutocomplete.$el;
+    element = element.querySelector("input");
+    const google = window.google;
+    var autocomplete = new google.maps.places.Autocomplete(element, {
+      types: ["geocode"]
+    });
+    autocomplete.addListener("place_changed", () => {
+      var place = autocomplete.getPlace();
+      this.location = place.formatted_address;
+      this.debounceUpdate(
+        place.geometry.location.lat().toString(),
+        place.geometry.location.lng().toString()
+      );
+    });
+
+    axios
+      .get(`${this.getComponentWebPath("automation")}/settings`)
+      .then(response => {
+        this.location = response.data.location;
+      });
+  },
   methods: {
     getComponentWebPath,
+    debounceUpdate: throttle(function(latitude, longitude) {
+      axios.post(
+        `${this.getComponentWebPath("automation")}/`,
+        qs.stringify({
+          location: this.location,
+          latitude,
+          longitude
+        }),
+        {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      );
+    }, 500),
     goLegacy() {
       window.open("/web/dashboard");
     },
