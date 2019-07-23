@@ -75,8 +75,9 @@
     </v-flex>
   </v-layout>
 </template>
-<script lang="ts">
+<script>
 import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
+import DashboardMap from "./DashboardMap.vue";
 import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
 import DashboardLock from "./DashboardLock.vue";
@@ -134,6 +135,15 @@ videoCamera[ScryptedInterface.Camera] = "Camera";
 videoCamera[ScryptedInterface.VideoCamera] = "VideoCamera";
 validTypes[ScryptedDeviceType.Camera] = videoCamera;
 
+const position = {
+  priority: 0,
+  component: "DashboardMap",
+  height: 4,
+  collapse: true,
+};
+position[ScryptedInterface.PositionSensor] = "PositionSensor";
+validTypes["Map"] = position;
+
 const randoms = [];
 for (var rrr = 0; rrr < 100; rrr++) {
   randoms.push(Math.round(Math.random() * 10000));
@@ -142,6 +152,7 @@ for (var rrr = 0; rrr < 100; rrr++) {
 export default {
   mixins: [DashboardBase],
   components: {
+    DashboardMap,
     DashboardToggle,
     DashboardCamera,
     DashboardLock,
@@ -166,7 +177,7 @@ export default {
     },
     heightForTypes(d) {
       return d.types.reduce((cur, devices) => {
-        const validType = this.validTypes[devices.type];
+        const validType = validTypes[devices.type];
         const ret =
           cur +
           (validType.height || 1) *
@@ -222,8 +233,6 @@ export default {
       return validTypes;
     },
     rooms() {
-      var validTypes = this.validTypes;
-
       var ret = {};
       this.$store.state.scrypted.devices
         .map(id => [id, this.$store.state.systemState[id]])
@@ -305,6 +314,31 @@ export default {
       });
 
       ret = Object.values(ret);
+
+      var map = {
+        name: "Map",
+        types: [
+          {
+            name: "PositionSensor",
+            ids: [],
+            type: "Map"
+          }
+        ]
+      };
+      this.$store.state.scrypted.devices
+        .map(id => [id, this.$store.state.systemState[id]])
+        .filter(([, device]) => {
+          return device.interfaces.value.includes(
+            ScryptedInterface.PositionSensor
+          );
+        })
+        .forEach(([id,]) => {
+          map.types[0].ids.push(id);
+        });
+
+      if (map.types[0].ids.length) {
+        ret.push(map);
+      }
 
       return ret;
     }
