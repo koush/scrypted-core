@@ -2,8 +2,8 @@
   <div>
     <v-checkbox
       :readonly="lazyValue.readonly"
-      v-if="lazyValue.type === 'Boolean'"
-      v-model="lazyValue.value"
+      v-if="lazyValue.type && lazyValue.type.toLowerCase() === 'boolean'"
+      v-model="booleanValue"
       :label="lazyValue.title"
       :hint="lazyValue.description"
       :placeholder="lazyValue.placeholder"
@@ -27,7 +27,7 @@
       </template>
     </v-select>
     <v-select
-      v-else-if="lazyValue.type && lazyValue.type.startsWith('device')"
+      v-else-if="lazyValue.type && lazyValue.type.toLowerCase().startsWith('device')"
       v-model="lazyValue.value"
       :items="devices"
       outlined
@@ -50,7 +50,7 @@
       :label="lazyValue.title"
       :hint="lazyValue.description"
       persistent-hint
-      :type="lazyValue.type === 'Password' ? 'password' : undefined"
+      :type="lazyValue.type && lazyValue.type.toLowerCase() === 'password' ? 'password' : undefined"
     >
       <template v-slot:append-outer>
         <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
@@ -62,10 +62,19 @@
 </template>
 <script>
 import RPCInterface from "./RPCInterface.vue";
+import cloneDeep from "lodash.clonedeep";
 
 export default {
   mixins: [RPCInterface],
   computed: {
+    booleanValue: {
+      get() {
+        return this.lazyValue.value && this.lazyValue.value.toLowerCase() === 'true';
+      },
+      set(val) {
+        this.lazyValue.value = val.toString();
+      }
+    },
     dirty() {
       return this.lazyValue.value !== this.value.value;
     },
@@ -75,21 +84,25 @@ export default {
         expression = this.lazyValue.type.split(":")[1];
         // var interfaces = this.$scrypted.systemManager.getDeviceById(id).interfaces.map(iface => `var ${iface} = true`);
       } catch (e) {
-        expression = 'true;';
+        expression = "true;";
       }
-      return this.$store.state.scrypted.devices.map(id => this.$scrypted.systemManager.getDeviceById(id))
-      .filter(device => {
-        try {
-          return eval(`(function() { var interfaces = ${JSON.stringify(device.interfaces)}; var type='${device.type}'; return ${expression} })`)();
-        }
-        catch (e) {
-          return true;
-        }
-      })
-      .map(device => ({
-        id: device.id,
-        text: device.name,
-      }));
+      return this.$store.state.scrypted.devices
+        .map(id => this.$scrypted.systemManager.getDeviceById(id))
+        .filter(device => {
+          try {
+            return eval(
+              `(function() { var interfaces = ${JSON.stringify(
+                device.interfaces
+              )}; var type='${device.type}'; return ${expression} })`
+            )();
+          } catch (e) {
+            return true;
+          }
+        })
+        .map(device => ({
+          id: device.id,
+          text: device.name
+        }));
     }
   },
   methods: {
