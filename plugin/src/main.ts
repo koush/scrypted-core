@@ -116,7 +116,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 
     removeAlerts(ids: string[]) {
-        if (!ids) {
+        if (!ids || !ids.length) {
             __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").removeAll();
         }
         else {

@@ -64,7 +64,7 @@ export function removeAlert(alert) {
     });
 }
 
-export function hasPhysicalLocation(type: ScryptedDeviceType) {
+export function hasFixedPhysicalLocation(type: ScryptedDeviceType, interfaces?: ScryptedInterface[]) {
     switch (type) {
         case ScryptedDeviceType.Light:
         case ScryptedDeviceType.Outlet:
@@ -78,14 +78,14 @@ export function hasPhysicalLocation(type: ScryptedDeviceType) {
         case ScryptedDeviceType.Thermostat:
         case ScryptedDeviceType.Vacuum:
         case ScryptedDeviceType.Garage:
-        case ScryptedDeviceType.Sensor:
             return true;
+        case ScryptedDeviceType.Sensor:
+            return interfaces && !interfaces.includes(ScryptedInterface.PositionSensor);
     }
     return false;
 }
 
 const inference = {
-
 }
 
 function addInference(iface: ScryptedInterface, ...types: ScryptedDeviceType[]) {
@@ -124,7 +124,7 @@ export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, inter
 
 
 export function isSyncable(type: ScryptedDeviceType) {
-    if (hasPhysicalLocation(type)) {
+    if (hasFixedPhysicalLocation(type)) {
         return true;
     }
     switch (type) {

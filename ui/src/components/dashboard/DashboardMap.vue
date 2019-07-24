@@ -23,26 +23,38 @@ import DashboardBase from "./DashboardBase";
 export default {
   mixins: [DashboardBase],
   props: ["value"],
+  watch: {
+    center() {
+      this.updateBounds();
+    }
+  },
   mounted() {
-    this.$refs.mapRef.$mapPromise.then(map => {
-      var markers = this.markers; //some array
-      var google = window.google;
-      var bounds = new google.maps.LatLngBounds();
-      var fits = true;
-      for (var i = 0; i < markers.length; i++) {
-        let bounds = map.getBounds();
-        if (bounds && !bounds.contains(markers[i])) {
-          bounds.extend(markers[i]);
-          fits = false;
+    this.updateBounds();
+  },
+  methods: {
+    updateBounds() {
+      this.$refs.mapRef.$mapPromise.then(map => {
+        var markers = this.markers; //some array
+        var google = window.google;
+        var bounds = map.getBounds();
+        if (!bounds) {
+          bounds = new google.maps.LatLngBounds();
         }
-      }
-      if (!fits) {
-        map.fitBounds(bounds);
-      }
-      if (!map.getZoom() || map.getZoom() > 16) {
-        map.setZoom(16);
-      }
-    });
+        var fits = true;
+        for (var i = 0; i < markers.length; i++) {
+          if (!bounds.contains(markers[i])) {
+            bounds.extend(markers[i]);
+            fits = false;
+          }
+        }
+        if (!fits) {
+          map.fitBounds(bounds);
+        }
+        if (!map.getZoom() || map.getZoom() > 16) {
+          map.setZoom(16);
+        }
+      });
+    }
   },
   computed: {
     center() {

@@ -76,7 +76,7 @@
                         v-model="type"
                       ></v-select>
                       <v-combobox
-                        v-if="hasPhysicalLocation(type)"
+                        v-if="hasFixedPhysicalLocation(type, deviceState.interfaces)"
                         :items="existingRooms"
                         outlined
                         v-model="room"
@@ -204,7 +204,7 @@ import {
   getComponentWebPath,
   getDeviceViewPath,
   removeAlert,
-  hasPhysicalLocation
+  hasFixedPhysicalLocation
 } from "./helpers";
 import { ScryptedInterface } from "@scrypted/sdk";
 import Notifier from "../interfaces/Notifier.vue";
@@ -231,6 +231,7 @@ import HttpRequestHandler from "../interfaces/HttpRequestHandler.vue";
 import PasswordStore from "../interfaces/PasswordStore.vue";
 import Scene from "../interfaces/Scene.vue";
 import TemperatureSetting from "../interfaces/TemperatureSetting.vue";
+import PositionSensor from "../interfaces/sensors/PositionSensor.vue";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -252,7 +253,8 @@ const cardInterfaces = [
   ScryptedInterface.VideoCamera,
   ScryptedInterface.TemperatureSetting,
   ScryptedInterface.PasswordStore,
-  ScryptedInterface.Settings
+  ScryptedInterface.PositionSensor,
+  ScryptedInterface.Settings,
 ];
 
 const cardActionInterfaces = [
@@ -297,6 +299,7 @@ export default {
     Settings,
     ColorSettingTemperature,
     TemperatureSetting,
+    PositionSensor,
 
     Lock,
     OnOff,
@@ -343,7 +346,7 @@ export default {
     }
   },
   methods: {
-    hasPhysicalLocation,
+    hasFixedPhysicalLocation,
     getComponentWebPath,
     removeAlert,
     initialState() {
