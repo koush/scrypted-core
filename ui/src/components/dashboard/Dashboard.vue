@@ -86,11 +86,13 @@ import DashboardSensors from "./DashboardSensors.vue";
 import DashboardBase from "./DashboardBase";
 import "../header-card.css";
 
+import {getDefaultDashboard} from "./layout";
+
 const validTypes = [];
 
 const toggles = {
   priority: 30,
-  component: "DashboardToggle",
+  component: DashboardToggle,
   collapse: true
 };
 toggles[ScryptedInterface.OnOff] = "Toggle";
@@ -138,7 +140,7 @@ validTypes[ScryptedDeviceType.Camera] = videoCamera;
 const position = {
   priority: 0,
   component: "DashboardMap",
-  height: 4,
+  height: 6,
   collapse: true,
 };
 position[ScryptedInterface.PositionSensor] = "PositionSensor";

@@ -15,7 +15,7 @@
           <v-btn v-on="on" text>{{$store.state.username}}</v-btn>
         </template>
         <v-list>
-                    <v-list-item class="font-weight-light" @click="reload">
+          <v-list-item class="font-weight-light" @click="reload">
             <v-list-item-content>
               <v-list-item-title>Reload</v-list-item-title>
             </v-list-item-content>
@@ -160,271 +160,14 @@
 <script>
 import qs from "query-string";
 import axios from "axios";
-import Device from "./components/Device.vue";
-import AggregateComponent from "./components/aggregate/AggregateComponent.vue";
-import AutomationComponent from "./components/automation/AutomationComponent.vue";
-import WebPushComponent from "./components/webpush/WebPushComponent.vue";
-import ScriptComponent from "./components/script/ScriptComponent.vue";
-import InstallPlugin from "./components/script/InstallPlugin.vue";
-import RemoteManagementComponent from "./components/builtin/RemoteManagementComponent.vue";
-import LogComponent from "./components/builtin/LogComponent.vue";
-import GoogleHomeComponent from "./components/builtin/GoogleHomeComponent.vue";
-import AlexaComponent from "./components/builtin/AlexaComponent.vue";
-import HomeKitComponent from "./components/builtin/HomeKitComponent.vue";
-import MailComponent from "./components/mail/MailComponent.vue";
-import SettingsComponent from "./components/builtin/SettingsComponent.vue";
-import Zwave from "./components/zwave/Zwave.vue";
-import Dashboard from "./components/dashboard/Dashboard.vue";
-import Drawer from "./components/Drawer.vue";
-import Devices from "./components/Devices.vue";
-import VueRouter from "vue-router";
-import client from "@scrypted/client";
-import { removeAlert } from "./components/helpers";
 
-let router = new VueRouter({
-  routes: [
-    {
-      path: "/device",
-      component: Devices
-    },
-    {
-      path: "/",
-      component: Dashboard
-    },
-    {
-      path: "/component/automation",
-      component: AutomationComponent
-    },
-    {
-      path: "/component/script",
-      component: ScriptComponent
-    },
-    {
-      path: "/component/script/install",
-      component: InstallPlugin
-    },
-    {
-      path: "/component/aggregate",
-      component: AggregateComponent
-    },
-    {
-      path: "/component/webpush",
-      component: WebPushComponent
-    },
-    {
-      path: "/component/remote",
-      component: RemoteManagementComponent
-    },
-    {
-      path: "/component/home",
-      component: GoogleHomeComponent
-    },
-    {
-      path: "/component/homekit",
-      component: HomeKitComponent
-    },
-    {
-      path: "/component/alexa",
-      component: AlexaComponent
-    },
-    {
-      path: "/component/settings",
-      component: SettingsComponent
-    },
-    {
-      path: "/component/mail",
-      component: MailComponent
-    },
-    {
-      path: "/component/zwave",
-      component: Zwave,
-      children: Zwave.childRoutes
-    },
-    {
-      path: "/component/log/:path*",
-      component: LogComponent
-    },
-    {
-      path: "/device/:id",
-      component: Device
-    }
-  ]
-});
+import Drawer from "./components/Drawer.vue";
+import { removeAlert } from "./components/helpers";
+import router from "./router";
 
 import Vue from "vue";
-import Vuex from "vuex";
-Vue.use(Vuex);
-
-const store = new Vuex.Store({
-  state: {
-    systemState: {},
-    scrypted: {
-      devices: [],
-      alerts: []
-    },
-    username: undefined,
-    isLoggedIn: undefined,
-    isLoggedIntoCloud: undefined,
-    isConnected: undefined,
-    hasLogin: undefined
-  },
-  mutations: {
-    setSystemState: function(store, systemState) {
-      store.systemState = systemState;
-    },
-    setDevices(store, devices) {
-      store.scrypted.devices = devices;
-    },
-    setAlerts(store, alerts) {
-      store.scrypted.alerts = alerts;
-    },
-    removeAlert(store, alertId) {
-      store.scrypted.alerts = store.scrypted.alerts.filter(
-        alert => alert.id != alertId
-      );
-    },
-    addAlert(store, alert) {
-      const alerts = store.scrypted.alerts.filter(
-        existing => existing.id != alert.id
-      );
-      alerts.push(alert);
-      store.scrypted.alerts = alerts;
-    },
-    addDevice(store, id) {
-      var devices = store.scrypted.devices.filter(device => device !== id);
-      devices.push(id);
-      store.scrypted.devices = devices;
-    },
-    removeDevice(store, id) {
-      store.scrypted.devices = store.scrypted.devices.filter(
-        device => device !== id
-      );
-    },
-    setIsLoggedIntoCloud(store, isLoggedIntoCloud) {
-      store.isLoggedIntoCloud = isLoggedIntoCloud;
-    },
-    setIsLoggedIn(store, isLoggedIn) {
-      store.isLoggedIn = isLoggedIn;
-    },
-    setUsername(store, username) {
-      store.username = username;
-    },
-    setIsConnected(store, isConnected) {
-      store.isConnected = isConnected;
-    },
-    setHasLogin(store, hasLogin) {
-      store.hasLogin = hasLogin;
-    }
-  }
-});
-
-function hasValue(state, property) {
-  return state[property] && state[property].value;
-}
-function isValidDevice(id) {
-  const state = store.state.systemState[id];
-  for (var property of [
-    "id",
-    "name",
-    "interfaces",
-    "component",
-    "events",
-    "metadata",
-    "type"
-  ]) {
-    if (!hasValue(state, property)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-Vue.use(Vue => {
-  Vue.prototype.$connectScrypted = () => {
-    const clientPromise = client.connect(null);
-
-    store.commit("setHasLogin", undefined);
-    store.commit("setIsLoggedIn", undefined);
-    store.commit("setUsername", undefined);
-    store.commit("setIsConnected", undefined);
-    store.commit("setIsLoggedIntoCloud", undefined);
-
-    return axios
-      .get("/login", {
-        headers: {
-          Accept: "application/json"
-        }
-      })
-      .then(response => {
-        if (!response.data.expiration) {
-          if (response.data.redirect) {
-            store.commit("setIsLoggedIntoCloud", false);
-          }
-          store.commit("setHasLogin", response.data.hasLogin);
-          throw new Error("Login failed.");
-        }
-        store.commit("setHasLogin", true);
-        store.commit("setIsLoggedIn", true);
-        store.commit("setUsername", response.data.username);
-        setTimeout(() => {
-          store.commit("setIsLoggedIn", false);
-        }, response.data.expiration);
-        return clientPromise;
-      })
-      .catch(e => {
-        store.commit("setIsLoggedIn", false);
-        throw e;
-      })
-      .then(scrypted => {
-        Vue.prototype.$scrypted = scrypted;
-        // system state is returned as a reference and updated by the scrypted client, so passing it to vue allows direct model updates.
-        // this is not the same behavior as on android. fix?
-        const systemState = scrypted.systemManager.getSystemState();
-        store.commit("setSystemState", systemState);
-        store.commit("setDevices", Object.keys(systemState));
-        store.commit("setIsConnected", true);
-
-        scrypted.onClose = () => {
-          store.commit("setIsConnected", false);
-        };
-
-        scrypted.systemManager.listen(
-          (eventSource, eventDetails, eventData) => {
-            if (eventSource) {
-              const id = eventSource.id;
-
-              if (eventDetails.property === "id" && !eventData) {
-                Vue.delete(systemState, id);
-                store.commit("removeDevice", id);
-                return;
-              }
-
-              // ensure the property is reactive
-              if (eventDetails.eventInterface == "ScryptedDevice") {
-                Vue.set(systemState, id, systemState[id]);
-                if (isValidDevice(id)) {
-                  store.commit("addDevice", id);
-                }
-                return;
-              }
-            } else if (eventDetails.eventInterface == "Logger") {
-              store.commit("addAlert", eventData);
-            }
-          }
-        );
-
-        scrypted.rpc("alerts").then(alerts => {
-          store.commit("setAlerts", alerts);
-        });
-      })
-      .catch(e => {
-        store.commit("setIsConnected", false);
-        throw e;
-      });
-  };
-
-  Vue.prototype.$connectScrypted();
-});
+import store from './store';
+import "./client";
 
 const PushConnectionManager = window["pushconnect"].PushConnectionManager;
 var pushConnectionPromise;
@@ -516,7 +259,7 @@ export default {
         });
     },
     clearAlerts() {
-      this.$scrypted.rpc("removeAlerts").then(() => {
+      this.$scrypted.rpc("this", "removeAlerts").then(() => {
         this.$store.commit("setAlerts", []);
       });
     },

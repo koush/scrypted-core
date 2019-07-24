@@ -46,7 +46,7 @@ module.exports = {
     },
   },
   chainWebpack: config => config.resolve.symlinks(false),
-  runtimeCompiler: false,
+  runtimeCompiler: true,
   devServer: {
     port: 8081,
     // disableHostCheck: true,

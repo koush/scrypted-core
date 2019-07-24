@@ -30,7 +30,7 @@ class ScryptedDeviceImpl implements ProxyHandler<object>, ScryptedDevice {
         }
         var listenerId = Math.random().toString();
         this.session.listeners[listenerId] = callback;
-        
+
         this.session.send({
             type: 'listen',
             listenerId,
@@ -127,7 +127,7 @@ class ScryptedDeviceImpl implements ProxyHandler<object>, ScryptedDevice {
                 method: target(),
             };
         }
-        return this.session.rpc({
+        return this.session.sendMessageForResult({
             type: 'method',
             id: this.id,
             method: target(),
@@ -138,6 +138,7 @@ class ScryptedDeviceImpl implements ProxyHandler<object>, ScryptedDevice {
 
 class SystemManagerImpl implements SystemManager {
     session: ClientSession;
+    listeners: any = {};
 
     constructor(session: ClientSession) {
         this.session = session;
@@ -152,7 +153,7 @@ class SystemManagerImpl implements SystemManager {
         return new Proxy(device, device);
     }
     getDeviceByName(name: string): ScryptedDevice | null {
-        return null;
+        throw new Error("Method not implemented.");
     }
     getDeviceState(id: string): object {
         throw new Error("Method not implemented.");
@@ -163,12 +164,11 @@ class SystemManagerImpl implements SystemManager {
         return this.session.systemState;
     }
     systemCall(method: string): Promise<any> {
-        return this.session.rpc({
+        return this.session.sendMessageForResult({
             type: 'system',
             method: method,
         });
     }
-    listeners: any = {};
     listen(callback: (eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: object) => void): EventListenerRegister {
         var listenerId = Math.random().toString();
         this.listeners[listenerId] = callback;
@@ -220,16 +220,16 @@ class MediaManagerImpl implements MediaManager {
         this.session = session;
     }
     convertMediaObjectToBuffer(mediaSource: MediaObject, toMimeType: string): Promise<Buffer> {
-        return this.session.rpc({
+        return this.session.sendMessageForResult({
             type: 'media',
             method: 'convertMediaObjectToBuffer',
             toMimeType,
             mediaSource,
         })
-        .then(base64 => Buffer.from(base64, 'base64'));
+            .then(base64 => Buffer.from(base64, 'base64'));
     }
     _convertMediaObjectToUri(method: string, mediaSource: MediaObject, toMimeType: string): Promise<string> {
-        return this.session.rpc({
+        return this.session.sendMessageForResult({
             type: 'media',
             method,
             toMimeType,
@@ -260,10 +260,43 @@ class MediaManagerImpl implements MediaManager {
     }
 }
 
+class RPCProxy implements ProxyHandler<object> {
+    session: ClientSession;
+    target: string;
+    properties: string[];
+    constructor(session: ClientSession, target: string, ...properties: string[]) {
+        this.session = session;
+        this.target = target;
+        this.properties = properties;
+    }
+
+    get?(target: any, property: PropertyKey, receiver: any): any {
+        if (this.properties.includes(property.toString())) {
+            return this.session.sendMessageForResult({
+                type: 'rpc',
+                target: this.target,
+                method: property,
+            });
+        }
+
+        return new Proxy(() => property, this);
+    }
+
+    apply?(target: any, thisArg: any, argArray?: any): any {
+        return this.session.sendMessageForResult({
+            type: 'rpc',
+            target: this.target,
+            method: target(),
+            args: argArray,
+        });
+    }
+}
+
 export interface ScryptedClientStatic extends ScryptedStatic {
     disconnect(): void;
-    rpc(method: string, ...args: any[]): Promise<any>;
+    rpc(target: string, method: string, args: any[]): Promise<any>;
     onClose?: Function;
+    userStorage: Storage,
 }
 
 class ClientSession {
@@ -282,7 +315,7 @@ class ClientSession {
         this.apiUrl = apiUrl;
     }
 
-    rpc(options: any): Promise<any> {
+    sendMessageForResult(options: any): Promise<any> {
         const resultId = Math.random().toString();
         this.send(Object.assign({
             resultId,
@@ -316,7 +349,7 @@ class ClientSession {
         }
         const { resultId, error, result } = message;
         this.resolvePendingResult(resultId, result, error);
-}
+    }
 }
 
 export default {
@@ -335,7 +368,6 @@ export default {
 
             socket.on('open', async function () {
                 try {
-
                     const session = new ClientSession(socket, apiUrl);
                     const systemManager = new SystemManagerImpl(session);
                     const mediaManager = new MediaManagerImpl(session);
@@ -352,9 +384,11 @@ export default {
                         systemManager,
                         mediaManager,
                         disconnect: socket.close.bind(socket),
-                        rpc(method: string, ...args: any[]): Promise<any> {
-                            return session.rpc({
+                        userStorage: new Proxy(function(){}, new RPCProxy(session, 'userStorage', 'length')) as any as Storage,
+                        rpc(target: string, method: string, args: any[]): Promise<any> {
+                            return session.sendMessageForResult({
                                 type: 'rpc',
+                                target,
                                 method,
                                 args,
                             });

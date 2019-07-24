@@ -20,7 +20,8 @@ export default {
       var bounds = new google.maps.LatLngBounds();
       var fits = true;
       for (var i = 0; i < markers.length; i++) {
-        if (!map.getBounds().contains(markers[i])) {
+        let bounds = map.getBounds();
+        if (bounds && !bounds.contains(markers[i])) {
           bounds.extend(markers[i]);
           fits = false;
         }

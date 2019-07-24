@@ -59,7 +59,7 @@ export function getComponentViewPath(id) {
 }
 
 export function removeAlert(alert) {
-    this.$scrypted.rpc("removeAlerts", [alert.id]).then(() => {
+    this.$scrypted.rpc('this', "removeAlerts", [[alert.id]]).then(() => {
         this.$store.commit("removeAlert", alert.id);
     });
 }
