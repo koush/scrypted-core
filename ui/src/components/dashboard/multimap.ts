@@ -9,3 +9,18 @@ export class Multimap<K, V> extends Map<K, V[]> {
         array.push(v);
     }
 }
+
+export class EnsureMap<K, V> extends Map<K, V> {
+    ensureFunc: () => V;
+    constructor(ensureFunc: () => V) {
+        super();
+        this.ensureFunc = ensureFunc;
+    }
+    ensure(k: K) {
+        var ret = this.get(k);
+        if (!ret) {
+            this.set(k, ret = this.ensureFunc());
+        }
+        return ret;
+    }
+}

@@ -235,6 +235,8 @@ export default {
       return validTypes;
     },
     rooms() {
+      getDefaultDashboard(this.$store.state.scrypted.devices, this.$scrypted.systemManager);
+
       var ret = {};
       this.$store.state.scrypted.devices
         .map(id => [id, this.$store.state.systemState[id]])
