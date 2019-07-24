@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <div>{{$store.state.systemState[value.deviceId].name.value}}</div> -->
     <a @click="dialog = true">
       <v-img contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
     </a>
@@ -13,7 +14,7 @@
         playsinline
         autoplay
       ></video>
-      <v-img v-if="picture" contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
+      <v-img v-else contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
     </v-dialog>
   </div>
 </template>
@@ -31,7 +32,6 @@ export default {
   data() {
     return {
       video: false,
-      picture: false,
       src: undefined,
       overlay: false,
       dialog: false
@@ -71,27 +71,32 @@ export default {
     }
   },
   mounted() {
-    const device = this.$scrypted.systemManager.getDeviceById(this.value.deviceId);
+    const device = this.$scrypted.systemManager.getDeviceById(
+      this.value.deviceId
+    );
     if (device.interfaces.includes(ScryptedInterface.VideoCamera)) {
+      this.video = true;
       const videoStream = device.getVideoStream();
       this.$scrypted.mediaManager
         .convertMediaObjectToLocalUri(videoStream, "image/jpeg")
         .then(result => {
-          this.video = true;
           const url = new URL(result);
           this.src = url.pathname;
         })
-        .catch(() => {});
+        .catch(() => {
+          this.src = "images/cameraloading.jpg";
+        });
     } else {
       const picture = device.takePicture();
       this.$scrypted.mediaManager
         .convertMediaObjectToLocalUri(picture, "image/jpeg")
         .then(result => {
-          this.picture = true;
           const url = new URL(result);
           this.src = url.pathname;
         })
-        .catch(() => {});
+        .catch(() => {
+          this.src = "images/cameraloading.jpg";
+        });
     }
   }
 };

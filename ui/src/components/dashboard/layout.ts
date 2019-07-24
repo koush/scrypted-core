@@ -21,6 +21,10 @@ interface CardComponentInternal extends CardComponent {
     priority: number;
 }
 
+interface CardComponentTypeOptions {
+    cardName?: string;
+}
+
 class CardComponentType {
     priority: number;
     collapse: boolean;
@@ -28,8 +32,10 @@ class CardComponentType {
     requiresAnyInterface: Set<string>;
     height: number;
     component: any;
+    cardName: string | undefined;
 
-    constructor(type: ScryptedDeviceType, priority: number, collapse: boolean, height: number, component: any, ...requiresAnyInterface: ScryptedInterface[]) {
+    constructor(type: ScryptedDeviceType, priority: number, collapse: boolean, height: number, component: any, options: CardComponentTypeOptions, ...requiresAnyInterface: ScryptedInterface[]) {
+        Object.assign(this, options);
         this.component = component;
         this.type = type;
         this.priority = priority;
@@ -51,9 +57,9 @@ class CardComponentType {
         return false;
     }
 
-    create(name: string, devices: ScryptedDevice[]): CardComponentInternal {
+    create(name: string, devices: ScryptedDevice[]): CardComponentInternal[] {
         if (this.collapse) {
-            return {
+            return [{
                 component: this.component,
                 priority: this.priority,
                 value: {
@@ -61,24 +67,30 @@ class CardComponentType {
                     type: this.type,
                     deviceIds: devices.map(device => device.id),
                 }
-            };
+            }];
         }
 
-        return {
+        return devices.map(device => ({
             component: this.component,
             priority: this.priority,
             value: {
-                name: devices[0].name,
+                name: device.name,
                 type: this.type,
-                deviceId: devices[0].id,
+                deviceId: device.id,
             }
-        };
+        }));
     }
 
     clone(): CardComponentType {
-        var ret = new CardComponentType(this.type, this.priority, this.collapse, this.height, this.component, ...[]);
+        var ret = new CardComponentType(this.type, this.priority, this.collapse, this.height, this.component, {
+            cardName: this.cardName,
+        }, ...[]);
         ret.requiresAnyInterface = this.requiresAnyInterface;
         return ret;
+    }
+
+    getCardName(cardName: string): string {
+        return this.cardName || cardName || uncategorized;
     }
 }
 
@@ -98,19 +110,22 @@ function pluralize(type): string {
             return "Cameras";
         case ScryptedDeviceType.Thermostat:
             return "Thermostats";
+        case ScryptedDeviceType.Sensor:
+            return "Sensors";
     }
     return type;
 }
 
+const uncategorized = "Uncategorized";
 var cardComponentTypes: CardComponentType[] = [];
 
 for (var type of [ScryptedDeviceType.Light, ScryptedDeviceType.Outlet, ScryptedDeviceType.Switch, ScryptedDeviceType.Fan]) {
-    cardComponentTypes.push(new CardComponentType(type, 30, true, 1, DashboardToggle, ScryptedInterface.OnOff));
+    cardComponentTypes.push(new CardComponentType(type, 30, true, 1, DashboardToggle, undefined, ScryptedInterface.OnOff));
 }
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Sensor, 0, true, 6, DashboardMap, ScryptedInterface.PositionSensor));
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Camera, 0, false, 4, DashboardCamera, ScryptedInterface.Camera, ScryptedInterface.VideoCamera));
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 10, false, 1, DashboardLock, ScryptedInterface.Lock));
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Thermostat, 20, false, 1, DashboardThermostat, ScryptedInterface.TemperatureSetting));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Sensor, 0, true, 6, DashboardMap, { cardName: "Map" }, ScryptedInterface.PositionSensor));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Camera, 0, false, 4, DashboardCamera, undefined, ScryptedInterface.Camera, ScryptedInterface.VideoCamera));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 10, false, 1, DashboardLock, undefined, ScryptedInterface.Lock));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Thermostat, 20, false, 1, DashboardThermostat, undefined, ScryptedInterface.TemperatureSetting));
 
 export function getDefaultDashboard(deviceIds: string[], systemManager: SystemManager): Card[] {
     var supportedTypes: Map<ScryptedDevice, CardComponentType> = new Map();
@@ -131,7 +146,10 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
 
     // map devices into rooms/types.
     var rooms: EnsureMap<string, Multimap<CardComponentType, ScryptedDevice>> = new EnsureMap(() => new Multimap());
-    devices.forEach(device => rooms.ensure(device.room || 'Default Room').add(supportedTypes.get(device), device));
+    devices.forEach(device => {
+        var supportedType = supportedTypes.get(device);
+        rooms.ensure(supportedType.getCardName(device.room)).add(supportedType, device)
+    });
 
     devices = [];
 
@@ -145,8 +163,13 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
         }
     }
 
-    var types: EnsureMap<ScryptedDeviceType, Multimap<string, ScryptedDevice>> = new EnsureMap(() => new Multimap());
-    devices.forEach(device => types.ensure(supportedTypes.get(device).type).add(device.room || 'Default Room', device));
+    var types: EnsureMap<string, Multimap<string, ScryptedDevice>> = new EnsureMap(() => new Multimap());
+    devices.forEach(device => {
+        var supportedType = supportedTypes.get(device);
+        // use the card name override when grouping by type
+        var cardName = supportedType.getCardName(supportedType.type);
+        types.ensure(cardName).add(supportedType.getCardName(device.room), device)
+    });
 
     var ret: Card[] = [];
     for (let [room, roomTypes] of rooms.entries()) {
@@ -154,7 +177,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
         let height = 0;
         for (let [roomType, roomTypeDevices] of roomTypes.entries()) {
             // type needs to be specific, since we're grouped by room
-            components.push(roomType.create(`${pluralize(roomType.type)}`, roomTypeDevices));
+            components.push(...roomType.create(`${pluralize(roomType.type)}`, roomTypeDevices));
             height += roomType.height;
         }
         components.sort((a, b) => a.priority - b.priority);
@@ -174,7 +197,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
         for (let [room, roomDevices] of typeRooms.entries()) {
             // room needs to be specific, since we're grouped by type
             var supportedType = supportedTypes.get(roomDevices[0]);
-            components.push(supportedType.create(`${room}`, roomDevices));
+            components.push(...supportedType.create(`${room}`, roomDevices));
             height += supportedType.height;
         }
         components.sort((a, b) => a.priority - b.priority);

@@ -1,5 +1,14 @@
 <template>
-  <GmapMap :center="center" :zoom="16" ref="mapRef" style="height: 400px">
+  <GmapMap
+    :center="center"
+    :zoom="16"
+    ref="mapRef"
+    style="height: 400px"
+    :options="{
+   mapTypeControl: false,
+   fullscreenControl: false,
+ }"
+  >
     <GmapMarker
       :key="index"
       v-for="(position, index) in markers"
