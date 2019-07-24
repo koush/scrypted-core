@@ -1,12 +1,12 @@
 <template>
-  <v-list-item ripple :to="getDeviceViewPath(deviceId)">
+  <v-list-item ripple :to="getDeviceViewPath(value.deviceId)">
     <v-list-item-icon>
       <font-awesome-icon size="sm" :icon="icon" :color="color" />
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title
         class="font-weight-light"
-      >{{ this.$store.state.systemState[this.deviceId].name.value }}</v-list-item-title>
+      >{{ $store.state.systemState[value.deviceId].name.value }}</v-list-item-title>
     </v-list-item-content>
 
     <v-list-item-action>
@@ -21,7 +21,7 @@ import DashboardBase from "./DashboardBase";
 import colors from "vuetify/es5/util/colors";
 
 export default {
-  props: ["type", "group", "deviceId"],
+  props: ["value"],
   mixins: [DashboardBase],
   methods: {
     getDeviceViewPath
@@ -29,7 +29,7 @@ export default {
 
   computed: {
     icon() {
-      switch (this.getDevice(this.deviceId).thermostatMode) {
+      switch (this.getDevice(this.value.deviceId).thermostatMode) {
         case ThermostatMode.Heat:
           return "fire-alt";
         case ThermostatMode.Cool:
@@ -40,7 +40,7 @@ export default {
       return "thermometer-three-quarters";
     },
     color() {
-      const device = this.getDevice(this.deviceId);
+      const device = this.getDevice(this.value.deviceId);
       if (device.thermostatMode === ThermostatMode.Off) {
         return "#a9afbb";
       }
@@ -57,12 +57,12 @@ export default {
     on: {
       get() {
         return (
-          this.getDevice(this.deviceId).thermostatMode !== ThermostatMode.Off
+          this.getDevice(this.value.deviceId).thermostatMode !== ThermostatMode.Off
         );
       },
       set(val) {
         const device = this.$scrypted.systemManager.getDeviceById(
-          this.deviceId
+          this.value.deviceId
         );
         if (val) {
           device.setThermostatMode(ThermostatMode.On);

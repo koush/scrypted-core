@@ -3,8 +3,6 @@ import Vue from "vue";
 import Vuex from "vuex";
 Vue.use(Vuex);
 
-var poopy = 34;
-
 const store = new Vuex.Store({
   state: {
     systemState: {},

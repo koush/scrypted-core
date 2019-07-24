@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex v-if="!roomColumns.length" xs12 md6 lg4>
+    <v-flex v-if="!cardColumns.length" xs12 md6 lg4>
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
@@ -23,50 +23,26 @@
     <v-flex
       v-else
       v-bind="stylesForBreakpoints"
-      v-for="(roomColumn, index) in roomColumns"
+      v-for="(cardColumn, index) in cardColumns"
       :key="index"
     >
-      <v-flex v-for="(room, roomIndex) in roomColumn" :key="room.name">
+      <v-flex v-for="(card, cardIndex) in cardColumn" :key="card.name">
         <v-card raised class="header-card">
           <v-card-title
-            :class="randomGradient(index * 4 + roomIndex)"
+            :class="randomGradient(index * 4 + cardIndex)"
             class="subtitle-1 text--white header-card-gradient font-weight-light"
           >
-            {{ room.name }}
-            <div
-              style="position: absolute; right: 10px"
-              v-for="type in room.types"
-              :key="type.name || type.type"
-            >
-              <component
-                v-if="validTypes[type.type].collapse && type.type == 'Sensor'"
-                :group="room.name"
-                :type="type"
-                :is="validTypes[type.type].component"
-              ></component>
-            </div>
+            {{ card.name }}
           </v-card-title>
           <div class="header-card-spacer"></div>
 
           <v-list flat class="header-card-content">
             <v-list-item-group>
-              <div v-for="type in room.types" :key="type.name || type.type">
-                <div v-if="type.type != 'Sensor'">
-                  <component
-                    v-if="validTypes[type.type].collapse"
-                    :group="type.name || (room.name || pluralize(type.type))"
-                    :type="type"
-                    :is="validTypes[type.type].component"
-                  ></component>
-                  <component
-                    v-else
-                    v-for="deviceId in type.ids"
-                    :key="deviceId"
-                    :group="type.name || (room.name || pluralize(type.type))"
-                    :deviceId="deviceId"
-                    :is="validTypes[type.type].component"
-                  ></component>
-                </div>
+              <div v-for="(component, componentIndex) in card.components" :key="componentIndex">
+                <component
+                  :value="component.value"
+                  :is="component.component"
+                ></component>
               </div>
             </v-list-item-group>
           </v-list>
@@ -86,7 +62,7 @@ import DashboardSensors from "./DashboardSensors.vue";
 import DashboardBase from "./DashboardBase";
 import "../header-card.css";
 
-import {getDefaultDashboard} from "./layout";
+import { getDefaultDashboard } from "./layout";
 
 const validTypes = [];
 
@@ -141,7 +117,7 @@ const position = {
   priority: 0,
   component: "DashboardMap",
   height: 6,
-  collapse: true,
+  collapse: true
 };
 position[ScryptedInterface.PositionSensor] = "PositionSensor";
 validTypes["Map"] = position;
@@ -209,24 +185,24 @@ export default {
     columnsForBreakpoint() {
       return this.getColumnsForBreakpoint(this.$vuetify.breakpoint.name);
     },
-    roomColumns() {
-      var rooms = this.rooms;
+    cardColumns() {
+      var cards = this.cards;
       const columns = [];
 
-      for (var room of rooms) {
+      for (var card of cards) {
         // find teh column with the leeast juink
         if (columns.length < this.columnsForBreakpoint) {
-          columns.push([room]);
+          columns.push([card]);
           continue;
         }
 
         const least = columns.reduce((a, b) =>
-          a.reduce((c, d) => c + this.heightForTypes(d), 0) <
-          b.reduce((c, d) => c + this.heightForTypes(d), 0)
+          a.reduce((c, d) => c + d.height, 0) <
+          b.reduce((c, d) => c + d.height, 0)
             ? a
             : b
         );
-        least.push(room);
+        least.push(card);
       }
 
       return columns;
@@ -234,118 +210,12 @@ export default {
     validTypes() {
       return validTypes;
     },
-    rooms() {
-      getDefaultDashboard(this.$store.state.scrypted.devices, this.$scrypted.systemManager);
-
-      var ret = {};
-      this.$store.state.scrypted.devices
-        .map(id => [id, this.$store.state.systemState[id]])
-        // filter out devices we can't show in the ui
-        .filter(([, device]) => {
-          return device.type && validTypes[device.type.value]; // && device.metadata.value.syncWithIntegrations;
-        })
-        // verify the interfaces we need exist on the devices we can use.
-        .filter(([, device]) => {
-          if (!device.interfaces || !device.interfaces.value) {
-            return false;
-          }
-
-          for (var iface of device.interfaces.value) {
-            if (validTypes[device.type.value][iface]) {
-              return true;
-            }
-          }
-          return false;
-        })
-        // group the devices into rooms
-        .forEach(([id, device]) => {
-          const name = device.room.value || "Default Room";
-          var room = (ret[name] = ret[name] || {
-            name,
-            types: {}
-          });
-          const typeKey =
-            validTypes[device.type.value].typeKey || device.type.value;
-          var type = (room.types[typeKey] = room.types[typeKey] || []);
-          type.push(id);
-        });
-
-      // find rooms that only have a couple device types, and merge them
-      const singles = [];
-      Object.values(ret).forEach(room => {
-        if (Object.keys(room.types).length <= 2) {
-          delete ret[room.name];
-          singles.push(room);
-        }
-      });
-
-      const merged = {};
-      singles.forEach(single => {
-        Object.keys(single.types).forEach(type => {
-          const name = this.pluralize(type);
-          const group = (merged[name] = merged[name] || {
-            name,
-            type,
-            types: {}
-          });
-          const roomType = `${single.name} ${this.pluralize(type)}`;
-          group.types[roomType] = group.types[roomType] || [];
-          group.types[roomType].push(...single.types[type]);
-        });
-      });
-
-      Object.assign(ret, merged);
-
-      // single.types[type].length === 1 ? this.$store.state.systemState[single.types[type][0]].name.value :
-
-      // massage the room types into array which is easier to use
-      // sort by priority.
-      Object.values(ret).forEach(room => {
-        room.types = Object.entries(room.types)
-          .map(([type, ids]) => ({
-            name:
-              ids.length === 1
-                ? this.$store.state.systemState[ids[0]].name.value
-                : room.type
-                ? type
-                : undefined,
-            type: room.type || type,
-            ids
-          }))
-          .sort(
-            (a, b) => validTypes[a.type].priority - validTypes[b.type].priority
-          );
-      });
-
-      ret = Object.values(ret);
-
-      var map = {
-        name: "Map",
-        types: [
-          {
-            name: "PositionSensor",
-            ids: [],
-            type: "Map"
-          }
-        ]
-      };
-      this.$store.state.scrypted.devices
-        .map(id => [id, this.$store.state.systemState[id]])
-        .filter(([, device]) => {
-          return device.interfaces.value.includes(
-            ScryptedInterface.PositionSensor
-          );
-        })
-        .forEach(([id,]) => {
-          map.types[0].ids.push(id);
-        });
-
-      if (map.types[0].ids.length) {
-        ret.push(map);
-      }
-
-      return ret;
-    }
+    cards() {
+      return getDefaultDashboard(
+        this.$store.state.scrypted.devices,
+        this.$scrypted.systemManager
+      );
+    },
   }
 };
 </script>

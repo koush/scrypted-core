@@ -3,7 +3,7 @@
     <v-list-item-icon>
       <font-awesome-icon
         size="sm"
-        :icon="typeToIcon(type.type)"
+        :icon="typeToIcon(value.type)"
         :color="on ? 'orange' : '#a9afbb'"
       />
     </v-list-item-icon>
@@ -21,7 +21,7 @@
           <v-card-title>
             <font-awesome-icon
               size="sm"
-              :icon="typeToIcon(type.type)"
+              :icon="typeToIcon(value.type)"
               color="white"
               style="margin-right: 20px"
             />
@@ -30,7 +30,7 @@
 
           <v-flex xs12>
             <v-layout align-center justify-center column>
-              <div v-if="type.type == 'Light'">
+              <div v-if="value.type == 'Light'">
                 <div class="slider-pad-bottom"></div>
                 <vue-slider
                   :width="40"
@@ -45,9 +45,9 @@
               <v-list color="blue">
                 <DashboardPopupToggle
                   :light="true"
-                  v-for="deviceId in type.ids"
+                  v-for="deviceId in value.deviceIds"
                   :key="deviceId"
-                  :type="type.type"
+                  :type="value.type"
                   :id="deviceId"
                   :name="$store.state.systemState[deviceId].name.value"
                 ></DashboardPopupToggle>
@@ -69,7 +69,7 @@ import { ScryptedInterface } from "@scrypted/sdk";
 import throttle from "lodash.throttle";
 
 export default {
-  props: ["type", "group"],
+  props: ["value"],
   mixins: [DashboardBase],
   components: {
     VueSlider,
@@ -101,7 +101,7 @@ export default {
       }, 300);
     },
     debounceSetBrightness: throttle(function(self) {
-      self.type.ids
+      self.value.deviceIds
         .map(id => self.getDevice(id))
         .filter(device =>
           device.interfaces.includes(ScryptedInterface.Brightness)
@@ -112,7 +112,7 @@ export default {
   computed: {
     brightness: {
       get() {
-        const brightnessDevices = this.type.ids
+        const brightnessDevices = this.value.deviceIds
           .map(id => this.getDevice(id))
           .filter(device =>
             device.interfaces.includes(ScryptedInterface.Brightness)
@@ -132,19 +132,19 @@ export default {
       }
     },
     groupName() {
-      if (this.type.name) {
-        return this.type.name;
+      if (this.value.name) {
+        return this.value.name;
       }
-      return this.pluralize(this.type.type);
+      return this.pluralize(this.value.type);
     },
     on: {
       get() {
-        return this.type.ids
+        return this.value.deviceIds
           .map(id => this.getDevice(id))
           .reduce((on, device) => on || device.on, false);
       },
       set(value) {
-        this.type.ids
+        this.value.deviceIds
           .map(id => this.getDevice(id))
           .forEach(device => device[value ? "turnOn" : "turnOff"]());
       }

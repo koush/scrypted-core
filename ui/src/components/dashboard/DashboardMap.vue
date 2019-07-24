@@ -13,10 +13,11 @@ import DashboardBase from "./DashboardBase";
 
 export default {
   mixins: [DashboardBase],
-  props: ["type", "group"],
+  props: ["value"],
   mounted() {
     this.$refs.mapRef.$mapPromise.then(map => {
       var markers = this.markers; //some array
+      var google = window.google;
       var bounds = new google.maps.LatLngBounds();
       var fits = true;
       for (var i = 0; i < markers.length; i++) {
@@ -51,7 +52,7 @@ export default {
       };
     },
     markers() {
-      return this.type.ids.map(id => {
+      return this.value.deviceIds.map(id => {
         const device = this.getDevice(id);
         var position = device.position;
         return {

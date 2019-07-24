@@ -27,7 +27,7 @@ scryptedServerVariables.senderId = null;
 scryptedServerVariables.apiKey = "AIzaSyCBbKhH_IM1oIZMOO65xOnzgDDrmC2lAoc";
 
 export default {
-  props: ["type", "deviceId"],
+  props: ["value"],
   data() {
     return {
       video: false,
@@ -51,7 +51,7 @@ export default {
       }
 
       this.$pushconnect().then(rtcManager => {
-        const rtspUrl = `camera://${this.deviceId}`;
+        const rtspUrl = `camera://${this.value.deviceId}`;
 
         currentStream = rtcManager.connect({
           senderId: scryptedServerVariables.senderId,
@@ -71,7 +71,7 @@ export default {
     }
   },
   mounted() {
-    const device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
+    const device = this.$scrypted.systemManager.getDeviceById(this.value.deviceId);
     if (device.interfaces.includes(ScryptedInterface.VideoCamera)) {
       const videoStream = device.getVideoStream();
       this.$scrypted.mediaManager
@@ -80,7 +80,8 @@ export default {
           this.video = true;
           const url = new URL(result);
           this.src = url.pathname;
-        });
+        })
+        .catch(() => {});
     } else {
       const picture = device.takePicture();
       this.$scrypted.mediaManager
@@ -89,7 +90,8 @@ export default {
           this.picture = true;
           const url = new URL(result);
           this.src = url.pathname;
-        });
+        })
+        .catch(() => {});
     }
   }
 };
