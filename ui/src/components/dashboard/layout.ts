@@ -6,14 +6,25 @@ import DashboardLock from "./DashboardLock.vue";
 import DashboardThermostat from "./DashboardThermostat.vue";
 import { Multimap, EnsureMap } from "./multimap";
 
+function randomGradient() {
+    const gradients = [
+        "purple-gradient",
+        "orange-gradient",
+        "red-gradient",
+        "green-gradient"
+    ];
+    return gradients[Math.round(Math.random() * gradients.length)];
+}
+
 export interface Card {
     name: string;
     components: CardComponent[];
     height: number;
+    color: string;
 }
 
 export interface CardComponent {
-    component: any;
+    component: string;
     value: any;
 }
 
@@ -60,7 +71,7 @@ class CardComponentType {
     create(name: string, devices: ScryptedDevice[]): CardComponentInternal[] {
         if (this.collapse) {
             return [{
-                component: this.component,
+                component: this.component.name,
                 priority: this.priority,
                 value: {
                     name,
@@ -71,7 +82,7 @@ class CardComponentType {
         }
 
         return devices.map(device => ({
-            component: this.component,
+            component: this.component.name,
             priority: this.priority,
             value: {
                 name: device.name,
@@ -186,6 +197,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             name: room,
             components,
             height,
+            color: randomGradient(),
         }
         ret.push(card);
     }
@@ -206,6 +218,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             name: pluralize(type),
             components,
             height,
+            color: randomGradient(),
         }
         ret.push(card);
     }

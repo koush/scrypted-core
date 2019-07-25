@@ -30,7 +30,7 @@
 
       <v-menu left bottom>
         <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on" style="margin-right: 24px;">
+          <v-btn icon v-on="on">
             <v-badge :value="$store.state.scrypted.alerts.length" color="red" overlap>
               <template v-slot:badge>{{ $store.state.scrypted.alerts.length }}</template>
               <v-icon>notifications</v-icon>
@@ -66,6 +66,32 @@
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title class="caption">Clear All Alerts</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+
+      <v-menu left bottom v-if="$store.state.menu">
+        <template v-slot:activator="{ on }">
+          <v-btn icon v-on="on">
+              <v-icon>more_vert</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item
+            class="font-weight-light"
+            v-for="(menuItem, index) in $store.state.menu"
+            :key="index"
+            @click="menuItem.click"
+          >
+            <v-list-item-icon v-if="menuItem.icon">
+              <font-awesome-icon size="sm" :icon="menuItem.icon" style="color: #a9afbb;" />
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="caption">{{ menuItem.title }}</v-list-item-title>
+              <v-list-item-subtitle class="caption">{{ menuItem.subtitle }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -329,6 +355,6 @@ export default {
         }
       ]
     };
-  }
+  },
 };
 </script>

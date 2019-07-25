@@ -21,6 +21,7 @@ import DashboardBase from "./DashboardBase";
 import colors from "vuetify/es5/util/colors";
 
 export default {
+  name: "DashboardThermostat",
   props: ["value"],
   mixins: [DashboardBase],
   methods: {

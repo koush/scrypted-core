@@ -21,6 +21,7 @@
 import DashboardBase from "./DashboardBase";
 
 export default {
+  name: "DashboardMap",
   mixins: [DashboardBase],
   props: ["value"],
   watch: {

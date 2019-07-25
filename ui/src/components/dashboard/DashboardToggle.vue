@@ -69,6 +69,7 @@ import { ScryptedInterface } from "@scrypted/sdk";
 import throttle from "lodash.throttle";
 
 export default {
+  name: "DashboardToggle",
   props: ["value"],
   mixins: [DashboardBase],
   components: {

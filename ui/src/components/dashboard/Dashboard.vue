@@ -1,58 +1,100 @@
 <template>
-  <v-layout>
-    <v-flex v-if="!cardColumns.length" xs12 md6 lg4>
-      <v-flex>
-        <v-card raised class="header-card">
-          <v-card-title
-            class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
-          >No Devices Found</v-card-title>
-          <div class="header-card-spacer"></div>
-          <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
+  <div>
+    <div v-if="editMode">
+      <v-card>
+        <v-card-title>Edit Layout</v-card-title>
+        <v-form>
+          <v-container>
+            <v-layout>
+              <v-flex>
+                <v-switch v-model="cardAlignCenter" label="Align Center"></v-switch>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-form>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text color="blue" @click="saveLayout">Save</v-btn>
+          <v-btn text color="primary" @click="editMode = !editMode">Done</v-btn>
+        </v-card-actions>
+      </v-card>
+      <div class="header-card-spacer"></div>
+    </div>
 
-            <v-btn color="primary" dark text to="/component/script/install">
-              Install Plugins
-              <v-icon right color="primary">cloud_download</v-icon>
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+    <v-layout :align-center="cardAlignCenter">
+      <v-flex v-if="!cardColumns.length" xs12 md6 lg4>
+        <v-flex>
+          <v-card raised class="header-card">
+            <v-card-title
+              class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            >No Devices Found</v-card-title>
+            <div class="header-card-spacer"></div>
+            <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+
+              <v-btn color="primary" dark text to="/component/script/install">
+                Install Plugins
+                <v-icon right color="primary">cloud_download</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
       </v-flex>
-    </v-flex>
 
-    <v-flex
-      v-else
-      v-bind="stylesForBreakpoints"
-      v-for="(cardColumn, index) in cardColumns"
-      :key="index"
-    >
-      <v-flex v-for="(card, cardIndex) in cardColumn" :key="card.name">
-        <v-card raised class="header-card">
-          <v-card-title
-            :class="randomGradient(index * 4 + cardIndex)"
-            class="subtitle-1 text--white header-card-gradient font-weight-light"
-          >
-            {{ card.name }}
-          </v-card-title>
-          <div class="header-card-spacer"></div>
+      <v-flex
+        v-else
+        v-bind="stylesForBreakpoints"
+        v-for="(cardColumn, index) in cardColumns"
+        :key="index"
+      >
+        <v-flex v-for="(card, cardIndex) in cardColumn" :key="card.name">
+          <v-card raised class="header-card">
+            <v-card-title
+              :class="card.color"
+              class="subtitle-1 text--white header-card-gradient font-weight-light"
+            >{{ card.name }}</v-card-title>
+            <div class="header-card-spacer"></div>
 
-          <v-list flat class="header-card-content">
-            <v-list-item-group>
-              <div v-for="(component, componentIndex) in card.components" :key="componentIndex">
-                <component
-                  :value="component.value"
-                  :is="component.component"
-                ></component>
-              </div>
-            </v-list-item-group>
-          </v-list>
-        </v-card>
+            <v-card-actions v-if="editMode">
+              <v-layout align-center justify-center>
+                <v-btn dark fab color="green" @click="card.color = 'green-gradient'"></v-btn>
+                <v-btn dark fab color="purple" @click="card.color = 'purple-gradient'"></v-btn>
+                <v-btn dark fab color="red" @click="card.color = 'red-gradient'"></v-btn>
+                <v-btn dark fab color="orange" @click="card.color = 'orange-gradient'"></v-btn>
+              </v-layout>
+            </v-card-actions>
+
+            <v-list flat class="header-card-content">
+              <v-list-item-group>
+                <div v-for="(component, componentIndex) in card.components" :key="componentIndex">
+                  <component :value="component.value" :is="component.component"></component>
+                </div>
+              </v-list-item-group>
+            </v-list>
+
+            <v-card-actions v-if="editMode">
+              <v-btn icon @click="moveCard(index, cardIndex, -1, 0)">
+                <v-icon>arrow_left</v-icon>
+              </v-btn>
+              <v-btn icon @click="moveCard(index, cardIndex, 0, 1)">
+                <v-icon>arrow_drop_down</v-icon>
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn icon @click="moveCard(index, cardIndex, 0, -1)">
+                <v-icon>arrow_drop_up</v-icon>
+              </v-btn>
+              <v-btn icon @click="moveCard(index, cardIndex, 1, 0)">
+                <v-icon>arrow_right</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
       </v-flex>
-    </v-flex>
-  </v-layout>
+    </v-layout>
+  </div>
 </template>
-<script>
-import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
+<script lang="ts">
 import DashboardMap from "./DashboardMap.vue";
 import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
@@ -63,64 +105,7 @@ import DashboardBase from "./DashboardBase";
 import "../header-card.css";
 
 import { getDefaultDashboard } from "./layout";
-
-const validTypes = [];
-
-const toggles = {
-  priority: 30,
-  component: DashboardToggle,
-  collapse: true
-};
-toggles[ScryptedInterface.OnOff] = "Toggle";
-validTypes[ScryptedDeviceType.Outlet] = validTypes[
-  ScryptedDeviceType.Switch
-] = validTypes[ScryptedDeviceType.Light] = validTypes[
-  ScryptedDeviceType.Fan
-] = toggles;
-
-const lock = {
-  priority: 20,
-  component: "DashboardLock"
-};
-lock[ScryptedInterface.Lock] = "Lock";
-validTypes[ScryptedDeviceType.Lock] = lock;
-
-const thermostat = {
-  priority: 20,
-  component: "DashboardThermostat"
-};
-thermostat[ScryptedInterface.TemperatureSetting] = "TemperatureSetting";
-validTypes[ScryptedDeviceType.Thermostat] = thermostat;
-
-const sensors = {
-  priority: 10,
-  component: "DashboardSensors",
-  collapse: true,
-  typeKey: "Sensor"
-};
-sensors[ScryptedInterface.Thermometer] = "Thermometer";
-sensors[ScryptedInterface.HumiditySensor] = "HumiditySensor";
-sensors[ScryptedInterface.EntrySensor] = "EntrySensor";
-// validTypes[ScryptedDeviceType.Sensor] = sensors;
-// validTypes[ScryptedDeviceType.Thermostat] = sensors;
-
-const videoCamera = {
-  priority: 0,
-  component: "DashboardCamera",
-  height: 4
-};
-videoCamera[ScryptedInterface.Camera] = "Camera";
-videoCamera[ScryptedInterface.VideoCamera] = "VideoCamera";
-validTypes[ScryptedDeviceType.Camera] = videoCamera;
-
-const position = {
-  priority: 0,
-  component: "DashboardMap",
-  height: 6,
-  collapse: true
-};
-position[ScryptedInterface.PositionSensor] = "PositionSensor";
-validTypes["Map"] = position;
+import { Menu } from "../../store";
 
 const randoms = [];
 for (var rrr = 0; rrr < 100; rrr++) {
@@ -137,55 +122,94 @@ export default {
     DashboardSensors,
     DashboardThermostat
   },
-  methods: {
-    getColumnsForBreakpoint(bp) {
-      switch (bp) {
-        case "xl":
-          return 4;
-        case "lg":
-          return 3;
-        case "md":
-          return 2;
-        case "sm":
-          return 2;
-        case "xs":
-          return 1;
+  data() {
+    return {
+      editMode: false,
+      cardColumns: [],
+      cardAlignCenter: false
+    };
+  },
+  mounted() {
+    var menu: Menu[] = [
+      {
+        title: "Toggle Edit Layout",
+        icon: "edit",
+        click: () => {
+          this.editMode = !this.editMode;
+        }
+      },
+      {
+        title: "Save Layout",
+        icon: "save",
+        click: () => {
+          this.saveLayout();
+        }
+      },
+      {
+        title: "Auto Layout",
+        icon: "magic",
+        click: async () => {
+          await this.getCardLayout(true);
+        }
       }
-      return 1;
-    },
-    heightForTypes(d) {
-      return d.types.reduce((cur, devices) => {
-        const validType = validTypes[devices.type];
-        const ret =
-          cur +
-          (validType.height || 1) *
-            (validType.collapse ? 1 : devices.ids.length);
-        return ret;
-      }, 1);
-    },
-    randomGradient(i) {
-      const gradients = [
-        "purple-gradient",
-        "orange-gradient",
-        "red-gradient",
-        "green-gradient"
-      ];
-      return gradients[randoms[i % 100] % 4];
+    ];
+
+    this.$store.commit("setMenu", menu);
+
+    this.getCardLayout();
+  },
+  destroyed() {
+    this.$store.commit("clearMenu");
+  },
+  watch: {
+    "$vuetify.breakpoint.name"() {
+      this.cardColumnns = [];
+      this.getCardLayout();
     }
   },
-  computed: {
-    stylesForBreakpoints() {
-      const styles = {};
-      for (var bp of ["xs", "sm", "md", "lg", "xl"]) {
-        let w = this.getColumnsForBreakpoint(bp);
-        styles[`${bp}${12 / w}`] = true;
+  methods: {
+    async saveLayout() {
+      await this.$scrypted.userStorage.setItem(
+        this.currentLayoutKey,
+        JSON.stringify({
+          cardColumns: this.cardColumns,
+          cardAlignCenter: this.cardAlignCenter
+        })
+      );
+    },
+    moveCard(cardColumn, cardIndex, x, y) {
+      try {
+        var card = this.cardColumns[cardColumn][cardIndex];
+        var newColumn = (cardColumn + x) % this.cardColumns.length;
+        var newIndex = (cardIndex + y) % this.cardColumns[newColumn].length;
+        this.cardColumns[cardColumn].splice(cardIndex, 1);
+        this.cardColumns[newColumn].splice(newIndex, 0, card);
+      } catch (e) {
+        console.error("error moving card", x, y, e);
       }
-      return styles;
     },
-    columnsForBreakpoint() {
-      return this.getColumnsForBreakpoint(this.$vuetify.breakpoint.name);
-    },
-    cardColumns() {
+    async getCardLayout(auto) {
+      if (!auto) {
+        try {
+          let found = await this.$scrypted.userStorage.getItem(
+            `${this.currentLayoutKey}`
+          );
+          if (found) {
+            found = JSON.parse(found);
+            if (found.cardColumns) {
+              this.cardColumns = found.cardColumns;
+              this.cardAlignCenter = !!found.cardAlignCenter;
+              return;
+            }
+          }
+        } catch (e) {
+          console.error(
+            "error restoring card configuration for screen configuration",
+            e
+          );
+        }
+      }
+
       var cards = this.cards;
       const columns = [];
 
@@ -205,10 +229,35 @@ export default {
         least.push(card);
       }
 
-      return columns;
+      this.cardColumns = columns;
     },
-    validTypes() {
-      return validTypes;
+    getColumnsForBreakpoint(bp) {
+      switch (bp) {
+        case "xl":
+          return 4;
+        case "lg":
+          return 3;
+        case "md":
+          return 2;
+        case "sm":
+          return 2;
+        case "xs":
+          return 1;
+      }
+      return 1;
+    }
+  },
+  computed: {
+    stylesForBreakpoints() {
+      const styles = {};
+      for (var bp of ["xs", "sm", "md", "lg", "xl"]) {
+        let w = this.getColumnsForBreakpoint(bp);
+        styles[`${bp}${12 / w}`] = true;
+      }
+      return styles;
+    },
+    columnsForBreakpoint() {
+      return this.getColumnsForBreakpoint(this.$vuetify.breakpoint.name);
     },
     cards() {
       return getDefaultDashboard(
@@ -216,8 +265,9 @@ export default {
         this.$scrypted.systemManager
       );
     },
+    currentLayoutKey() {
+      return `cardColumns-${this.$vuetify.breakpoint.name}`;
+    }
   }
 };
 </script>
-<style>
-</style>

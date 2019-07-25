@@ -28,6 +28,7 @@ scryptedServerVariables.senderId = null;
 scryptedServerVariables.apiKey = "AIzaSyCBbKhH_IM1oIZMOO65xOnzgDDrmC2lAoc";
 
 export default {
+  name: "DashboardCamera",
   props: ["value"],
   data() {
     return {

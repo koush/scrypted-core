@@ -30,6 +30,7 @@ import DashboardBase from "./DashboardBase";
 import {getDeviceViewPath} from "../helpers";
 
 export default {
+  name: "DashboardLock",
   mixins: [DashboardBase],
   props: ["value"],
   methods: {

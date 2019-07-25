@@ -62,7 +62,6 @@
 </template>
 <script>
 import RPCInterface from "./RPCInterface.vue";
-import cloneDeep from "lodash.clonedeep";
 
 export default {
   mixins: [RPCInterface],

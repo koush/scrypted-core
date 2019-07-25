@@ -5,6 +5,7 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    menu: undefined,
     systemState: {},
     scrypted: {
       devices: [],
@@ -17,7 +18,7 @@ const store = new Vuex.Store({
     hasLogin: undefined
   },
   mutations: {
-    setSystemState: function(store, systemState) {
+    setSystemState: function (store, systemState) {
       store.systemState = systemState;
     },
     setDevices(store, devices) {
@@ -62,8 +63,21 @@ const store = new Vuex.Store({
     },
     setHasLogin(store, hasLogin) {
       store.hasLogin = hasLogin;
+    },
+    setMenu(store, menu) {
+      Vue.set(store, 'menu', menu);
+    },
+    clearMenu(store) {
+      Vue.delete(store, 'menu');
     }
   }
 });
+
+export interface Menu {
+  title: string;
+  subtitle?: string;
+  icon?: string;
+  click: Function;
+}
 
 export default store;

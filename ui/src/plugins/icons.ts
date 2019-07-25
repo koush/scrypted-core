@@ -5,6 +5,8 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faMagic,
+  faEdit,
   faLeaf,
   faFireAlt,
   faUserSecret,
@@ -69,6 +71,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faMagic,
+  faEdit,
   faLeaf,
   faFireAlt,
   faUserSecret,
