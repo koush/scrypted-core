@@ -2,13 +2,12 @@
   <v-flex xs12 md8 lg6>
     <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
-        class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="orange-gradient subtitle-1 text--white  font-weight-light"
       >
         <font-awesome-icon size="sm" icon="bolt" />
         <span class="title font-weight-light">&nbsp;&nbsp;Scrypted Plugins</span>
       </v-card-title>
 
-      <div class="header-card-spacer"></div>
       <v-card-text>Integrate your existing smart home devices and services.</v-card-text>
       <v-form>
         <v-container>

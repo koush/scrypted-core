@@ -4,9 +4,8 @@
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            class="orange-gradient subtitle-1 text--white  font-weight-light"
           >{{ settings.name }}</v-card-title>
-          <div class="header-card-spacer"></div>
           <v-card-text>Home Id: {{ settings.homeId }} Node Id: {{ settings.nodeId }}</v-card-text>
 
           <v-flex>
@@ -18,7 +17,6 @@
               <v-card-title
                 class="small-header green-gradient white--text font-weight-light subtitle-2"
               >Command Class: 0x{{ parseInt(key).toString(16) }}</v-card-title>
-              <div class="header-card-spacer"></div>
 
               <v-simple-table>
                 <thead>

@@ -4,9 +4,8 @@
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            class="orange-gradient subtitle-1 text--white  font-weight-light"
           >Google Home</v-card-title>
-          <div class="header-card-spacer"></div>
 
           <div v-if="settings.loginEmail">
             <v-card-text>
@@ -28,9 +27,8 @@
       <v-flex xs12 sm6 md6 lg4>
         <v-card raised class="header-card">
           <v-card-title
-            class="green-gradient subtitle-1 header-card-gradient font-weight-light"
+            class="green-gradient subtitle-1  font-weight-light"
           >Default Passcode</v-card-title>
-          <div class="header-card-spacer"></div>
           <v-form>
             <v-container>
               <v-layout>

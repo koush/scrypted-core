@@ -4,9 +4,8 @@
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            class="orange-gradient subtitle-1 text--white  font-weight-light"
           >HomeKit Accessory Bridge</v-card-title>
-          <div class="header-card-spacer"></div>
 
           <div>
             <v-card-text>Enable the Scrypted HomeKit Accessory Bridge ands connect your iOS devices using the Home app.</v-card-text>

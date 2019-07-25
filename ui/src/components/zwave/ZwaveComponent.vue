@@ -4,9 +4,8 @@
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            class="orange-gradient subtitle-1 text--white  font-weight-light"
           >Z-Wave Component</v-card-title>
-          <div class="header-card-spacer"></div>
 
           <div>
             <v-card-text>The Z-Wave component exposes Z-Wave USB controllers to Scrypted plugins. Install a Z-Wave plugin to connect your Z-Wave devices.</v-card-text>
@@ -18,9 +17,8 @@
           <v-flex xs12 lg6 v-for="homeId in settings.homeIds" :key="homeId.id">
             <v-card raised class="header-card">
               <v-card-title
-                class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+                class="green-gradient subtitle-1 text--white  font-weight-light"
               >Z-Wave Home Id: {{ homeId.id }}</v-card-title>
-              <div class="header-card-spacer"></div>
 
               <v-flex>
                 <v-btn

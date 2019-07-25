@@ -1,6 +1,19 @@
 <template>
   <v-layout>
     <v-flex xs12 md6 lg4>
+      <GmapMap
+        :center="position"
+        :zoom="16"
+        ref="mapRef"
+        style="height: 400px"
+        :options="{
+   mapTypeControl: false,
+   fullscreenControl: false,
+ }"
+      >
+        <GmapMarker :position="position" />
+      </GmapMap>
+
       <v-flex>
         <v-text-field
           ref="locationAutocomplete"
@@ -63,7 +76,11 @@ export default {
     return {
       restart: false,
       restartStatus: undefined,
-      location: ""
+      location: "",
+      position: {
+        lat: 0,
+        lng: 0
+      }
     };
   },
   computed: {
@@ -72,25 +89,31 @@ export default {
     }
   },
   mounted() {
-    let element = this.$refs.locationAutocomplete.$el;
-    element = element.querySelector("input");
-    const google = window.google;
-    var autocomplete = new google.maps.places.Autocomplete(element, {
-      types: ["geocode"]
-    });
-    autocomplete.addListener("place_changed", () => {
-      var place = autocomplete.getPlace();
-      this.location = place.formatted_address;
-      this.debounceUpdate(
-        place.geometry.location.lat().toString(),
-        place.geometry.location.lng().toString()
-      );
+    this.$refs.mapRef.$mapPromise.then(map => {
+      let element = this.$refs.locationAutocomplete.$el;
+      element = element.querySelector("input");
+      var autocomplete = new google.maps.places.Autocomplete(element, {
+        types: ["geocode"]
+      });
+      autocomplete.addListener("place_changed", () => {
+        var place = autocomplete.getPlace();
+        this.location = place.formatted_address;
+        this.position.lat = place.geometry.location.lat();
+        this.position.lng = place.geometry.location.lng();
+
+        this.debounceUpdate(
+          place.geometry.location.lat().toString(),
+          place.geometry.location.lng().toString()
+        );
+      });
     });
 
     axios
       .get(`${this.getComponentWebPath("automation")}/settings`)
       .then(response => {
         this.location = response.data.location;
+        this.position.lat = parseFloat(response.data.latitude);
+        this.position.lng = parseFloat(response.data.longitude);
       });
   },
   methods: {

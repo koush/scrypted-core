@@ -7,20 +7,18 @@
       style="margin-bottom: 60px"
     >
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white  font-weight-light"
       >
         <font-awesome-icon size="sm" icon="database" />&nbsp;&nbsp;Managing Devices
       </v-card-title>
-      <div class="header-card-spacer"></div>
       <v-card-text>These devices were created by {{ name }}.</v-card-text>
       <DeviceGroup :deviceGroup="managedDevices"></DeviceGroup>
     </v-card>
 
     <v-card raised class="header-card">
       <v-card-title
-        class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="red-gradient subtitle-1 text--white  font-weight-light"
       >{{ script.npmPackage ? "Plugin Management" : "Edit Script" }}</v-card-title>
-      <div class="header-card-spacer"></div>
 
       <v-form>
         <v-container>
@@ -175,9 +173,8 @@
 
     <v-card raised class="header-card" v-if="showStorage" style="margin-top: 60px">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white  font-weight-light"
       >Script Storage</v-card-title>
-      <div class="header-card-spacer"></div>
       <v-form>
         <v-container>
           <v-layout>

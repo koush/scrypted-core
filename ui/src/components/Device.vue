@@ -37,9 +37,7 @@
             </div>
 
             <v-card raised class="header-card">
-              <v-card-title
-                class="orange-gradient subtitle-1 header-card-gradient font-weight-light"
-              >
+              <v-card-title class="orange-gradient subtitle-1 font-weight-light">
                 {{name}}
                 <v-layout row justify-end align-center>
                   <component
@@ -51,7 +49,6 @@
                   ></component>
                 </v-layout>
               </v-card-title>
-              <div class="header-card-spacer"></div>
 
               <v-layout align-center justify-center>
                 <component
@@ -170,10 +167,7 @@
         <v-flex xs12 v-for="iface in cardInterfaces" :key="iface">
           <v-flex v-if="name">
             <v-card>
-              <v-card-title
-                class="red-gradient subtitle-1 header-card-gradient font-weight-light"
-              >{{ iface }}</v-card-title>
-              <div class="header-card-spacer"></div>
+              <v-card-title class="red-gradient white--text subtitle-1 font-weight-light">{{ iface }}</v-card-title>
               <component :value="deviceState" :device="systemDevice" :is="iface"></component>
             </v-card>
           </v-flex>
@@ -254,7 +248,7 @@ const cardInterfaces = [
   ScryptedInterface.TemperatureSetting,
   ScryptedInterface.PasswordStore,
   ScryptedInterface.PositionSensor,
-  ScryptedInterface.Settings,
+  ScryptedInterface.Settings
 ];
 
 const cardActionInterfaces = [

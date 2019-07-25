@@ -14,11 +14,11 @@
         </v-form>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-btn text color="blue" @click="editCards = !editCards">Toggle Preview</v-btn>
           <v-btn text color="blue" @click="saveLayout">Save</v-btn>
           <v-btn text color="primary" @click="editMode = !editMode">Done</v-btn>
         </v-card-actions>
       </v-card>
-      <div class="header-card-spacer"></div>
     </div>
 
     <v-layout :align-center="cardAlignCenter">
@@ -26,9 +26,8 @@
         <v-flex>
           <v-card raised class="header-card">
             <v-card-title
-              class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+              class="red-gradient subtitle-1 text--white font-weight-light"
             >No Devices Found</v-card-title>
-            <div class="header-card-spacer"></div>
             <v-card-text>No devices found, install a plugin to add support for your things</v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -50,20 +49,18 @@
       >
         <v-flex v-for="(card, cardIndex) in cardColumn" :key="card.name">
           <v-card raised class="header-card">
-            <v-card-title
-              :class="card.color"
-              class="subtitle-1 text--white header-card-gradient font-weight-light"
-            >{{ card.name }}</v-card-title>
-            <div class="header-card-spacer"></div>
+            <v-card-title :class="card.color" class="subtitle-1 font-weight-light">{{ card.name }}</v-card-title>
 
-            <v-card-actions v-if="editMode">
-              <v-layout align-center justify-center>
-                <v-btn dark fab color="green" @click="card.color = 'green-gradient'"></v-btn>
-                <v-btn dark fab color="purple" @click="card.color = 'purple-gradient'"></v-btn>
-                <v-btn dark fab color="red" @click="card.color = 'red-gradient'"></v-btn>
-                <v-btn dark fab color="orange" @click="card.color = 'orange-gradient'"></v-btn>
-              </v-layout>
-            </v-card-actions>
+            <div v-if="editCardMode">
+              <v-card-actions>
+                <v-layout align-center justify-center>
+                  <v-btn dark fab color="green" @click="card.color = 'green-gradient'"></v-btn>
+                  <v-btn dark fab color="purple" @click="card.color = 'purple-gradient'"></v-btn>
+                  <v-btn dark fab color="red" @click="card.color = 'red-gradient'"></v-btn>
+                  <v-btn dark fab color="orange" @click="card.color = 'orange-gradient'"></v-btn>
+                </v-layout>
+              </v-card-actions>
+            </div>
 
             <v-list flat class="header-card-content">
               <v-list-item-group>
@@ -73,7 +70,7 @@
               </v-list-item-group>
             </v-list>
 
-            <v-card-actions v-if="editMode">
+            <v-card-actions v-if="editCardMode">
               <v-btn icon @click="moveCard(index, cardIndex, -1, 0)">
                 <v-icon>arrow_left</v-icon>
               </v-btn>
@@ -125,6 +122,7 @@ export default {
   data() {
     return {
       editMode: false,
+      editCards: false,
       cardColumns: [],
       cardAlignCenter: false
     };
@@ -132,10 +130,11 @@ export default {
   mounted() {
     var menu: Menu[] = [
       {
-        title: "Toggle Edit Layout",
+        title: "Edit Layout",
         icon: "edit",
         click: () => {
-          this.editMode = !this.editMode;
+          this.editMode = true;
+          this.editCards = true;
         }
       },
       {
@@ -248,6 +247,9 @@ export default {
     }
   },
   computed: {
+    editCardMode() {
+      return this.editMode && this.editCards;
+    },
     stylesForBreakpoints() {
       const styles = {};
       for (var bp of ["xs", "sm", "md", "lg", "xl"]) {

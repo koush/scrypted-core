@@ -84,7 +84,7 @@ export default {
           const url = new URL(result);
           this.src = url.pathname;
         })
-        .catch(() => {
+        .catch(e => {
           this.src = "images/cameraloading.jpg";
         });
     } else {
@@ -95,7 +95,7 @@ export default {
           const url = new URL(result);
           this.src = url.pathname;
         })
-        .catch(() => {
+        .catch(e => {
           this.src = "images/cameraloading.jpg";
         });
     }

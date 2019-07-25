@@ -285,7 +285,7 @@ export default {
         });
     },
     clearAlerts() {
-      this.$scrypted.rpc("this", "removeAlerts").then(() => {
+      this.$scrypted.rpc("this", "removeAlerts", []).then(() => {
         this.$store.commit("setAlerts", []);
       });
     },

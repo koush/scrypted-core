@@ -2,12 +2,11 @@
   <v-flex>
     <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white  font-weight-light"
       >
         <font-awesome-icon size="sm" icon="database" />
         <span class="title font-weight-light">&nbsp;&nbsp;Managed Device</span>
       </v-card-title>
-      <div class="header-card-spacer"></div>
       <v-card-text>
         {{ name }} was created by
         <a :href="`#/device/${ownerDevice.id}`">{{ ownerDevice.name }}.</a>
@@ -20,9 +19,8 @@
 
     <v-card v-if="showStorage" raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white  font-weight-light"
       >Script Storage</v-card-title>
-      <div class="header-card-spacer"></div>
       <v-flex>
         <Storage v-model="device.configuration" @input="onChange"></Storage>
       </v-flex>

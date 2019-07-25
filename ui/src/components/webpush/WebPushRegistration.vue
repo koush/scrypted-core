@@ -2,12 +2,11 @@
   <v-flex>
     <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white  font-weight-light"
       >
         <font-awesome-icon size="sm" icon="bell" />
         <span class="title font-weight-light">&nbsp;&nbsp;Browser Subscription</span>
       </v-card-title>
-      <div class="header-card-spacer"></div>
       <v-form>
         <v-container>
           <v-layout>

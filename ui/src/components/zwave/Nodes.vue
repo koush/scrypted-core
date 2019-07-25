@@ -4,9 +4,8 @@
       <v-flex>
         <v-card raised class="header-card">
           <v-card-title
-            class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+            class="orange-gradient subtitle-1 text--white  font-weight-light"
           >Z-Wave Home Id: {{ $route.params.homeId }}</v-card-title>
-          <div class="header-card-spacer"></div>
 
           <v-card-text>{{ settings.description }}</v-card-text>
           <v-simple-table>

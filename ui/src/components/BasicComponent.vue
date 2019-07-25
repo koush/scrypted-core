@@ -5,9 +5,8 @@
         <v-flex>
           <v-card v-if="!card.hide" raised class="header-card">
             <v-card-title
-              class="orange-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+              class="orange-gradient subtitle-1 text--white  font-weight-light"
             >{{ card.title }}</v-card-title>
-            <div class="header-card-spacer"></div>
 
             <v-card-text>{{ card.description }}</v-card-text>
             <component v-if="card.body" :is="card.body" v-model="card.value"></component>
@@ -31,9 +30,8 @@
             <v-flex >
               <v-card raised class="header-card">
                 <v-card-title
-                  class="red-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+                  class="red-gradient subtitle-1 text--white  font-weight-light"
                 >{{ deviceGroup.name }}</v-card-title>
-                <div class="header-card-spacer"></div>
                 <DeviceTable
                   :hideType="deviceGroup.hideType"
                   :deviceGroup="deviceGroup"

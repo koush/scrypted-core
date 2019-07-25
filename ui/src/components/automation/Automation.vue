@@ -7,13 +7,12 @@
       style="margin-bottom: 60px"
     >
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white font-weight-light"
       >
         <font-awesome-icon size="sm" icon="bolt" />
         <span class="title font-weight-light">&nbsp;&nbsp;Automation Triggers</span>
       </v-card-title>
 
-      <div class="header-card-spacer"></div>
       <v-card-text>Specify the events (and optional conditions) that will trigger the automation.</v-card-text>
 
       <v-form>
@@ -70,14 +69,13 @@
 
     <v-card raised class="header-card" style="margin-bottom: 60px">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white font-weight-light"
       >
         <font-awesome-icon size="sm" icon="play" />
         <span v-if="device.automationType !== 'Scene'">&nbsp;&nbsp;Automation Actions</span>
         <span v-else>&nbsp;&nbsp;Scene Activation Actions</span>
       </v-card-title>
 
-      <div class="header-card-spacer"></div>
       <v-card-text
         v-if="device.automationType !== 'Scene'"
       >Specify action(s) to take when the automation is triggered.</v-card-text>
@@ -101,12 +99,11 @@
 
     <v-card raised class="header-card" v-if="device.automationType === 'Scene'">
       <v-card-title
-        class="green-gradient subtitle-1 text--white header-card-gradient font-weight-light"
+        class="green-gradient subtitle-1 text--white font-weight-light"
       >
         <font-awesome-icon size="sm" icon="play" />
         <h5 class="card-title">&nbsp;&nbsp;Scene Deactivation Actions</h5>
       </v-card-title>
-      <div class="header-card-spacer"></div>
       <v-card-text>Specify action(s) to take when the scene deactivated.</v-card-text>
 
       <v-form>
