@@ -13,7 +13,7 @@ function randomGradient() {
         "red-gradient",
         "green-gradient"
     ];
-    return gradients[Math.round(Math.random() * gradients.length)];
+    return gradients[Math.round(Math.random() * 10000) % gradients.length];
 }
 
 export interface Card {
@@ -21,11 +21,13 @@ export interface Card {
     components: CardComponent[];
     height: number;
     color: string;
+    hidden: boolean;
 }
 
 export interface CardComponent {
     component: string;
     value: any;
+    hidden: boolean;
 }
 
 interface CardComponentInternal extends CardComponent {
@@ -72,6 +74,7 @@ class CardComponentType {
         if (this.collapse) {
             return [{
                 component: this.component.name,
+                hidden: false,
                 priority: this.priority,
                 value: {
                     name,
@@ -83,6 +86,7 @@ class CardComponentType {
 
         return devices.map(device => ({
             component: this.component.name,
+            hidden: false,
             priority: this.priority,
             value: {
                 name: device.name,
@@ -198,6 +202,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             components,
             height,
             color: randomGradient(),
+            hidden: false,
         }
         ret.push(card);
     }
@@ -219,6 +224,7 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             components,
             height,
             color: randomGradient(),
+            hidden: false,
         }
         ret.push(card);
     }
