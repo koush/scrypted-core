@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <div>{{$store.state.systemState[value.deviceId].name.value}}</div> -->
+    <!-- <div>{{$store.state.systemState[deviceId].name.value}}</div> -->
     <a @click="dialog = true">
       <v-img contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
     </a>
@@ -29,7 +29,7 @@ scryptedServerVariables.apiKey = "AIzaSyCBbKhH_IM1oIZMOO65xOnzgDDrmC2lAoc";
 
 export default {
   name: "DashboardCamera",
-  props: ["value"],
+  props: ["deviceId"],
   data() {
     return {
       video: false,
@@ -52,7 +52,7 @@ export default {
       }
 
       this.$pushconnect().then(rtcManager => {
-        const rtspUrl = `camera://${this.value.deviceId}`;
+        const rtspUrl = `camera://${this.deviceId}`;
 
         currentStream = rtcManager.connect({
           senderId: scryptedServerVariables.senderId,
@@ -73,7 +73,7 @@ export default {
   },
   mounted() {
     const device = this.$scrypted.systemManager.getDeviceById(
-      this.value.deviceId
+      this.deviceId
     );
     if (device.interfaces.includes(ScryptedInterface.VideoCamera)) {
       this.video = true;
@@ -85,7 +85,7 @@ export default {
           this.src = url.pathname;
         })
         .catch(e => {
-          console.error(this.value.deviceId, e);
+          console.error(this.deviceId, e);
           this.src = "images/cameraloading.jpg";
         });
     } else {

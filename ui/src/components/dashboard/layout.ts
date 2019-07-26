@@ -1,4 +1,4 @@
-import { SystemManager, ScryptedDeviceType, ScryptedDevice, ScryptedInterface } from "@scrypted/sdk";
+import { SystemManager, ScryptedDeviceType, ScryptedDevice, ScryptedInterface, Settings, Setting } from "@scrypted/sdk";
 import DashboardMap from "./DashboardMap.vue";
 import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
@@ -141,6 +141,68 @@ cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Sensor, 0, true
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Camera, 0, false, 4, DashboardCamera, undefined, ScryptedInterface.Camera, ScryptedInterface.VideoCamera));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 10, false, 1, DashboardLock, undefined, ScryptedInterface.Lock));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Thermostat, 20, false, 1, DashboardThermostat, undefined, ScryptedInterface.TemperatureSetting));
+
+var cardComponentSettings: Map<string, Setting[]> = new Map();
+{
+    cardComponentSettings.set(DashboardToggle.name, [
+        {
+            title: "Label",
+            key: "name",
+            value: "New Toggle",
+        },
+        {
+            title: "Icon",
+            key: "type",
+            choices: [ScryptedDeviceType.Light, ScryptedDeviceType.Outlet, ScryptedDeviceType.Switch, ScryptedDeviceType.Fan]
+        },
+        {
+            title: "Toggle Devices",
+            key: "deviceIds",
+            type: `device[]:${JSON.stringify([ScryptedDeviceType.Light, ScryptedDeviceType.Outlet, ScryptedDeviceType.Switch, ScryptedDeviceType.Fan])}.includes(type) && interfaces.includes(${JSON.stringify(ScryptedInterface.OnOff)})`,
+            value: JSON.stringify([]),
+        }
+    ]);
+
+    cardComponentSettings.set(DashboardMap.name, [
+        {
+            title: "Position Devices",
+            key: "deviceIds",
+            type: `device[]:${JSON.stringify(ScryptedDeviceType.Sensor)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.PositionSensor)})`,
+            value: JSON.stringify([]),
+        }
+    ]);
+
+    cardComponentSettings.set(DashboardCamera.name, [
+        {
+            title: "Camera Device",
+            key: "deviceId",
+            type: `device:${JSON.stringify(ScryptedDeviceType.Camera)} === type && (interfaces.includes(${JSON.stringify(ScryptedInterface.Camera)}) || interfaces.includes(${JSON.stringify(ScryptedInterface.VideoCamera)}))`,
+            value: null,
+        }
+    ]);
+
+    cardComponentSettings.set(DashboardLock.name, [
+        {
+            title: "Lock Device",
+            key: "deviceId",
+            type: `device:${JSON.stringify(ScryptedDeviceType.Lock)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.Lock)})`,
+            value: null,
+        }
+    ]);
+
+    cardComponentSettings.set(DashboardThermostat.name, [
+        {
+            title: "Themostat Device",
+            key: "deviceId",
+            type: `device:${JSON.stringify(ScryptedDeviceType.Thermostat)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.TemperatureSetting)})`,
+            value: null,
+        }
+    ]);
+}
+
+export function getCardComponentSettings(): Map<string, Setting[]> {
+    return cardComponentSettings;
+}
 
 export function getDefaultDashboard(deviceIds: string[], systemManager: SystemManager): Card[] {
     var supportedTypes: Map<ScryptedDevice, CardComponentType> = new Map();

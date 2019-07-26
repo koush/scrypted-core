@@ -2,10 +2,13 @@
   <Grower
     addButton="Add Storage Entry"
     v-model="lazyValue"
-    :component="StorageEntry"
     :empty="{ key: '', value:''}"
     @input="onInput"
-  ></Grower>
+  >
+    <template v-slot:default="slotProps">
+      <StorageEntry v-model="slotProps.item" @input="slotProps.onInput"></StorageEntry>
+    </template>
+  </Grower>
 </template>
 <script>
 import Grower from "./Grower.vue";
@@ -16,7 +19,8 @@ import ObjectToArrayValue from "./ObjectToArrayValue.vue";
 export default {
   mixins: [CustomValue, ObjectToArrayValue],
   components: {
-    Grower
+    Grower,
+    StorageEntry,
   },
   computed: {
     StorageEntry() {

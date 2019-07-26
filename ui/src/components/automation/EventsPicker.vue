@@ -1,11 +1,14 @@
 <template>
-  <Grower
-    v-model="lazyValue"
-    :component="EventPicker"
-    :empty="unassigned"
-    @input="onInput"
-    :componentProps="componentProps"
-  ></Grower>
+  <Grower v-model="lazyValue" :empty="unassigned" @input="onInput">
+    <template v-slot:default="slotProps">
+      <EventPicker
+        :events="events"
+        :interfaces="interfaces"
+        v-model="slotProps.item"
+        @input="slotProps.onInput"
+      ></EventPicker>
+    </template>
+  </Grower>
 </template>
 
 <script>
@@ -17,11 +20,12 @@ export default {
   props: {
     name: String,
     events: Array,
-    interfaces: Array,
+    interfaces: Array
   },
   mixins: [CustomValue],
   components: {
     Grower,
+    EventPicker
   },
   methods: {
     createInputValue() {
@@ -29,13 +33,10 @@ export default {
     }
   },
   computed: {
-    EventPicker() {
-      return EventPicker;
-    },
     componentProps() {
       return {
         events: this.events,
-        interfaces: this.interfaces,
+        interfaces: this.interfaces
       };
     },
     unassigned() {
@@ -45,6 +46,6 @@ export default {
         model: {}
       };
     }
-  },
+  }
 };
 </script>

@@ -1,12 +1,19 @@
 <template>
   <Grower
     v-model="lazyValue"
-    :component="ScriptVariablePicker"
     :empty="unassigned"
     @input="onInput"
-    :componentProps="componentProps"
     addButton="Add Variable"
-  ></Grower>
+  >
+    <template v-slot:default="slotProps">
+      <ScriptVariablePicker
+        :actions="actions"
+        :scriptType="scriptType"
+        v-model="slotProps.item"
+        @input="slotProps.onInput"
+      ></ScriptVariablePicker>
+    </template>
+  </Grower>
 </template>
 
 <script>
@@ -18,18 +25,10 @@ export default {
   props: ["actions", "scriptType"],
   mixins: [CustomValue],
   components: {
-    Grower
+    Grower,
+    ScriptVariablePicker
   },
   computed: {
-    ScriptVariablePicker() {
-      return ScriptVariablePicker;
-    },
-    componentProps() {
-      return {
-        actions: this.actions,
-        scriptType: this.scryptType
-      };
-    },
     unassigned() {
       return {
         key: "",

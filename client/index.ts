@@ -1,4 +1,4 @@
-import { EventListener, ScryptedStatic, SystemManager, ScryptedDevice, EventDetails, EventListenerRegister, ScryptedDeviceType, EventListenerOptions, ScryptedInterfaceDescriptors, MediaManager, MediaObject, FFMpegInput, ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedStatic, SystemManager, ScryptedDevice, EventDetails, EventListenerRegister, ScryptedDeviceType, EventListenerOptions, ScryptedInterfaceDescriptors, MediaManager, MediaObject, FFMpegInput, ScryptedInterface } from "@scrypted/sdk";
 import { Socket, SocketOptions } from 'engine.io-client';
 const Client = require('engine.io-client');
 import axios from 'axios';

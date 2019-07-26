@@ -1,5 +1,7 @@
-.header-card {
-  margin-bottom: 20px;
+.header-card::before {
+  margin-top: 20px;
+  display: block;
+  content: "";
 }
 .header-card>*:nth-child(1) {
   border-top-left-radius: inherit;

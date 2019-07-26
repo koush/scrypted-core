@@ -1,5 +1,5 @@
 <template>
-  <v-textarea label="Script" v-model="value.script" outlined auto-grow></v-textarea>
+  <v-textarea label="Script" v-model="lazyValue.script" outlined auto-grow @input="onChange"></v-textarea>
 </template>
 
 <script>

@@ -23,7 +23,7 @@ import DashboardBase from "./DashboardBase";
 export default {
   name: "DashboardMap",
   mixins: [DashboardBase],
-  props: ["value"],
+  props: ["deviceIds"],
   watch: {
     center() {
       this.updateBounds();
@@ -74,7 +74,7 @@ export default {
       };
     },
     markers() {
-      return this.value.deviceIds.map(id => {
+      return this.deviceIds.map(id => {
         const device = this.getDevice(id);
         var position = device.position;
         return {

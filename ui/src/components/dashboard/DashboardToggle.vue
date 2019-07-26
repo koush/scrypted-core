@@ -3,12 +3,12 @@
     <v-list-item-icon>
       <font-awesome-icon
         size="sm"
-        :icon="typeToIcon(value.type)"
+        :icon="typeToIcon(type)"
         :color="on ? 'orange' : '#a9afbb'"
       />
     </v-list-item-icon>
     <v-list-item-content>
-      <v-list-item-title class="font-weight-light">{{ groupName }}</v-list-item-title>
+      <v-list-item-title class="font-weight-light">{{ name }}</v-list-item-title>
     </v-list-item-content>
 
     <v-list-item-action>
@@ -17,20 +17,20 @@
 
     <v-overlay :value="showLightsDialog" opacity=".8">
       <v-container fluid>
-        <v-card v-click-outside="maybeHideDialog" dark color="blue" raised>
+        <v-card v-click-outside="maybeHideDialog" dark color="purple" raised>
           <v-card-title>
             <font-awesome-icon
               size="sm"
-              :icon="typeToIcon(value.type)"
+              :icon="typeToIcon(type)"
               color="white"
               style="margin-right: 20px"
             />
-            <span class="title font-weight-light">{{ groupName }}</span>
+            <span class="title font-weight-light">{{ name }}</span>
           </v-card-title>
 
           <v-flex xs12>
             <v-layout align-center justify-center column>
-              <div v-if="value.type == 'Light'">
+              <div v-if="type == 'Light'">
                 <div class="slider-pad-bottom"></div>
                 <vue-slider
                   :width="40"
@@ -42,12 +42,12 @@
                 ></vue-slider>
                 <div class="slider-pad-bottom"></div>
               </div>
-              <v-list color="blue">
+              <v-list color="purple">
                 <DashboardPopupToggle
                   :light="true"
-                  v-for="deviceId in value.deviceIds"
+                  v-for="deviceId in deviceIds"
                   :key="deviceId"
-                  :type="value.type"
+                  :type="type"
                   :id="deviceId"
                   :name="$store.state.systemState[deviceId].name.value"
                 ></DashboardPopupToggle>
@@ -64,13 +64,13 @@ import DashboardBase from "./DashboardBase";
 import DashboardPopupToggle from "./DashboardPopupToggle.vue";
 import ClickOutside from "vue-click-outside";
 import VueSlider from "vue-slider-component";
-import "vue-slider-component/theme/material.css";
+import "vue-slider-component/theme/default.css";
 import { ScryptedInterface } from "@scrypted/sdk";
 import throttle from "lodash.throttle";
 
 export default {
   name: "DashboardToggle",
-  props: ["value"],
+  props: ["name", "deviceIds", "type"],
   mixins: [DashboardBase],
   components: {
     VueSlider,
@@ -102,7 +102,7 @@ export default {
       }, 300);
     },
     debounceSetBrightness: throttle(function(self) {
-      self.value.deviceIds
+      self.deviceIds
         .map(id => self.getDevice(id))
         .filter(device =>
           device.interfaces.includes(ScryptedInterface.Brightness)
@@ -113,7 +113,7 @@ export default {
   computed: {
     brightness: {
       get() {
-        const brightnessDevices = this.value.deviceIds
+        const brightnessDevices = this.deviceIds
           .map(id => this.getDevice(id))
           .filter(device =>
             device.interfaces.includes(ScryptedInterface.Brightness)
@@ -132,20 +132,14 @@ export default {
         this.debounceSetBrightness(this);
       }
     },
-    groupName() {
-      if (this.value.name) {
-        return this.value.name;
-      }
-      return this.pluralize(this.value.type);
-    },
     on: {
       get() {
-        return this.value.deviceIds
+        return this.deviceIds
           .map(id => this.getDevice(id))
           .reduce((on, device) => on || device.on, false);
       },
       set(value) {
-        this.value.deviceIds
+        this.deviceIds
           .map(id => this.getDevice(id))
           .forEach(device => device[value ? "turnOn" : "turnOff"]());
       }

@@ -4,13 +4,15 @@
       <v-layout>
         <v-flex>
           <Grower
-            :componentProps="componentProps"
             addButton="Add Password"
             v-model="passwords"
-            :component="PasswordEntry"
             :empty="{ key: '', value:''}"
             @input="onInput"
-          ></Grower>
+          >
+            <template v-slot:default="slotProps">
+              <PasswordEntry :device="device" v-model="slotProps.item" @input="slotProps.onInput"></PasswordEntry>
+            </template>
+          </Grower>
         </v-flex>
       </v-layout>
     </v-container>
@@ -25,23 +27,16 @@ export default {
   mixins: [RPCInterface],
   components: {
     Grower,
+    PasswordEntry
   },
   data() {
     return {
-      PasswordEntry,
       passwords: []
     };
   },
   watch: {
     value() {
       this.refresh();
-    }
-  },
-  computed: {
-    componentProps() {
-      return {
-        device: this.device
-      };
     }
   },
   methods: {

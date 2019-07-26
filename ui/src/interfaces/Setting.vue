@@ -26,21 +26,40 @@
         </v-btn>
       </template>
     </v-select>
-    <v-select
+    <Grower
+      v-else-if="lazyValue.type && lazyValue.type.toLowerCase().startsWith('device[]')"
+      v-model="lazyValue.value"
+    >
+      <template v-slot:default="slotProps">
+        <DevicePicker
+          v-model="slotProps.item"
+          @input="slotProps.onInput"
+          :devices="devices"
+          :title="lazyValue.title"
+          :description="lazyValue.description"
+        ></DevicePicker>
+      </template>
+
+      <template v-slot:append-outer>
+        <v-btn v-if="dirty" @click="save" >
+         Save
+        </v-btn>
+      </template>
+    </Grower>
+
+    <DevicePicker
       v-else-if="lazyValue.type && lazyValue.type.toLowerCase().startsWith('device')"
       v-model="lazyValue.value"
-      :items="devices"
-      outlined
-      :label="lazyValue.title"
-      :hint="lazyValue.description"
-      persistent-hint
+      :devices="devices"
+      :title="lazyValue.title"
+      :description="lazyValue.description"
     >
       <template v-slot:append-outer>
         <v-btn v-if="dirty" color="green" dark tile @click="save" class="shift-up">
           <v-icon>check</v-icon>
         </v-btn>
       </template>
-    </v-select>
+    </DevicePicker>
     <v-text-field
       :readonly="lazyValue.readonly"
       v-else
@@ -62,20 +81,33 @@
 </template>
 <script>
 import RPCInterface from "./RPCInterface.vue";
+import DevicePicker from "../common/DevicePicker.vue";
+import Grower from "../common/Grower.vue";
+import cloneDeep from "lodash.clonedeep";
 
 export default {
   mixins: [RPCInterface],
+  components: {
+    DevicePicker,
+    Grower
+  },
   computed: {
     booleanValue: {
       get() {
-        return this.lazyValue.value && this.lazyValue.value.toLowerCase() === 'true';
+        return (
+          this.lazyValue.value && this.lazyValue.value.toLowerCase() === "true"
+        );
       },
       set(val) {
         this.lazyValue.value = val.toString();
       }
     },
     dirty() {
-      return this.lazyValue.value !== this.value.value;
+      var type = this.value.type || "";
+      if (type.indexOf("[]") == -1) {
+        return this.lazyValue.value !== this.value.value;
+      }
+      return JSON.stringify(this.lazyValue.value) !== this.value.value;
     },
     devices() {
       var expression;
@@ -85,7 +117,7 @@ export default {
       } catch (e) {
         expression = "true;";
       }
-      return this.$store.state.scrypted.devices
+      var ret = this.$store.state.scrypted.devices
         .map(id => this.$scrypted.systemManager.getDeviceById(id))
         .filter(device => {
           try {
@@ -102,11 +134,36 @@ export default {
           id: device.id,
           text: device.name
         }));
+        ret.splice(0, 0, {
+          id: null,
+          text: "Select a Device",
+        })
+        return ret;
     }
   },
   methods: {
+    createLazyValue() {
+      var type = this.value.type || "";
+      if (type.indexOf("[]") == -1) {
+        return cloneDeep(this.value);
+      }
+
+      var ret = cloneDeep(this.value);
+      ret.value = JSON.parse(ret.value);
+      return ret;
+    },
+    createInputValue() {
+      var type = this.lazyValue.type || "";
+      if (type.indexOf("[]") == -1) {
+        return this.lazyValue;
+      }
+
+      var ret = cloneDeep(this.lazyValue);
+      ret.value = JSON.stringify(ret.value.filter(id => id));
+      return ret;
+    },
     save() {
-      this.rpc().putSetting(this.lazyValue.key, this.lazyValue.value);
+      this.rpc().putSetting(this.lazyValue.key, this.createInputValue().value);
       this.onInput();
     }
   }

@@ -1,24 +1,24 @@
 <template>
-  <v-list-item ripple :to="getDeviceViewPath(value.deviceId)">
+  <v-list-item ripple :to="getDeviceViewPath(deviceId)">
     <v-list-item-icon>
       <font-awesome-icon size="sm" :icon="locked ? 'lock' : 'lock-open'" :color="locked ? '#a9afbb' : 'orange'" />
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title
         class="font-weight-light"
-      >{{ $store.state.systemState[value.deviceId].name.value }}</v-list-item-title>
+      >{{ $store.state.systemState[deviceId].name.value }}</v-list-item-title>
     </v-list-item-content>
     <v-list-item-action>
       <v-btn icon x-small @click.prevent="locked = false">
         <v-icon
-          :color="$store.state.systemState[value.deviceId].lockState.value === 'Locked' ? undefined : 'orange'"
+          :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? undefined : 'orange'"
         >lock_open</v-icon>
       </v-btn>
     </v-list-item-action>
     <v-list-item-action>
       <v-btn icon x-small @click.prevent="locked = true">
         <v-icon
-          :color="$store.state.systemState[value.deviceId].lockState.value === 'Locked' ? 'green' : undefined"
+          :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? 'green' : undefined"
         >lock</v-icon>
       </v-btn>
     </v-list-item-action>
@@ -32,7 +32,7 @@ import {getDeviceViewPath} from "../helpers";
 export default {
   name: "DashboardLock",
   mixins: [DashboardBase],
-  props: ["value"],
+  props: ["deviceId"],
   methods: {
     getDeviceViewPath,
   },
@@ -40,13 +40,13 @@ export default {
     locked: {
       get() {
         return (
-          this.$store.state.systemState[this.value.deviceId].lockState.value ==
+          this.$store.state.systemState[this.deviceId].lockState.value ==
           "Locked"
         );
       },
       set(val) {
         const device = this.$scrypted.systemManager.getDeviceById(
-          this.value.deviceId
+          this.deviceId
         );
         if (val) {
           device.lock();

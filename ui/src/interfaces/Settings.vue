@@ -37,15 +37,12 @@ export default {
     this.refresh();
   },
   methods: {
-    refresh() {
-      this.rpc()
-        .getSettings()
-        .then(settings => {
-          this.settings = settings.map(setting => ({
-            key: setting.key,
-            value: setting
-          }));
-        });
+    async refresh() {
+      var settings = await this.rpc().getSettings();
+      this.settings = settings.map(setting => ({
+        key: setting.key,
+        value: setting
+      }));
     }
   }
 };

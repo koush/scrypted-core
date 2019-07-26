@@ -1,12 +1,15 @@
 <template>
-  <Grower v-model="lazyValue" :component="InterfacePicker" :empty="unassigned" @input="onInput" :componentProps="{interfaces}"></Grower>
+  <Grower v-model="lazyValue" :empty="unassigned" @input="onInput">
+    <template v-slot:default="slotProps">
+      <InterfacePicker :interfaces="interfaces" v-model="slotProps.item" @input="slotProps.onInput"></InterfacePicker>
+    </template>
+  </Grower>
 </template>
 
 <script>
 import InterfacePicker from "./InterfacePicker.vue";
 import CustomValue from "../../common/CustomValue.vue";
 import Grower from "../../common/Grower.vue";
-
 
 export default {
   props: {
@@ -16,11 +19,9 @@ export default {
   mixins: [CustomValue],
   components: {
     Grower,
+    InterfacePicker
   },
   computed: {
-    InterfacePicker() {
-      return InterfacePicker;
-    },
     unassigned() {
       return {
         // unique per interfaces array
