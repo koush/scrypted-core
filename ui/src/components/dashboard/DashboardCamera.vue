@@ -97,6 +97,7 @@ export default {
           this.src = url.pathname;
         })
         .catch(e => {
+          console.error(this.deviceId, e);
           this.src = "images/cameraloading.jpg";
         });
     }

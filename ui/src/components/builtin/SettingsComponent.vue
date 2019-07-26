@@ -89,7 +89,7 @@ export default {
     }
   },
   mounted() {
-    this.$refs.mapRef.$mapPromise.then(map => {
+    this.$refs.mapRef.$mapPromise.then(() => {
       let element = this.$refs.locationAutocomplete.$el;
       element = element.querySelector("input");
       var autocomplete = new google.maps.places.Autocomplete(element, {

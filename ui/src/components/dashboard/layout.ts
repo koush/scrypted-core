@@ -1,4 +1,4 @@
-import { SystemManager, ScryptedDeviceType, ScryptedDevice, ScryptedInterface, Settings, Setting } from "@scrypted/sdk";
+import { SystemManager, ScryptedDeviceType, ScryptedDevice, ScryptedInterface, Setting } from "@scrypted/sdk";
 import DashboardMap from "./DashboardMap.vue";
 import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
