@@ -4,6 +4,7 @@ import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
 import DashboardLock from "./DashboardLock.vue";
 import DashboardThermostat from "./DashboardThermostat.vue";
+import DashboardStartStop from "./DashboardStartStop.vue";
 import { Multimap, EnsureMap } from "./multimap";
 
 function randomGradient() {
@@ -141,6 +142,7 @@ cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Sensor, 0, true
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Camera, 0, false, 4, DashboardCamera, undefined, ScryptedInterface.Camera, ScryptedInterface.VideoCamera));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 10, false, 1, DashboardLock, undefined, ScryptedInterface.Lock));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Thermostat, 20, false, 1, DashboardThermostat, undefined, ScryptedInterface.TemperatureSetting));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Vacuum, 25, false, 1, DashboardStartStop, undefined, ScryptedInterface.StartStop));
 
 var cardComponentSettings: Map<string, Setting[]> = new Map();
 {
@@ -183,6 +185,11 @@ var cardComponentSettings: Map<string, Setting[]> = new Map();
 
     cardComponentSettings.set(DashboardLock.name, [
         {
+            title: "Custom Label",
+            key: "name",
+            value: "",
+        },
+        {
             title: "Lock Device",
             key: "deviceId",
             type: `device:${JSON.stringify(ScryptedDeviceType.Lock)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.Lock)})`,
@@ -192,9 +199,28 @@ var cardComponentSettings: Map<string, Setting[]> = new Map();
 
     cardComponentSettings.set(DashboardThermostat.name, [
         {
+            title: "Custom Label",
+            key: "name",
+            value: "",
+        },
+        {
             title: "Themostat Device",
             key: "deviceId",
             type: `device:${JSON.stringify(ScryptedDeviceType.Thermostat)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.TemperatureSetting)})`,
+            value: null,
+        }
+    ]);
+
+    cardComponentSettings.set(DashboardStartStop.name, [
+        {
+            title: "Custom Label",
+            key: "name",
+            value: "",
+        },
+        {
+            title: "Vacuum Device",
+            key: "deviceId",
+            type: `device:${JSON.stringify(ScryptedDeviceType.Vacuum)} === type && interfaces.includes(${JSON.stringify(ScryptedInterface.StartStop)})`,
             value: null,
         }
     ]);

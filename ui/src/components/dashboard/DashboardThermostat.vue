@@ -6,7 +6,7 @@
     <v-list-item-content>
       <v-list-item-title
         class="font-weight-light"
-      >{{ $store.state.systemState[deviceId].name.value }}</v-list-item-title>
+      >{{ name || device.name }}</v-list-item-title>
     </v-list-item-content>
 
     <v-list-item-action>
@@ -22,7 +22,7 @@ import colors from "vuetify/es5/util/colors";
 
 export default {
   name: "DashboardThermostat",
-  props: ["deviceId"],
+  props: ["name", "deviceId"],
   mixins: [DashboardBase],
   methods: {
     getDeviceViewPath
@@ -30,7 +30,7 @@ export default {
 
   computed: {
     icon() {
-      switch (this.getDevice(this.deviceId).thermostatMode) {
+      switch (this.device.thermostatMode) {
         case ThermostatMode.Heat:
           return "fire-alt";
         case ThermostatMode.Cool:
@@ -41,16 +41,15 @@ export default {
       return "thermometer-three-quarters";
     },
     color() {
-      const device = this.getDevice(this.deviceId);
-      if (device.thermostatMode === ThermostatMode.Off) {
+      if (this.device.thermostatMode === ThermostatMode.Off) {
         return "#a9afbb";
       }
 
-      if (device.thermostatMode == ThermostatMode.Heat) {
+      if (this.device.thermostatMode == ThermostatMode.Heat) {
         return colors.orange.base;
-      } else if (device.thermostatMode == ThermostatMode.Cool) {
+      } else if (this.device.thermostatMode == ThermostatMode.Cool) {
         return colors.blue.base;
-      } else if (device.thermostatMode == ThermostatMode.Eco) {
+      } else if (this.device.thermostatMode == ThermostatMode.Eco) {
         return colors.green.base;
       }
       return colors.orange.base;
@@ -58,17 +57,14 @@ export default {
     on: {
       get() {
         return (
-          this.getDevice(this.deviceId).thermostatMode !== ThermostatMode.Off
+          this.device.thermostatMode !== ThermostatMode.Off
         );
       },
       set(val) {
-        const device = this.$scrypted.systemManager.getDeviceById(
-          this.deviceId
-        );
         if (val) {
-          device.setThermostatMode(ThermostatMode.On);
+          this.device.setThermostatMode(ThermostatMode.On);
         } else {
-          device.setThermostatMode(ThermostatMode.Off);
+          this.device.setThermostatMode(ThermostatMode.Off);
         }
       }
     }

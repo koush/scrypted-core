@@ -50,15 +50,17 @@
                 </v-layout>
               </v-card-title>
 
-              <v-layout align-center justify-center>
-                <component
-                  v-for="iface in cardButtonInterfaces"
-                  :key="iface"
-                  :value="deviceState"
-                  :device="systemDevice"
-                  :is="iface"
-                ></component>
-              </v-layout>
+              <v-flex>
+                <v-layout align-center justify-center>
+                  <component
+                    v-for="iface in cardButtonInterfaces"
+                    :key="iface"
+                    :value="deviceState"
+                    :device="systemDevice"
+                    :is="iface"
+                  ></component>
+                </v-layout>
+              </v-flex>
 
               <v-form>
                 <v-container>
@@ -167,7 +169,9 @@
         <v-flex xs12 v-for="iface in cardInterfaces" :key="iface">
           <v-flex v-if="name">
             <v-card>
-              <v-card-title class="red-gradient white--text subtitle-1 font-weight-light">{{ iface }}</v-card-title>
+              <v-card-title
+                class="red-gradient white--text subtitle-1 font-weight-light"
+              >{{ iface }}</v-card-title>
               <component :value="deviceState" :device="systemDevice" :is="iface"></component>
             </v-card>
           </v-flex>

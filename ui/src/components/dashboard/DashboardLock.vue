@@ -1,25 +1,24 @@
 <template>
   <v-list-item ripple :to="getDeviceViewPath(deviceId)">
     <v-list-item-icon>
-      <font-awesome-icon size="sm" :icon="locked ? 'lock' : 'lock-open'" :color="locked ? '#a9afbb' : 'orange'" />
+      <font-awesome-icon
+        class="mt-1"
+        size="sm"
+        :icon="locked ? 'lock' : 'lock-open'"
+        :color="locked ? '#a9afbb' : 'orange'"
+      />
     </v-list-item-icon>
     <v-list-item-content>
-      <v-list-item-title
-        class="font-weight-light"
-      >{{ $store.state.systemState[deviceId].name.value }}</v-list-item-title>
+      <v-list-item-title class="font-weight-light">{{ name || device.name }}</v-list-item-title>
     </v-list-item-content>
     <v-list-item-action>
       <v-btn icon x-small @click.prevent="locked = false">
-        <v-icon
-          :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? undefined : 'orange'"
-        >lock_open</v-icon>
+        <v-icon :color="device.lockState === 'Locked' ? undefined : 'orange'">lock_open</v-icon>
       </v-btn>
     </v-list-item-action>
     <v-list-item-action>
       <v-btn icon x-small @click.prevent="locked = true">
-        <v-icon
-          :color="$store.state.systemState[deviceId].lockState.value === 'Locked' ? 'green' : undefined"
-        >lock</v-icon>
+        <v-icon :color="device.lockState === 'Locked' ? 'green' : undefined">lock</v-icon>
       </v-btn>
     </v-list-item-action>
   </v-list-item>
@@ -27,22 +26,19 @@
 
 <script lang="ts">
 import DashboardBase from "./DashboardBase";
-import {getDeviceViewPath} from "../helpers";
+import { getDeviceViewPath } from "../helpers";
 
 export default {
   name: "DashboardLock",
   mixins: [DashboardBase],
-  props: ["deviceId"],
+  props: ["name", "deviceId"],
   methods: {
-    getDeviceViewPath,
+    getDeviceViewPath
   },
   computed: {
     locked: {
       get() {
-        return (
-          this.$store.state.systemState[this.deviceId].lockState.value ==
-          "Locked"
-        );
+        return this.device.lockState == "Locked";
       },
       set(val) {
         const device = this.$scrypted.systemManager.getDeviceById(

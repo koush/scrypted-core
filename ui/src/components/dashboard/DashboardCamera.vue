@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <div>{{$store.state.systemState[deviceId].name.value}}</div> -->
     <a @click="dialog = true">
       <v-img contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
     </a>
@@ -20,6 +19,7 @@
 </template>
 <script>
 import { ScryptedInterface } from "@scrypted/sdk";
+import DashboardBase from "./DashboardBase";
 var currentStream;
 
 const scryptedServerVariables = {};
@@ -30,6 +30,7 @@ scryptedServerVariables.apiKey = "AIzaSyCBbKhH_IM1oIZMOO65xOnzgDDrmC2lAoc";
 export default {
   name: "DashboardCamera",
   props: ["deviceId"],
+  mixins: [DashboardBase],
   data() {
     return {
       video: false,
@@ -72,12 +73,9 @@ export default {
     }
   },
   mounted() {
-    const device = this.$scrypted.systemManager.getDeviceById(
-      this.deviceId
-    );
-    if (device.interfaces.includes(ScryptedInterface.VideoCamera)) {
+    if (this.device.interfaces.includes(ScryptedInterface.VideoCamera)) {
       this.video = true;
-      const videoStream = device.getVideoStream();
+      const videoStream = this.device.getVideoStream();
       this.$scrypted.mediaManager
         .convertMediaObjectToLocalUri(videoStream, "image/jpeg")
         .then(result => {
@@ -89,7 +87,7 @@ export default {
           this.src = "images/cameraloading.jpg";
         });
     } else {
-      const picture = device.takePicture();
+      const picture = this.device.takePicture();
       this.$scrypted.mediaManager
         .convertMediaObjectToLocalUri(picture, "image/jpeg")
         .then(result => {

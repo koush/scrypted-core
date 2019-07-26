@@ -74,8 +74,7 @@ export default {
       };
     },
     markers() {
-      return this.deviceIds.map(id => {
-        const device = this.getDevice(id);
+      return this.devices.map(device => {
         var position = device.position;
         return {
           lat: position.latitude,

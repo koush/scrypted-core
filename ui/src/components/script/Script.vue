@@ -135,7 +135,6 @@
               <v-btn v-if="script.npmPackage" outlined color="blue" @click="reload" xs4>Reload</v-btn>
               <v-btn v-else outlined color="blue" @click="test" xs4>Run Script</v-btn>
               <v-btn outlined color="blue" @click="debug" xs4>Debug</v-btn>
-              <v-btn xs4 outlined color="blue" @click="showStorage = !showStorage">Storage</v-btn>
               <v-alert
                 style="margin-top: 16px;"
                 outlined
@@ -154,6 +153,7 @@
       </v-form>
 
       <v-card-actions>
+        <v-btn text color="primary" @click="showStorage = !showStorage">Storage</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           v-if="script.npmPackage && !updateAvailable"

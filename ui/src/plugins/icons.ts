@@ -5,6 +5,10 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faHome,
+  faPlayCircle,
+  faStopCircle,
+  faPauseCircle,
   faSlidersH,
   faMagic,
   faEdit,
@@ -72,6 +76,10 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const icons =[
+  faHome,
+  faPlayCircle,
+  faStopCircle,
+  faPauseCircle,
   faSlidersH,
   faMagic,
   faEdit,

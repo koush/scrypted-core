@@ -11,9 +11,9 @@
         {{ device.internalId }}
       </v-card-text>
       <v-card-actions>
-        <v-btn text color="blue" :to="`/device/${ownerDevice.id}`">{{ ownerDevice.name }}</v-btn>
-        <v-spacer></v-spacer>
         <v-btn text color="primary" @click="showStorage = !showStorage">Storage</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn text color="blue" :to="`/device/${ownerDevice.id}`">{{ ownerDevice.name }}</v-btn>
       </v-card-actions>
     </v-card>
 

@@ -1,5 +1,5 @@
 <template>
-  <v-list-item ripple :to="getDeviceViewPath(id)">
+  <v-list-item ripple :to="getDeviceViewPath(device.id)">
     <v-list-item-icon>
       <font-awesome-icon
         size="sm"
@@ -20,7 +20,7 @@
 import {getDeviceViewPath} from "../helpers";
 import DashboardBase from "./DashboardBase";
 export default {
-  props: ["id", "type", "name", "light"],
+  props: ["type", "name", "light"],
   mixins: [DashboardBase],
   methods: {
     getDeviceViewPath,
@@ -28,10 +28,10 @@ export default {
   computed: {
     on: {
       get() {
-        return this.$store.state.systemState[this.id].on.value;
+        return this.device.on;
       },
       set(value) {
-        this.setOnOff(this.id, value);
+        value ? this.device.turnOn() : this.device.turnOff();
       }
     }
   }

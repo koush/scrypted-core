@@ -1,11 +1,7 @@
 <template>
   <v-list-item ripple @click="showDevices()">
     <v-list-item-icon>
-      <font-awesome-icon
-        size="sm"
-        :icon="typeToIcon(type)"
-        :color="on ? 'orange' : '#a9afbb'"
-      />
+      <font-awesome-icon size="sm" :icon="typeToIcon(type)" :color="on ? 'orange' : '#a9afbb'" />
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title class="font-weight-light">{{ name }}</v-list-item-title>
@@ -45,11 +41,11 @@
               <v-list color="purple">
                 <DashboardPopupToggle
                   :light="true"
-                  v-for="deviceId in deviceIds"
-                  :key="deviceId"
+                  v-for="device in devices"
+                  :key="device.id"
                   :type="type"
-                  :id="deviceId"
-                  :name="$store.state.systemState[deviceId].name.value"
+                  :deviceId="device.id"
+                  :name="device.name"
                 ></DashboardPopupToggle>
               </v-list>
             </v-layout>
@@ -82,7 +78,7 @@ export default {
   data() {
     return {
       showLightsDialog: false,
-      watchClickOutside: false,
+      watchClickOutside: false
     };
   },
   methods: {
@@ -113,11 +109,9 @@ export default {
   computed: {
     brightness: {
       get() {
-        const brightnessDevices = this.deviceIds
-          .map(id => this.getDevice(id))
-          .filter(device =>
-            device.interfaces.includes(ScryptedInterface.Brightness)
-          );
+        const brightnessDevices = this.devices.filter(device =>
+          device.interfaces.includes(ScryptedInterface.Brightness)
+        );
         if (!brightnessDevices.length) {
           return undefined;
         }
@@ -134,14 +128,10 @@ export default {
     },
     on: {
       get() {
-        return this.deviceIds
-          .map(id => this.getDevice(id))
-          .reduce((on, device) => on || device.on, false);
+        return this.devices.reduce((on, device) => on || device.on, false);
       },
       set(value) {
-        this.deviceIds
-          .map(id => this.getDevice(id))
-          .forEach(device => device[value ? "turnOn" : "turnOff"]());
+        this.devices.forEach(device => device[value ? "turnOn" : "turnOff"]());
       }
     }
   }

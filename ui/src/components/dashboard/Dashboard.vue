@@ -202,6 +202,7 @@ import DashboardToggle from "./DashboardToggle.vue";
 import DashboardCamera from "./DashboardCamera.vue";
 import DashboardLock from "./DashboardLock.vue";
 import DashboardThermostat from "./DashboardThermostat.vue";
+import DashboardStartStop from "./DashboardStartStop.vue";
 import DashboardSensors from "./DashboardSensors.vue";
 import DashboardBase from "./DashboardBase";
 import DashboardAddComponent from "./DashboardAddComponent.vue";
@@ -262,6 +263,7 @@ export default {
     DashboardLock,
     DashboardSensors,
     DashboardThermostat,
+    DashboardStartStop,
     DashboardAddComponent,
     Settings
   },
