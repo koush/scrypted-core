@@ -50,7 +50,8 @@
     </v-layout>
 
     <v-layout :align-center="cardAlignCenter">
-      <v-flex v-if="!cardColumns.length" xs12 md6 lg4>
+      <div v-if="!cardColumns"></div>
+      <v-flex v-else-if="isEmpty" xs12 md6 lg4>
         <v-flex>
           <v-card raised class="header-card">
             <v-card-title
@@ -276,7 +277,7 @@ export default {
     return {
       editMode: false,
       editCards: false,
-      cardColumns: [],
+      cardColumns: null,
       cardAlignCenter: false,
       cardComponentSettings: null
     };
@@ -346,7 +347,7 @@ export default {
         components: [],
         height: 1,
         color: "green-gradient",
-        state: {},
+        state: {}
       };
       this.cardColumns[0].splice(0, 0, card);
     },
@@ -410,35 +411,38 @@ export default {
       }
     },
     sanitizeCardColumns(cardColumns) {
-              cardColumns.forEach((column, colIndex) => {
-                column.forEach((card: Card, cardIndex) => {
-                  // sanitize
-                  const sanitized: Card = {
-                    name: undefined,
-                    components: [],
-                    height: 1,
-                    color: "green-gradient",
-                    state: {
-                      hidden: false,
-                    }
-                  };
-                  cardColumns[colIndex][cardIndex] = Object.assign(sanitized, card);
-                  
-                  card.components.forEach((component, componentIndex) => {
-                    var sanitized: CardComponent = {
-                      component: undefined,
-                      value: undefined,
-                      state: {
-                        hidden: false,
-                      }
-                    };
+      cardColumns.forEach((column, colIndex) => {
+        column.forEach((card: Card, cardIndex) => {
+          // sanitize
+          const sanitized: Card = {
+            name: undefined,
+            components: [],
+            height: 1,
+            color: "green-gradient",
+            state: {
+              hidden: false
+            }
+          };
+          cardColumns[colIndex][cardIndex] = Object.assign(sanitized, card);
 
-                    card.components[componentIndex] = Object.assign(sanitized, component);
-                  })
-                });
-              });
+          card.components.forEach((component, componentIndex) => {
+            var sanitized: CardComponent = {
+              component: undefined,
+              value: undefined,
+              state: {
+                hidden: false
+              }
+            };
 
-              this.cardColumns = cardColumns;
+            card.components[componentIndex] = Object.assign(
+              sanitized,
+              component
+            );
+          });
+        });
+      });
+
+      this.cardColumns = cardColumns;
     },
     async getCardLayout(auto) {
       if (!auto) {
@@ -462,7 +466,7 @@ export default {
         }
       }
 
-      var cards = this.cards;
+      var cards = this.autoCards;
       const columns = [];
 
       for (var card of cards) {
@@ -500,6 +504,14 @@ export default {
     }
   },
   computed: {
+    isEmpty() {
+      for (var col of this.cardColumns) {
+        if (col.length) {
+          return false;
+        }
+      }
+      return true;
+    },
     showCardComponentSettings: {
       get() {
         return !!this.cardComponentSettings;
@@ -522,7 +534,7 @@ export default {
     columnsForBreakpoint() {
       return this.getColumnsForBreakpoint(this.$vuetify.breakpoint.name);
     },
-    cards() {
+    autoCards() {
       return getDefaultDashboard(
         this.$store.state.scrypted.devices,
         this.$scrypted.systemManager
