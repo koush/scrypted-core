@@ -1,7 +1,7 @@
 <template>
   <GmapMap
-    :center="position"
-    :zoom="16"
+    :center="center"
+    :zoom="zoom"
     ref="mapRef"
     style="height: 400px"
     :options="{
@@ -9,10 +9,7 @@
    fullscreenControl: false,
  }"
   >
-    <GmapMarker
-      :position="position"
-      :label="lazyValue.name"
-    />
+    <GmapMarker v-if="position" :position="position" :label="lazyValue.name" />
   </GmapMap>
 </template>
 
@@ -22,12 +19,27 @@ import RPCInterface from "../RPCInterface.vue";
 export default {
   mixins: [RPCInterface],
   computed: {
-      position() {
-          return {
-              lat: this.lazyValue.position.latitude,
-              lng: this.lazyValue.position.longitude,
-          }
+    center() {
+      if (!this.position) {
+        return {
+          lat: 0,
+          lng: 0
+        };
       }
+      return this.position;
+    },
+    zoom() {
+      return !this.position ? 2 : 16;
+    },
+    position() {
+      if (!this.lazyValue.position) {
+        return;
+      }
+      return {
+        lat: this.lazyValue.position.latitude,
+        lng: this.lazyValue.position.longitude
+      };
+    }
   }
 };
 </script>

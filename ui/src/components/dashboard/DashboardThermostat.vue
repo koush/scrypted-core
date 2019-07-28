@@ -1,12 +1,10 @@
 <template>
   <v-list-item ripple :to="getDeviceViewPath(deviceId)">
     <v-list-item-icon>
-      <font-awesome-icon size="sm" :icon="icon" :color="color" />
+      <v-fa-icon small :icon="icon" :color="color"></v-fa-icon>
     </v-list-item-icon>
     <v-list-item-content>
-      <v-list-item-title
-        class="font-weight-light"
-      >{{ name || device.name }}</v-list-item-title>
+      <v-list-item-title class="font-weight-light">{{ name || device.name }}</v-list-item-title>
     </v-list-item-content>
 
     <v-list-item-action>
@@ -56,9 +54,7 @@ export default {
     },
     on: {
       get() {
-        return (
-          this.device.thermostatMode !== ThermostatMode.Off
-        );
+        return this.device.thermostatMode !== ThermostatMode.Off;
       },
       set(val) {
         if (val) {

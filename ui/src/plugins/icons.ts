@@ -5,6 +5,7 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faVolumeOff,
   faHome,
   faPlayCircle,
   faStopCircle,
@@ -73,9 +74,8 @@ import {
   faGithub,
 } from '@fortawesome/free-brands-svg-icons'
 
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
 const icons =[
+  faVolumeOff,
   faHome,
   faPlayCircle,
   faStopCircle,
@@ -145,5 +145,8 @@ for (var icon in icons) {
   library.add(icons[icon])
 }
 
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
+import VFontAwesomeIcon from '../common/VFontAwesomeIcon';
+Vue.component('v-fa-icon', VFontAwesomeIcon);

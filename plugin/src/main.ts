@@ -68,7 +68,13 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     
         ws.onmessage = (message) => {
             const data = JSON.parse(message.data);
-            this.handleIncomingMessage(data, session);
+            try {
+                this.handleIncomingMessage(data, session);
+            }
+            catch (e) {
+                this.log.e(`error handling message ${e}`);
+                this.log.e(message.data);
+            }
         }
 
         ws.onclose = () => {
@@ -162,6 +168,14 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         }
     }
 
+    // legacy shim
+    listenDevice(id, options, callback) {
+        if (systemManager.listenDevice) {
+            return systemManager.listenDevice(id, options, callback);
+        }
+        return systemManager.getDeviceById(id).listen(options, callback);
+    }
+
     handleIncomingMessage(message: any, session: WebSocketSession) {
         switch (message.type) {
             case 'rpc': {
@@ -171,7 +185,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             }
             case 'listen': {
                 const { id, listenerId, options } = message;
-                const register = systemManager.getDeviceById(id).listen(options, (eventSource, eventDetails, eventData) => {
+                const register = this.listenDevice(id, options, (eventSource, eventDetails, eventData) => {
                     this.sendOutgoingMessage({
                         type: 'listenEvent',
                         listenerId,
@@ -202,7 +216,12 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             case 'method': {
                 const { id, method, argArray, resultId } = message;
                 const device = systemManager.getDeviceById(id);
-                this.returnResult(session, resultId, device[method](...argArray));
+                try {
+                    this.returnResult(session, resultId, device[method](...argArray));
+                }
+                catch (e) {
+                    this.returnError(session, resultId, e);
+                }
                 break;
             }
             case 'system': {

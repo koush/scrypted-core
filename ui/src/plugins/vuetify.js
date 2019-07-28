@@ -11,9 +11,7 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 export default new Vuetify({
-  components: {
-  },
   icons: {
-    iconfont: 'md' // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
+    iconfont: 'mdiSvg' // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
   }
 })

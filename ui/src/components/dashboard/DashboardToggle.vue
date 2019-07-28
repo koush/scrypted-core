@@ -1,7 +1,7 @@
 <template>
   <v-list-item ripple @click="showDevices()">
     <v-list-item-icon>
-      <font-awesome-icon size="sm" :icon="typeToIcon(type)" :color="on ? 'orange' : '#a9afbb'" />
+      <v-fa-icon small :icon="typeToIcon(type)" :color="on ? 'orange' : '#a9afbb'"></v-fa-icon>
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title class="font-weight-light">{{ name }}</v-list-item-title>

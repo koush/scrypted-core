@@ -180,7 +180,13 @@ class SystemManagerImpl implements SystemManager {
     handleIncomingMessage(message: any) {
         switch (message.type) {
             case 'listenEvent': {
-                console.log(message);
+                const { id, listenerId, eventDetails, eventData } = message;
+                const listener = this.session.listeners[listenerId];
+                if (!listener) {
+                    return;
+                }
+                const device = new ScryptedDeviceImpl(this.session, id);
+                listener(device, eventDetails, eventData);
                 break;
             }
             case 'sync': {
@@ -384,7 +390,7 @@ export default {
                         systemManager,
                         mediaManager,
                         disconnect: socket.close.bind(socket),
-                        userStorage: new Proxy(function(){}, new RPCProxy(session, 'userStorage', 'length')) as any as Storage,
+                        userStorage: new Proxy(function () { }, new RPCProxy(session, 'userStorage', 'length')) as any as Storage,
                         rpc(target: string, method: string, args: any[]): Promise<any> {
                             return session.sendMessageForResult({
                                 type: 'rpc',

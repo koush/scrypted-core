@@ -95,9 +95,9 @@
                   <v-btn small dark fab color="purple" @click="card.color = 'purple-gradient'"></v-btn>
                   <v-btn small dark fab color="red" @click="card.color = 'red-gradient'"></v-btn>
                   <v-btn small dark fab color="orange" @click="card.color = 'orange-gradient'"></v-btn>
-                  <v-btn small icon @click="card.hidden = !card.hidden">
+                  <v-btn small icon @click="card.state.hidden = !card.state.hidden">
                     <font-awesome-icon
-                      :icon="card.hidden ? 'eye-slash' : 'eye'"
+                      :icon="card.state.hidden ? 'eye-slash' : 'eye'"
                       style="color: #a9afbb;"
                     />
                   </v-btn>
@@ -127,7 +127,7 @@
               <v-list-item-group>
                 <div v-for="(component, componentIndex) in card.components" :key="componentIndex">
                   <component
-                    v-if="!component.hidden || editCardMode"
+                    v-if="!component.state.hidden || editCardMode"
                     v-bind="component.value"
                     :is="component.component"
                   ></component>
@@ -152,9 +152,9 @@
                       <v-btn small icon @click="editCardComponent(component)">
                         <font-awesome-icon icon="sliders-h" style="color: #a9afbb;" />
                       </v-btn>
-                      <v-btn small icon @click="component.hidden = !component.hidden">
+                      <v-btn small icon @click="component.state.hidden = !component.state.hidden">
                         <font-awesome-icon
-                          :icon="component.hidden ? 'eye-slash' : 'eye'"
+                          :icon="component.state.hidden ? 'eye-slash' : 'eye'"
                           style="color: #a9afbb;"
                         />
                       </v-btn>
@@ -204,6 +204,7 @@ import DashboardLock from "./DashboardLock.vue";
 import DashboardThermostat from "./DashboardThermostat.vue";
 import DashboardStartStop from "./DashboardStartStop.vue";
 import DashboardSensors from "./DashboardSensors.vue";
+import DashboardMediaPlayer from "./DashboardMediaPlayer.vue";
 import DashboardBase from "./DashboardBase";
 import DashboardAddComponent from "./DashboardAddComponent.vue";
 import "../header-card.css";
@@ -265,6 +266,7 @@ export default {
     DashboardThermostat,
     DashboardStartStop,
     DashboardAddComponent,
+    DashboardMediaPlayer,
     Settings
   },
   directives: {
@@ -325,7 +327,7 @@ export default {
 
       var cardComponent: CardComponent = {
         component,
-        hidden: false,
+        state: {},
         value: {}
       };
 
@@ -344,7 +346,7 @@ export default {
         components: [],
         height: 1,
         color: "green-gradient",
-        hidden: false
+        state: {},
       };
       this.cardColumns[0].splice(0, 0, card);
     },
@@ -407,6 +409,37 @@ export default {
         console.error("error moving card", x, y, e);
       }
     },
+    sanitizeCardColumns(cardColumns) {
+              cardColumns.forEach((column, colIndex) => {
+                column.forEach((card: Card, cardIndex) => {
+                  // sanitize
+                  const sanitized: Card = {
+                    name: undefined,
+                    components: [],
+                    height: 1,
+                    color: "green-gradient",
+                    state: {
+                      hidden: false,
+                    }
+                  };
+                  cardColumns[colIndex][cardIndex] = Object.assign(sanitized, card);
+                  
+                  card.components.forEach((component, componentIndex) => {
+                    var sanitized: CardComponent = {
+                      component: undefined,
+                      value: undefined,
+                      state: {
+                        hidden: false,
+                      }
+                    };
+
+                    card.components[componentIndex] = Object.assign(sanitized, component);
+                  })
+                });
+              });
+
+              this.cardColumns = cardColumns;
+    },
     async getCardLayout(auto) {
       if (!auto) {
         try {
@@ -416,7 +449,7 @@ export default {
           if (found) {
             found = JSON.parse(found);
             if (found.cardColumns) {
-              this.cardColumns = found.cardColumns;
+              this.sanitizeCardColumns(found.cardColumns);
               this.cardAlignCenter = !!found.cardAlignCenter;
               return;
             }
@@ -448,7 +481,7 @@ export default {
         least.push(card);
       }
 
-      this.cardColumns = columns;
+      this.sanitizeCardColumns(columns);
     },
     getColumnsForBreakpoint(bp) {
       switch (bp) {

@@ -5,6 +5,7 @@ import DashboardCamera from "./DashboardCamera.vue";
 import DashboardLock from "./DashboardLock.vue";
 import DashboardThermostat from "./DashboardThermostat.vue";
 import DashboardStartStop from "./DashboardStartStop.vue";
+import DashboardMediaPlayer from "./DashboardMediaPlayer.vue";
 import { Multimap, EnsureMap } from "./multimap";
 
 function randomGradient() {
@@ -22,13 +23,13 @@ export interface Card {
     components: CardComponent[];
     height: number;
     color: string;
-    hidden: boolean;
+    state?: any;
 }
 
 export interface CardComponent {
     component: string;
     value: any;
-    hidden: boolean;
+    state?: any;
 }
 
 interface CardComponentInternal extends CardComponent {
@@ -75,7 +76,6 @@ class CardComponentType {
         if (this.collapse) {
             return [{
                 component: this.component.name,
-                hidden: false,
                 priority: this.priority,
                 value: {
                     name,
@@ -87,7 +87,6 @@ class CardComponentType {
 
         return devices.map(device => ({
             component: this.component.name,
-            hidden: false,
             priority: this.priority,
             value: {
                 name: device.name,
@@ -140,9 +139,11 @@ for (var type of [ScryptedDeviceType.Light, ScryptedDeviceType.Outlet, ScryptedD
 }
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Sensor, 0, true, 6, DashboardMap, { cardName: "Map" }, ScryptedInterface.PositionSensor));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Camera, 0, false, 4, DashboardCamera, undefined, ScryptedInterface.Camera, ScryptedInterface.VideoCamera));
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 10, false, 1, DashboardLock, undefined, ScryptedInterface.Lock));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Lock, 15, false, 1, DashboardLock, undefined, ScryptedInterface.Lock));
 cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Thermostat, 20, false, 1, DashboardThermostat, undefined, ScryptedInterface.TemperatureSetting));
-cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Vacuum, 25, false, 1, DashboardStartStop, undefined, ScryptedInterface.StartStop));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Vacuum, 10, false, 1, DashboardStartStop, undefined, ScryptedInterface.StartStop));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Speaker, 5, false, 8, DashboardMediaPlayer, undefined, ScryptedInterface.MediaPlayer));
+cardComponentTypes.push(new CardComponentType(ScryptedDeviceType.Display, 5, false, 8, DashboardMediaPlayer, undefined, ScryptedInterface.MediaPlayer));
 
 var cardComponentSettings: Map<string, Setting[]> = new Map();
 {
@@ -224,6 +225,22 @@ var cardComponentSettings: Map<string, Setting[]> = new Map();
             value: null,
         }
     ]);
+
+
+    cardComponentSettings.set(DashboardMediaPlayer.name, [
+        {
+            title: "Custom Label",
+            key: "name",
+            value: "",
+        },
+        {
+            title: "Media Player",
+            key: "deviceId",
+            type: `device:${JSON.stringify([ScryptedDeviceType.Speaker, ScryptedDeviceType.Display])}.includes(type) && (interfaces.includes(${JSON.stringify(ScryptedInterface.MediaPlayer)}) || interfaces.includes(${JSON.stringify(ScryptedInterface.VideoCamera)}))`,
+            value: null,
+        }
+    ]);
+
 }
 
 export function getCardComponentSettings(): Map<string, Setting[]> {
@@ -290,7 +307,6 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             components,
             height,
             color: randomGradient(),
-            hidden: false,
         }
         ret.push(card);
     }
@@ -312,7 +328,6 @@ export function getDefaultDashboard(deviceIds: string[], systemManager: SystemMa
             components,
             height,
             color: randomGradient(),
-            hidden: false,
         }
         ret.push(card);
     }

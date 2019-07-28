@@ -76,12 +76,15 @@ export default {
     markers() {
       return this.devices.map(device => {
         var position = device.position;
+        if (!position) {
+          return;
+        }
         return {
           lat: position.latitude,
           lng: position.longitude,
           label: device.name
         };
-      });
+      }).filter(position => position);
     }
   }
 };

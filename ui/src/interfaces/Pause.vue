@@ -4,7 +4,7 @@
       <v-btn depressed dark tile :outlined="!lazyValue.paused" color="blue" @click="pause">Pause</v-btn>
     </span>
     <span>
-      <v-btn depressed dark tile :outlined="lazyValue.paused || (lazyValue.running !== undefined && !lazyValue.running)" color="green" @click="resume">Resume</v-btn>
+      <v-btn depressed dark tile outlined color="green" @click="resume">Resume</v-btn>
     </span>
   </span>
 </template>
