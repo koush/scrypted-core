@@ -1,7 +1,6 @@
 import { ScryptedStatic, SystemManager, ScryptedDevice, EventDetails, EventListenerRegister, ScryptedDeviceType, EventListenerOptions, ScryptedInterfaceDescriptors, MediaManager, MediaObject, FFMpegInput, ScryptedInterface } from "@scrypted/sdk";
 import { Socket, SocketOptions } from 'engine.io-client';
 const Client = require('engine.io-client');
-import axios from 'axios';
 
 const allMethods: any[] = [].concat(...Object.values(ScryptedInterfaceDescriptors).map((type: any) => type.methods));
 const allProperties: any[] = [].concat(...Object.values(ScryptedInterfaceDescriptors).map((type: any) => type.properties));
@@ -176,6 +175,13 @@ class SystemManagerImpl implements SystemManager {
         return {
             removeListener,
         }
+    }
+    listenDevice(id: string, event: string | EventListenerOptions, callback: (eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: object) => void): EventListenerRegister {
+        var device = this.getDeviceById(id);
+        if (device == null) {
+            throw new Error('device not found');;
+        }
+        return device.listen(event, callback);
     }
     handleIncomingMessage(message: any) {
         switch (message.type) {
