@@ -7,6 +7,9 @@
             class="orange-gradient subtitle-1 text--white  font-weight-light"
           >{{ settings.name }}</v-card-title>
           <v-card-text>Home Id: {{ settings.homeId }} Node Id: {{ settings.nodeId }}</v-card-text>
+          <v-card-actions>
+            <v-btn text color="blue" @click="refreshNode">Refresh Node</v-btn>
+          </v-card-actions>
 
           <v-flex>
             <v-card
@@ -114,6 +117,16 @@ export default {
   },
   methods: {
     getComponentWebPath,
+    refreshNode() {
+      axios
+        .post(`${this.componentWebPath}/node/${this.homeIdInt}/${this.nodeId}/refresh`)
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        })
+    },
     refresh() {
       axios
         .get(`${this.componentWebPath}/view/${this.homeId}/${this.nodeId}`)

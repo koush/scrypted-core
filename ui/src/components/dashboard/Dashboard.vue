@@ -77,7 +77,7 @@
         :key="index"
       >
         <v-flex v-for="(card, cardIndex) in cardColumn" :key="cardIndex">
-          <v-card raised class="header-card" v-if="!card.hidden || editCardMode">
+          <v-card raised class="header-card" v-if="!card.state.hidden || editCardMode">
             <v-card-title :class="card.color" class="subtitle-1 font-weight-light">
               <v-text-field
                 hide-details
@@ -96,6 +96,7 @@
                   <v-btn small dark fab color="purple" @click="card.color = 'purple-gradient'"></v-btn>
                   <v-btn small dark fab color="red" @click="card.color = 'red-gradient'"></v-btn>
                   <v-btn small dark fab color="orange" @click="card.color = 'orange-gradient'"></v-btn>
+                  <v-btn small dark fab color="blue" @click="card.color = 'blue-gradient'"></v-btn>
                   <v-btn small icon @click="card.state.hidden = !card.state.hidden">
                     <font-awesome-icon
                       :icon="card.state.hidden ? 'eye-slash' : 'eye'"

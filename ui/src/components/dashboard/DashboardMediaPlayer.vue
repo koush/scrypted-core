@@ -71,7 +71,6 @@ export default {
 
     (async () => {
       this.mediaStatus = await this.device.getMediaStatus();
-      console.log(this.device.name, this.mediaStatus);
     })();
 
     this.ticker = setInterval(async () => {

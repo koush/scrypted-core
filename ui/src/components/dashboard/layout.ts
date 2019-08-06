@@ -13,7 +13,8 @@ function randomGradient() {
         "purple-gradient",
         "orange-gradient",
         "red-gradient",
-        "green-gradient"
+        "green-gradient",
+        'blue-gradient',
     ];
     return gradients[Math.round(Math.random() * 10000) % gradients.length];
 }
