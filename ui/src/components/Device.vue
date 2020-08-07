@@ -104,9 +104,9 @@
 
                 <v-btn color="info" text @click="openLogs" v-if="!loading">Logs</v-btn>
 
-                <v-dialog v-model="showDelete" width="500">
+                <v-dialog v-if="!loading" v-model="showDelete" width="500">
                   <template v-slot:activator="{ on }">
-                    <v-btn color="error" v-if="!loading" text v-on="on">Delete</v-btn>
+                    <v-btn color="error" text v-on="on">Delete</v-btn>
                   </template>
 
                   <v-card>

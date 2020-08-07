@@ -48,6 +48,7 @@
           </v-flex>
         </v-layout>
       </v-flex>
+      <component v-if="footer" :is="footer" />
     </v-layout>
   </div>
 </template>

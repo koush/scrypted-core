@@ -97,7 +97,7 @@ export default {
         .post(
           `${this.componentWebPath}/`,
           qs.stringify({
-            requireLocalLogin: this.settings.requireLocalLogin,
+            requireLocalLogin: !!this.settings.requireLocalLogin,
             environment: "home.scrypted.app"
           })
         )

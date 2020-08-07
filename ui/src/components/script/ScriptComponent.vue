@@ -1,9 +1,13 @@
 <script>
 import BasicComponent from "../BasicComponent.vue";
 import PluginUpdate from "./PluginUpdate.vue";
+import Stats from "./Stats.vue";
 
 export default {
   mixins: [BasicComponent],
+  components: {
+    Stats,
+  },
   methods: {
     getOwnerColumn(device) {
       return device.metadata.npmPackage;
@@ -15,6 +19,7 @@ export default {
   data() {
     var self = this;
     return {
+      footer: "Stats",
       cards: [
         {
           body: null,

@@ -72,32 +72,31 @@ export default {
       });
     }
   },
+  methods: {
+    fetchCamera(media) {
+        this.$scrypted.mediaManager
+          .convertMediaObjectToLocalUri(media, "image/jpeg")
+          .then(result => {
+            const url = new URL(result);
+            this.src = url.pathname;
+          })
+          .catch(e => {
+            console.error(this.deviceId, e);
+            this.src = "images/cameraloading.jpg";
+          });
+    },
+  },
   mounted() {
-    if (this.device.interfaces.includes(ScryptedInterface.VideoCamera)) {
+    if (this.device.interfaces.includes(ScryptedInterface.VideoCamera))
       this.video = true;
-      const videoStream = this.device.getVideoStream();
-      this.$scrypted.mediaManager
-        .convertMediaObjectToLocalUri(videoStream, "image/jpeg")
-        .then(result => {
-          const url = new URL(result);
-          this.src = url.pathname;
-        })
-        .catch(e => {
-          console.error(this.deviceId, e);
-          this.src = "images/cameraloading.jpg";
-        });
-    } else {
+
+    if (this.device.interfaces.includes(ScryptedInterface.Camera)) {
       const picture = this.device.takePicture();
-      this.$scrypted.mediaManager
-        .convertMediaObjectToLocalUri(picture, "image/jpeg")
-        .then(result => {
-          const url = new URL(result);
-          this.src = url.pathname;
-        })
-        .catch(e => {
-          console.error(this.deviceId, e);
-          this.src = "images/cameraloading.jpg";
-        });
+      this.fetchCamera(picture);
+    }
+    else if (this.device.interfaces.includes(ScryptedInterface.VideoCamera)) {
+      const videoStream = this.device.getVideoStream();
+      this.fetchCamera(videoStream);
     }
   }
 };
