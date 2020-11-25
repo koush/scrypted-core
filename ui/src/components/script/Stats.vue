@@ -30,6 +30,14 @@ import VueApexCharts from "vue-apexcharts";
 
 const metrics = [
   {
+    name: "CPU Time",
+    key: "time",
+  },
+  {
+    name: "Memory",
+    key: "heap",
+  },
+  {
     name: "HTTP",
     key: "http",
   },
@@ -42,8 +50,8 @@ const metrics = [
     key: "udp",
   },
   {
-    name: "Time",
-    key: "time",
+    name: "Objects",
+    key: "object",
   },
 ];
 

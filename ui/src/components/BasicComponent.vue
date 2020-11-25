@@ -66,6 +66,7 @@ import qs from "query-string";
 export default {
   data() {
     return {
+      footer: null,
       loading: false,
       settings: {},
     };
