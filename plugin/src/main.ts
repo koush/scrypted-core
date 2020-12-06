@@ -99,7 +99,9 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 
     getAlerts() {
-        return toArray(__manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll())
+        const alerts = __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll();
+        return toArray(alerts)
+            .filter(alert => !!alert)
             .map((alert: any) => {
                 const {
                     id,
