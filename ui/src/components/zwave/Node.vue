@@ -9,6 +9,7 @@
           <v-card-text>Home Id: {{ settings.homeId }} Node Id: {{ settings.nodeId }}</v-card-text>
           <v-card-actions>
             <v-btn text color="blue" @click="refreshNode">Refresh Node</v-btn>
+            <v-btn text color="blue" @click="forceRemove">Force Remove</v-btn>
           </v-card-actions>
 
           <v-flex>
@@ -120,6 +121,16 @@ export default {
     refreshNode() {
       axios
         .post(`${this.componentWebPath}/node/${this.homeIdInt}/${this.nodeId}/refresh`)
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        })
+    },
+    forceRemove() {
+      axios
+        .post(`${this.componentWebPath}/node/${this.homeIdInt}/${this.nodeId}/remove`)
         .then(response => {
           console.log(response.data);
         })
