@@ -222,7 +222,7 @@ import {
   Card
 } from "./layout";
 import { Menu } from "../../store";
-import { Settings as SettingsInterface, Setting } from "@scrypted/sdk";
+import { Settings as SettingsInterface, Setting } from "@scrypted/sdk/types";
 
 class CardComponentSettings implements SettingsInterface {
   cardComponent: CardComponent;

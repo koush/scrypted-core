@@ -127,7 +127,7 @@
 import InterfacesPicker from "./InterfacesPicker.vue";
 import EventsPicker from "./EventsPicker.vue";
 import cloneDeep from "lodash.clonedeep";
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk/types";
 
 const includeContextual = [
   ScryptedInterface.OnOff,

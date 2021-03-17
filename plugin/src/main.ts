@@ -1,29 +1,17 @@
 // https://developer.scrypted.app/#getting-started
 // package.json contains the metadata (name, interfaces) about this device
 // under the "scrypted" key.
-import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister } from '@scrypted/sdk';
+import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister, Notifications, Device, DeviceManifest, EventListenerOptions, ScryptedInterfaceProperty } from '@scrypted/sdk';
 import sdk from '@scrypted/sdk';
 const { systemManager, deviceManager, mediaManager, endpointManager, zwaveManager } = sdk;
 import Router from 'router';
 import Url from 'url-parse';
 import { UserStorage } from './userStorage';
+import { RpcPeer } from '../../../../node-scrypted/src/rpc';
+import { setupPluginRemote } from '../../../../node-scrypted/src/plugin/plugin-remote';
+import { PluginAPI } from '../../../../node-scrypted/src/plugin/plugin-api';
+import { Logger } from '../../../../node-scrypted/src/logger';
 const indexHtml: string = require('raw-loader!../fs/dist/index.html');
-
-function toArray(arrayLike: any): object[] {
-    const size = arrayLike.size ? arrayLike.size() : arrayLike.length;
-    var ret = [];
-    for (var i = 0; i < size; i++) {
-        ret.push(arrayLike[i]);
-    }
-    return ret;
-}
-
-class WebSocketSession {
-    userStorage: Storage;
-    rpcTargets: any;
-    webSocket: WebSocket;
-    listeners = new Map<String, EventListenerRegister>();
-}
 
 class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler {
     router = Router();
@@ -38,211 +26,112 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 
     sendJson(response: HttpResponse, data: object) {
-        response.send({
+        response.send(JSON.stringify(data), {
             headers: {
                 'Content-Type': 'application/json',
             }
-        }, JSON.stringify(data))
+        })
     }
 
-    onConnection(request: HttpRequest, webSocketUrl: string): void {
+    async onConnection(request: HttpRequest, webSocketUrl: string): Promise<void> {
         const ws = new WebSocket(webSocketUrl);
+
         if (request.isPublicEndpoint) {
             ws.close();
             return;
         }
 
+        const peer = new RpcPeer(message => ws.send(JSON.stringify(message)));
+        ws.onmessage = message => peer.handleMessage(JSON.parse(message.data));
         const userStorage = new UserStorage(request.username);
-        const session = new WebSocketSession();
-        session.webSocket = ws;
-        session.rpcTargets = {
-            this: this,
-            userStorage,
-            systemManager,
-            deviceManager,
-            mediaManager,
-            endpointManager,
-            zwaveManager,
-            localStorage,
-        };
-    
-        ws.onmessage = (message) => {
-            const data = JSON.parse(message.data);
-            try {
-                this.handleIncomingMessage(data, session);
-            }
-            catch (e) {
-                this.log.e(`error handling message ${e}`);
-                this.log.e(message.data);
-            }
+        peer.params.userStorage = userStorage;
+
+        let listeners: EventListenerRegister[] = [];
+        const manage = (listener: EventListenerRegister) => {
+            listeners.push(listener);
+            return listener;
         }
 
-        ws.onclose = () => {
-            console.log('Closing session.');
-            session.listeners.forEach(l => l.removeListener())
-        };
+        class PluginAPIImpl implements PluginAPI {
+            getLogger(nativeId: string): Promise<Logger> {
+                throw new Error('Method not implemented.');
+            }
+            getComponent(id: string): Promise<any> {
+                return systemManager.getComponent(id);
+            }
+            async setDeviceProperty(id: string, property: ScryptedInterfaceProperty, value: any): Promise<void> {
+                const device = await this.getDeviceById(id);
+                if (property === ScryptedInterfaceProperty.name)
+                    device.setName(value);
+                else if (property === ScryptedInterfaceProperty.type)
+                    device.setType(value);
+                else if (property === ScryptedInterfaceProperty.room)
+                    device.setRoom(value);
+                else
+                    throw new Error(`Not allowed to set property ${property}`);
+            }
+            setState(nativeId: string, key: string, value: any): void {
+                throw new Error('Method not implemented.');
+            }
+            onDevicesChanged(deviceManifest: DeviceManifest): void {
+                throw new Error('Method not implemented.');
+            }
+            onDeviceDiscovered(device: Device): void {
+                throw new Error('Method not implemented.');
+            }
+            onDeviceEvent(nativeId: string, eventInterface: any, eventData?: any): void {
+                throw new Error('Method not implemented.');
+            }
+            onDeviceRemoved(nativeId: String): void {
+                throw new Error('Method not implemented.');
+            }
+            setStorage(nativeId: string, storage: { [key: string]: any; }): void {
+                throw new Error('Method not implemented.');
+            }
+            async getDeviceById(id: string): Promise<ScryptedDevice> {
+                return systemManager.getDeviceById(id);
+            }
+            async listen(EventListener: (id: string, eventDetails: EventDetails, eventData: object) => void): Promise<EventListenerRegister> {
+                return manage(systemManager.listen((eventSource, eventDetails, eventData) => EventListener(eventSource?.id, eventDetails, eventData)));
+            }
+            async listenDevice(id: string, event: string | EventListenerOptions, callback: (eventDetails: EventDetails, eventData: object) => void): Promise<EventListenerRegister> {
+                return manage(systemManager.listenDevice(id, event, (eventSource, eventDetails, eventData) => callback(eventDetails, eventData)));
+            }
+            ioClose(id: string): void {
+                throw new Error('Method not implemented.');
+            }
+            ioSend(id: string, message: string): void {
+                throw new Error('Method not implemented.');
+            }
+            removeDevice(id: string): void {
+                systemManager.removeDevice(id);
+            }
+        }
+        const api = new PluginAPIImpl();
+
+        const remote = await setupPluginRemote(peer, api, null);
+        await remote.setSystemState(systemManager.getSystemState());
+
 
         // this listener keeps the system state up to date on the other end.
-        const systemListener = systemManager.listen((eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: object) => {
-            ws.send(JSON.stringify({
-                type: "sync",
-                id: eventSource.id,
-                eventDetails,
-                eventData,
-            }));
-        });
-        session.listeners.set('system', systemListener);
-    }
-
-    sendOutgoingMessage(message: any, webSocket: WebSocket) {
-        webSocket.send(JSON.stringify(message));
-    }
-
-    getAlerts() {
-        const alerts = __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").getAll();
-        return toArray(alerts)
-            .filter(alert => !!alert)
-            .map((alert: any) => {
-                const {
-                    id,
-                    title,
-                    message,
-                    timestamp,
-                    path,
-                    icon,
-                } = alert;
-
-                return {
-                    id,
-                    title,
-                    message,
-                    timestamp,
-                    path,
-                    icon,
-                };
-            });
-    }
-
-    removeAlerts(ids: string[]) {
-        if (!ids || !ids.length) {
-            __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").removeAll();
-        }
-        else {
-            for (var id of ids) {
-                __manager.getStore().boxFor("com.koushikdutta.scrypted.ScryptedAlert").remove(id);
-            }
-        }
-    }
-
-    returnResult(session: WebSocketSession, resultId: string, result: any) {
-        this.sendOutgoingMessage({
-            type: 'rpc',
-            resultId,
-            result: Buffer.isBuffer(result) ? new Buffer(result).toString('base64') : result,
-        }, session.webSocket);
-    }
-
-    returnError(session: WebSocketSession, resultId: string, e: any) {
-        this.sendOutgoingMessage({
-            type: 'rpc',
-            resultId,
-            error: e.toString(),
-        }, session.webSocket);
-    }
-
-    doRpc(session: WebSocketSession, resultId, target, method, args) {
-        try {
-            // console.log(target, method);
-            var value = args ? target[method](...args) : target[method];
-            var promise;
-            if (value && value.then && value.catch) {
-                promise = value;
+        const systemListener = systemManager.listen((eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: any) => {
+            if (eventSource) {
+                remote.updateState(eventSource.id, systemManager.getDeviceState(eventSource.id));
             }
             else {
-                promise = Promise.resolve(value);
+                if (eventDetails.property === ScryptedInterfaceProperty.id && eventData != null)
+                    remote.updateState(eventData as ScryptedInterfaceProperty, undefined);
+                else
+                    console.warn('unknown event source', eventData);
             }
-            promise
-            .then(result => this.returnResult(session, resultId, result))
-            .catch(e => this.returnError(session, resultId, e));
-        }
-        catch (e) {
-            this.returnError(session, resultId, e);
-        }
-    }
+        });
+        manage(systemListener);
 
-    // legacy shim
-    listenDevice(id, options, callback) {
-        if (systemManager.listenDevice) {
-            return systemManager.listenDevice(id, options, callback);
-        }
-        return systemManager.getDeviceById(id).listen(options, callback);
-    }
-
-    handleIncomingMessage(message: any, session: WebSocketSession) {
-        switch (message.type) {
-            case 'rpc': {
-                const { target, method, resultId, args } = message;
-                this.doRpc(session, resultId, session.rpcTargets[target], method, args);
-                break;
+        ws.onclose = () => {
+            for (const listener of listeners) {
+                listener.removeListener();
             }
-            case 'listen': {
-                const { id, listenerId, options } = message;
-                const register = this.listenDevice(id, options, (eventSource, eventDetails, eventData) => {
-                    this.sendOutgoingMessage({
-                        type: 'listenEvent',
-                        listenerId,
-                        id: eventSource.id,
-                        eventDetails,
-                        eventData,
-                    }, session.webSocket);
-                });
-                const existing = session.listeners.get(listenerId);
-                session.listeners.set(listenerId, register);
-                if (existing) {
-                    existing.removeListener();
-                }
-                break;
-            }
-            case 'systemListen': {
-
-            }
-            case 'removeListener': {
-                let { listenerId } = message;
-                const existing = session.listeners.get(listenerId);
-                session.listeners.delete(listenerId);
-                if (existing) {
-                    existing.removeListener();
-                }
-                break;
-            }
-            case 'method': {
-                const { id, method, argArray, resultId } = message;
-                const device = systemManager.getDeviceById(id);
-                try {
-                    this.returnResult(session, resultId, device[method](...argArray));
-                }
-                catch (e) {
-                    this.returnError(session, resultId, e);
-                }
-                break;
-            }
-            case 'system': {
-                // legacy
-                const { method, argArray, resultId } = message;
-                this.doRpc(session, resultId, systemManager, method, argArray || []);
-                break;
-            }
-            case 'media': {
-                // shimming is necessary because the media object itself needs to be
-                // proxied.
-                const { method, toMimeType, mediaSource, resultId } = message;
-                const { id, method: sourceMethod } = mediaSource;
-                const device = systemManager.getDeviceById(id);
-                const mediaObject = device[sourceMethod]();
-
-                this.doRpc(session, resultId, mediaManager, method, [mediaObject, toMimeType]);
-                break;
-            }
+            listeners = [];
         }
     }
 
@@ -264,11 +153,11 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                     .replace('href=/endpoint/@scrypted/core/public/img/icons/apple-touch-icon-152x152.png', `href="/endpoint/@scrypted/core/public/img/icons/apple-touch-icon-152x152.png${u.query}"`)
                     .replace('href=/endpoint/@scrypted/core/public/img/icons/safari-pinned-tab.svg', `href="/endpoint/@scrypted/core/public/img/icons/safari-pinned-tab.svg${u.query}"`)
                     ;
-                response.send({
+                response.send(rewritten, {
                     headers: {
                         'Content-Type': 'text/html',
                     }
-                }, rewritten);
+                });
             })
             .catch(() => {
                 response.sendFile("dist" + incomingUrl.pathname);
@@ -287,9 +176,9 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         }
         else {
             this.router(normalizedRequest, response, () => {
-                response.send({
+                response.send('Not Found', {
                     code: 404,
-                }, 'Not Found');
+                });
             });
         }
     }

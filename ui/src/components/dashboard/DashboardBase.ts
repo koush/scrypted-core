@@ -10,17 +10,17 @@ export default {
   },
   computed: {
     device() {
-      var device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
+      const device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
       if (device.interfaces.includes("Refresh")) {
-        var listener = device.listen(null, () => { });
+        const listener = device.listen(null, () => { });
         this.$once('destroyed', () => listener.removeListener());
       }
       return device;
     },
     devices() {
-      var devices = this.deviceIds.map(deviceId => this.$scrypted.systemManager.getDeviceById(deviceId));
+      const devices = this.deviceIds.map(deviceId => this.$scrypted.systemManager.getDeviceById(deviceId));
 
-      var listeners = [];
+      const listeners = [];
       devices.forEach(device => {
         if (device.interfaces.includes("Refresh")) {
           listeners.push(device.listen(null, () => { }));

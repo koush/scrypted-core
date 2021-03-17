@@ -38,7 +38,8 @@ export default {
   },
   methods: {
     async refresh() {
-      var settings = await this.rpc().getSettings();
+      const blub = this.rpc().getSettings();
+      var settings = await blub;
       this.settings = settings.map(setting => ({
         key: setting.key,
         value: setting

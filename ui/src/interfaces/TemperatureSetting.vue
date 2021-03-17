@@ -34,7 +34,7 @@
 import RPCInterface from "./RPCInterface.vue";
 import throttle from "lodash.throttle";
 import cloneDeep from "lodash.clonedeep";
-import { ThermostatMode } from "@scrypted/sdk";
+import { ThermostatMode } from "@scrypted/sdk/types";
 
 export default {
   mixins: [RPCInterface],

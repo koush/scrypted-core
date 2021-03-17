@@ -13,7 +13,8 @@ module.exports = {
     }],
     "@babel/plugin-transform-typescript",
     "@babel/plugin-proposal-class-properties",
-    "@babel/plugin-transform-modules-commonjs"
+    "@babel/plugin-transform-modules-commonjs",
+    "@babel/plugin-proposal-optional-chaining",
   ],
   presets: [
     '@vue/app',

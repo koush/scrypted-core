@@ -1,4 +1,4 @@
-import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk/types";
 
 export function typeToIcon(type) {
     switch (type) {
@@ -103,7 +103,7 @@ addInference(ScryptedInterface.OnOff, ScryptedDeviceType.Outlet, ScryptedDeviceT
 addInference(ScryptedInterface.Brightness, ScryptedDeviceType.Light);
 
 export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, interfaces: ScryptedInterface[]): ScryptedDeviceType[] {
-    var ret: Set<ScryptedDeviceType> = new Set<ScryptedDeviceType>();
+    const ret: Set<ScryptedDeviceType> = new Set<ScryptedDeviceType>();
 
     for (const iface of interfaces) {
         const types: ScryptedDeviceType[] = inference[iface];

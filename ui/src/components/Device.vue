@@ -1,6 +1,6 @@
 <template>
   <v-layout wrap>
-    <v-flex xs12 md6 v-if="name">
+    <v-flex xs12 md6 v-if="name != null">
       <v-layout row wrap>
         <v-flex xs12>
           <v-flex>
@@ -31,14 +31,16 @@
                 <div
                   v-linkified:options="{ className: 'alert-link' }"
                   v-html="alert.message"
-                  style="color: white;"
+                  style="color: white"
                 ></div>
               </v-alert>
             </div>
 
             <v-card raised class="header-card">
-              <v-card-title class="orange-gradient subtitle-1 font-weight-light">
-                {{name}}
+              <v-card-title
+                class="orange-gradient subtitle-1 font-weight-light"
+              >
+                {{ name || "No Device Name" }}
                 <v-layout row justify-end align-center>
                   <component
                     :value="deviceState"
@@ -66,7 +68,11 @@
                 <v-container>
                   <v-layout>
                     <v-flex xs12>
-                      <v-text-field v-model="name" label="Name" required></v-text-field>
+                      <v-text-field
+                        v-model="name"
+                        label="Name"
+                        required
+                      ></v-text-field>
                       <v-select
                         v-if="inferredTypes.length > 1"
                         :items="inferredTypes"
@@ -75,7 +81,9 @@
                         v-model="type"
                       ></v-select>
                       <v-combobox
-                        v-if="hasFixedPhysicalLocation(type, deviceState.interfaces)"
+                        v-if="
+                          hasFixedPhysicalLocation(type, deviceState.interfaces)
+                        "
                         :items="existingRooms"
                         outlined
                         v-model="room"
@@ -102,7 +110,9 @@
                 ></component>
                 <v-spacer></v-spacer>
 
-                <v-btn color="info" text @click="openLogs" v-if="!loading">Logs</v-btn>
+                <v-btn color="info" text @click="openLogs" v-if="!loading"
+                  >Logs</v-btn
+                >
 
                 <v-dialog v-if="!loading" v-model="showDelete" width="500">
                   <template v-slot:activator="{ on }">
@@ -111,24 +121,34 @@
 
                   <v-card>
                     <v-card-title
-                      style="margin-bottom: 8px;"
+                      style="margin-bottom: 8px"
                       class="red font-weight-light white--text"
                       primary-title
-                    >Delete Device</v-card-title>
+                      >Delete Device</v-card-title
+                    >
 
-                    <v-card-text>This will permanently delete the device. It can not be undone.</v-card-text>
+                    <v-card-text
+                      >This will permanently delete the device. It can not be
+                      undone.</v-card-text
+                    >
 
                     <v-divider></v-divider>
 
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      <v-btn color="primary" text @click="showDelete = false">Cancel</v-btn>
-                      <v-btn color="red" text @click="remove">Delete Device</v-btn>
+                      <v-btn color="primary" text @click="showDelete = false"
+                        >Cancel</v-btn
+                      >
+                      <v-btn color="red" text @click="remove"
+                        >Delete Device</v-btn
+                      >
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
 
-                <v-btn color="primary" v-if="!loading" text @click="save">Save</v-btn>
+                <v-btn color="primary" v-if="!loading" text @click="save"
+                  >Save</v-btn
+                >
               </v-card-actions>
             </v-card>
             <v-alert
@@ -137,29 +157,138 @@
               dismissible
               close-text="Close Alert"
               type="success"
-            >Saved.</v-alert>
+              >Saved.</v-alert
+            >
             <v-alert
               outlined
               v-model="showSaveError"
               dismissible
               close-text="Close Alert"
               type="success"
-            >There was an error while saving. Please check the logs.</v-alert>
+              >There was an error while saving. Please check the logs.</v-alert
+            >
+          </v-flex>
+        </v-flex>
+
+        <v-flex
+          xs12
+          v-if="!ownerDevice && pluginData"
+        >
+          <v-flex>
+            <v-card raised class="header-card">
+              <v-card-title
+                class="green-gradient subtitle-1 text--white font-weight-light"
+              >
+                <font-awesome-icon size="sm" icon="database" />
+                &nbsp;&nbsp;Plugin Management
+              </v-card-title>
+              <v-card-text></v-card-text>
+              <v-container>
+                <v-layout>
+                  <v-flex>
+                    <v-btn outlined color="blue" @click="reloadPlugin"
+                      >Reload Plugin</v-btn
+                    >
+                  </v-flex>
+                </v-layout></v-container
+              >
+              <v-card-actions>
+                <v-btn text color="primary" @click="showStorage = !showStorage"
+                  >Storage</v-btn
+                >
+
+                <v-spacer></v-spacer>
+                <v-btn
+                  v-if="!pluginData.updateAvailable"
+                  text
+                  color="blue"
+                  @click="openNpm"
+                  xs4
+                  >{{ pluginData.packageJson.name }}@{{
+                    pluginData.packageJson.version
+                  }}</v-btn
+                >
+                <v-btn v-else color="orange" @click="doInstall" dark
+                  >Install Update {{ pluginData.updateAvailable }}</v-btn
+                >
+              </v-card-actions>
+            </v-card>
+          </v-flex>
+        </v-flex>
+
+        <v-flex
+          xs12
+          v-if="ownerDevice && pluginData"
+        >
+          <v-flex>
+            <v-card raised class="header-card">
+              <v-card-title
+                class="green-gradient subtitle-1 text--white font-weight-light"
+              >
+                <font-awesome-icon size="sm" icon="database" />
+                &nbsp;&nbsp;Managed Device
+              </v-card-title>
+              <v-card-text></v-card-text>
+              <v-card-text>
+                <b>Native ID:</b>
+                {{ pluginData.nativeId }}
+              </v-card-text>
+              <v-card-actions>
+                <v-btn text color="primary" @click="showStorage = !showStorage"
+                  >Storage</v-btn
+                >
+                <v-spacer></v-spacer>
+                <v-btn text color="blue" :to="`/device/${ownerDevice.id}`">{{
+                  ownerDevice.name
+                }}</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-flex>
+        </v-flex>
+
+        <v-flex xs12 v-if="showStorage">
+          <v-flex>
+            <v-card raised class="header-card">
+              <v-card-title
+                class="green-gradient subtitle-1 text--white font-weight-light"
+                >Storage</v-card-title
+              >
+              <v-form>
+                <v-container>
+                  <v-layout>
+                    <v-flex xs12>
+                      <Storage
+                        v-model="pluginData.storage"
+                        @input="onChange"
+                      ></Storage>
+                    </v-flex>
+                  </v-layout>
+                </v-container>
+              </v-form>
+            </v-card>
           </v-flex>
         </v-flex>
 
         <v-flex xs12>
-          <component
-            v-if="deviceProps"
-            @refresh="reload"
-            @input="onChange"
-            :is="deviceProps.box"
-            :deviceProps="deviceProps"
-            v-model="device"
-            :id="id"
-            :name="name"
-            :type="type"
-          ></component>
+          <v-flex>
+            <v-card
+              raised
+              class="header-card"
+              v-for="iface in cardUnderInterfaces"
+              :key="iface"
+            >
+              <v-card-title
+                class="orange-gradient subtitle-1 font-weight-light"
+              >
+                {{ iface }}
+              </v-card-title>
+              <component
+                :value="deviceState"
+                :device="systemDevice"
+                :is="iface"
+              ></component>
+            </v-card>
+          </v-flex>
         </v-flex>
       </v-layout>
     </v-flex>
@@ -167,18 +296,27 @@
     <v-flex xs12 md6 lg6>
       <v-layout row wrap>
         <v-flex xs12 v-for="iface in cardInterfaces" :key="iface">
-          <v-flex v-if="name">
+          <v-flex v-if="name != null">
             <v-card>
               <v-card-title
                 class="red-gradient white--text subtitle-1 font-weight-light"
-              >{{ iface }}</v-card-title>
-              <component :value="deviceState" :device="systemDevice" :is="iface"></component>
+                >{{ iface }}</v-card-title
+              >
+              <component
+                :value="deviceState"
+                :device="systemDevice"
+                :is="iface"
+              ></component>
             </v-card>
           </v-flex>
         </v-flex>
 
         <v-flex ref="logsEl">
-          <LogCard v-if="component && showLogs" :rows="15" :logRoute="`/${component}/${id}/`"></LogCard>
+          <LogCard
+            v-if="showLogs"
+            :rows="15"
+            :logRoute="`/device/${id}/`"
+          ></LogCard>
         </v-flex>
       </v-layout>
     </v-flex>
@@ -202,9 +340,9 @@ import {
   getComponentWebPath,
   getDeviceViewPath,
   removeAlert,
-  hasFixedPhysicalLocation
+  hasFixedPhysicalLocation,
 } from "./helpers";
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk/types";
 import Notifier from "../interfaces/Notifier.vue";
 import OnOff from "../interfaces/OnOff.vue";
 import Brightness from "../interfaces/Brightness.vue";
@@ -230,6 +368,9 @@ import PasswordStore from "../interfaces/PasswordStore.vue";
 import Scene from "../interfaces/Scene.vue";
 import TemperatureSetting from "../interfaces/TemperatureSetting.vue";
 import PositionSensor from "../interfaces/sensors/PositionSensor.vue";
+import DeviceProvider from "../interfaces/DeviceProvider.vue";
+import Storage from "../common/Storage.vue";
+import { getNpmPath } from "./script/plugin";
 
 const cardHeaderInterfaces = [
   ScryptedInterface.OccupancySensor,
@@ -238,8 +379,10 @@ const cardHeaderInterfaces = [
   ScryptedInterface.Thermometer,
   ScryptedInterface.Battery,
   ScryptedInterface.Lock,
-  ScryptedInterface.OnOff
+  ScryptedInterface.OnOff,
 ];
+
+const cardUnderInterfaces = [ScryptedInterface.DeviceProvider];
 
 const cardInterfaces = [
   ScryptedInterface.Brightness,
@@ -252,12 +395,12 @@ const cardInterfaces = [
   ScryptedInterface.TemperatureSetting,
   ScryptedInterface.PasswordStore,
   ScryptedInterface.PositionSensor,
-  ScryptedInterface.Settings
+  ScryptedInterface.Settings,
 ];
 
 const cardActionInterfaces = [
   ScryptedInterface.OauthClient,
-  ScryptedInterface.HttpRequestHandler
+  ScryptedInterface.HttpRequestHandler,
 ];
 
 const cardButtonInterfaces = [
@@ -265,15 +408,15 @@ const cardButtonInterfaces = [
   ScryptedInterface.Pause,
   ScryptedInterface.StartStop,
   ScryptedInterface.Entry,
-  ScryptedInterface.Scene
+  ScryptedInterface.Scene,
 ];
 
 function filterInterfaces(interfaces) {
-  return function() {
-    if (!this.name) {
+  return function () {
+    if (this.name == null) {
       return [];
     }
-    return interfaces.filter(iface =>
+    return interfaces.filter((iface) =>
       this.$store.state.systemState[this.id].interfaces.value.includes(iface)
     );
   };
@@ -281,6 +424,8 @@ function filterInterfaces(interfaces) {
 
 export default {
   components: {
+    DeviceProvider,
+
     StartStop,
     Dock,
     Pause,
@@ -317,7 +462,9 @@ export default {
     ScriptDevice,
     AggregateDevice,
     WebPushRegistration,
-    Mail
+    Mail,
+
+    Storage,
   },
   data() {
     return this.initialState();
@@ -326,6 +473,7 @@ export default {
     if (this.needsLoad) {
       this.reload();
     }
+    this.systemDevice.refresh?.(undefined, true);
   },
   destroyed() {
     this.cleanupListener();
@@ -341,7 +489,7 @@ export default {
       if (this.needsLoad) {
         this.reload();
       }
-    }
+    },
   },
   methods: {
     hasFixedPhysicalLocation,
@@ -353,16 +501,18 @@ export default {
         showDelete: false,
         showSave: false,
         showSaveError: false,
-        deviceProps: undefined,
+        pluginData: undefined,
         name: undefined,
         room: undefined,
         type: undefined,
         device: undefined,
-        component: undefined,
         loading: false,
-        // deviceState: {},
-        syncWithIntegrations: undefined
+        showStorage: false,
+        syncWithIntegrations: undefined,
       };
+    },
+    openNpm() {
+      window.open(getNpmPath(this.pluginData.packageJson.name), "npm");
     },
     escapeHtml(html) {
       return html
@@ -389,56 +539,69 @@ export default {
       const metadata = this.$store.state.systemState[this.id].metadata;
       return metadata && metadata.value && metadata.value[prop];
     },
+    async reloadPlugin() {
+      const plugins = await this.$scrypted.systemManager.getComponent(
+        "plugins"
+      );
+      await plugins.reload(this.pluginData.packageJson.name);
+    },
     reload() {
-      // this.deviceState = {};
-      // Object.entries(this.$store.state.systemState[this.id]).forEach(
-      //   ([key, property]) => (this.deviceState[key] = property.value)
-      // );
-
       this.name = this.$store.state.systemState[this.id].name.value;
       this.room = this.$store.state.systemState[this.id].room.value;
       this.type = this.$store.state.systemState[this.id].type.value;
-      this.component = this.$store.state.systemState[this.id].component.value;
       this.syncWithIntegrations = this.getMetadata("syncWithIntegrations");
       this.device = undefined;
-      this.deviceProps = undefined;
       this.loading = true;
-      axios.get(`/web/device/${this.id}.json`).then(response => {
-        this.deviceProps = response.data;
-
-        this.loading = false;
-
-        if (this.systemDevice.interfaces.includes("Refresh")) {
-          this.listener = this.systemDevice.listen("Refresh", () => {});
-        }
-      });
+      this.$scrypted.systemManager
+        .getComponent("plugins")
+        .then(async (plugins) => {
+          const pluginData = {};
+          pluginData.nativeId = await plugins.getNativeId(this.id);
+          pluginData.pluginId = await plugins.getPluginId(this.id);
+          pluginData.storage = await plugins.getStorage(this.id);
+          pluginData.packageJson = await plugins.getPackageJson(
+            pluginData.pluginId
+          );
+          this.pluginData = pluginData;
+          this.loading = false;
+        });
     },
     remove() {
       const id = this.id;
       this.$router.replace("/device");
-      axios.post(`/web/device/${id}/delete`);
+      this.$scrypted.systemManager.removeDevice(id);
     },
-    save() {
-      const post = {
-        type: this.type,
-        name: this.name,
-        room: this.room,
-        syncWithIntegrations: this.syncWithIntegrations,
-        device: this.device
-      };
-
+    async save() {
       this.showSaveError = false;
       this.showSave = false;
-      axios
-        .post(`/web/device/${this.id}/`, post)
-        .then(() => {
-          this.showSave = true;
-          this.device = undefined;
-        })
-        .catch(() => (this.showSaveError = true));
-    }
+      try {
+        const device = this.systemDevice;
+        await device.setName(this.name);
+        await device.setType(this.type);
+        await device.setRoom(this.room);
+        const plugins = await this.$scrypted.systemManager.getComponent(
+          "plugins"
+        );
+        await plugins.setMetadata(
+          device.id,
+          "syncWithIntegrations",
+          this.syncWithIntegrations
+        );
+        await plugins.setStorage(device.id, this.pluginData.storage);
+        this.showSave = true;
+      } catch (e) {
+        this.showSaveError = true;
+      }
+    },
   },
   computed: {
+    ownerDevice() {
+      if (this.systemDevice.providerId === this.systemDevice.id)
+        return;
+      return this.$scrypted.systemManager.getDeviceById(
+        this.systemDevice.providerId
+      );
+    },
     deviceState() {
       var ret = {};
       Object.entries(this.$store.state.systemState[this.id]).forEach(
@@ -449,6 +612,7 @@ export default {
     cardButtonInterfaces: filterInterfaces(cardButtonInterfaces),
     cardActionInterfaces: filterInterfaces(cardActionInterfaces),
     cardInterfaces: filterInterfaces(cardInterfaces),
+    cardUnderInterfaces: filterInterfaces(cardUnderInterfaces),
     cardHeaderInterfaces: filterInterfaces(cardHeaderInterfaces),
     syncable() {
       return isSyncable(this.type);
@@ -461,11 +625,13 @@ export default {
     },
     existingRooms() {
       return this.$store.state.scrypted.devices
-        .map(device => this.$scrypted.systemManager.getDeviceById(device).room)
-        .filter(room => room);
+        .map(
+          (device) => this.$scrypted.systemManager.getDeviceById(device).room
+        )
+        .filter((room) => room);
     },
     deviceAlerts() {
-      return this.$store.state.scrypted.alerts.filter(alert =>
+      return this.$store.state.scrypted.alerts.filter((alert) =>
         alert.path.startsWith("/web" + getDeviceViewPath(this.id))
       );
     },
@@ -479,12 +645,12 @@ export default {
       return this.devices.includes(this.id);
     },
     needsLoad() {
-      return !this.deviceProps && this.canLoad && !this.loading;
+      return !this.pluginData && this.canLoad && !this.loading;
     },
     systemDevice() {
       return this.$scrypted.systemManager.getDeviceById(this.id);
-    }
-  }
+    },
+  },
 };
 </script>
 <style>

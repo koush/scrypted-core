@@ -46,7 +46,7 @@
 </template>
 <script>
 import DashboardBase from "./DashboardBase";
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk/types";
 import colors from "vuetify/es5/util/colors";
 import { getDeviceViewPath } from "../helpers";
 

@@ -10,7 +10,7 @@ export async function checkUpdate(npmPackage, npmPackageVersion): Promise<string
     return axios.get(`${componentPath}/npm/${npmPackage}`).then(response => {
         const data = response.data;
         if (data["dist-tags"]) {
-            var latest = data["dist-tags"].latest;
+            let latest = data["dist-tags"].latest;
             if (semver.gt(latest, npmPackageVersion)) {
                 return latest;
             }

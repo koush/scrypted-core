@@ -291,7 +291,7 @@ export default {
     },
     removeAlert,
     doAlert(alert) {
-      const alertPath = alert.path.replace("/web/", "/");
+      const alertPath = alert.url.replace("/web/", "/");
       this.removeAlert(alert);
       this.$router.push(alertPath);
     },

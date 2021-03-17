@@ -14,20 +14,19 @@
       :items-per-page="rows"
       :search="search"
     >
+      <template v-slot:item.date="{ item }">
+        <pre class="caption">{{ new Date(item.timestamp).toLocaleTimeString() }}</pre>
+      </template>
       <template v-slot:item.pri="{ item }">
-        <v-chip x-small :color="priToColor(item.pri)">{{ item.pri }}</v-chip>
+        <v-chip x-small :color="priToColor(item.level)">{{ item.level }}</v-chip>
       </template>
       <template v-slot:item.tag="{ item }">
-        <a :href="`#/${item.tag.replace('Scrypted/', 'component/log/')}`">{{item.title}}</a>
+        <router-link :to="`/component/log${item.path}`">{{ item.title }}</router-link>
       </template>
       <template v-slot:item.log="{ item }">
-        <pre class="caption">{{ item.log }}</pre>
+        <pre class="caption">{{ item.message }}</pre>
         <div class="caption font-weight-light">
-          <a :href="`${(item.path || '/').replace('/web', '#')}`">{{ item.title }}</a>
-        </div>
-        <div v-if="item.t">
-          <div>{{ item.t }}</div>
-          <pre class="caption">{{ item.ts }}</pre>
+          <router-link :to="item.path">{{ item.title }}</router-link>
         </div>
       </template>
     </v-data-table>
@@ -44,7 +43,6 @@
   </v-card>
 </template>
 <script>
-const eio = require("engine.io-client");
 export default {
   props: {
     logRoute: {
@@ -55,12 +53,12 @@ export default {
       default: 500
     }
   },
-  eioSocket: null,
+  disconnect: null,
   watch: {
     logRoute: {
       deep: true,
       handler() {
-        this.disconnect();
+        this.disconnect?.();
         this.connect();
       }
     }
@@ -94,8 +92,8 @@ export default {
   },
 
   methods: {
-    priToColor(pri) {
-      switch (pri) {
+    priToColor(level) {
+      switch (level.toUpperCase()) {
         case "E":
           return "error";
         case "I":
@@ -106,31 +104,27 @@ export default {
           return "success";
       }
     },
-    connect() {
-      //   var eioLocation =
-      //     window.location.hash.replace(
-      //       "#/component/log",
-      //       "/web/component/log/json"
-      //     ) + "/engine.io";
-      var eioLocation = `/web/component/log/json${this.logRoute}/engine.io`;
-      var address = window.location.protocol + "//" + window.location.host;
-      var socket = (this.eioSocket = new eio.Socket(address, {
-        path: eioLocation
-      }));
-
-      socket.on("open", () => {
-        socket.on("message", str => {
-          this.logs.unshift(JSON.parse(str));
-        });
-        socket.on("close", () => {});
-      });
-    },
-    disconnect() {
-      if (this.eioSocket) {
-        this.eioSocket.close();
+    async connect() {
+      let logger = await this.$scrypted.systemManager.getComponent("logger");
+      const parts = this.logRoute.split('/');
+      for (const part of parts) {
+        if (!part)
+          continue;
+        logger = await logger.getLogger(part);
       }
-      this.logs = [];
-    }
+      this.logs.push(...await logger.getLogs());
+
+      const observer = (entry) => {
+        this.logs.unshift(entry);
+      }
+
+      this.disconnect = () => {
+        this.disconnect = null;
+        logger.removeListener('log', observer);
+      }
+
+      logger.on('log', observer);
+    },
   },
   destroyed() {
     this.disconnect();

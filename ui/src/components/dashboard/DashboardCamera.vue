@@ -18,7 +18,7 @@
   </div>
 </template>
 <script>
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk/types";
 import DashboardBase from "./DashboardBase";
 var currentStream;
 

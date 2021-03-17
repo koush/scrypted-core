@@ -14,7 +14,7 @@
 </template>
 <script>
 import { getDeviceViewPath } from "../helpers";
-import { ThermostatMode } from "@scrypted/sdk";
+import { ThermostatMode } from "@scrypted/sdk/types";
 import DashboardBase from "./DashboardBase";
 import colors from "vuetify/es5/util/colors";
 

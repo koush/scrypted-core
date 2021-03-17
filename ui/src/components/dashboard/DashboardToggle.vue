@@ -61,7 +61,7 @@ import DashboardPopupToggle from "./DashboardPopupToggle.vue";
 import ClickOutside from "vue-click-outside";
 import VueSlider from "vue-slider-component";
 import "vue-slider-component/theme/default.css";
-import { ScryptedInterface } from "@scrypted/sdk";
+import { ScryptedInterface } from "@scrypted/sdk/types";
 import throttle from "lodash.throttle";
 
 export default {

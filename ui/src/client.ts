@@ -1,5 +1,5 @@
 import Vue from "vue";
-import client from "@scrypted/client";
+import client from '../../client/index';
 import axios from 'axios';
 import store from './store';
 
@@ -9,7 +9,7 @@ function hasValue(state, property) {
 
 function isValidDevice(id) {
     const state = store.state.systemState[id];
-    for (var property of [
+    for (let property of [
         "id",
         "name",
         "interfaces",
@@ -79,12 +79,6 @@ Vue.use(Vue => {
                         if (eventSource) {
                             const id = eventSource.id;
 
-                            if (eventDetails.property === "id" && !eventData) {
-                                Vue.delete(systemState, id);
-                                store.commit("removeDevice", id);
-                                return;
-                            }
-
                             // ensure the property is reactive
                             if (eventDetails.eventInterface == "ScryptedDevice") {
                                 Vue.set(systemState, id, systemState[id]);
@@ -95,6 +89,11 @@ Vue.use(Vue => {
                             }
                         } else if (eventDetails.eventInterface == "Logger") {
                             store.commit("addAlert", eventData);
+                        }
+                        else if (eventDetails.property === "id") {
+                            Vue.delete(systemState, eventData);
+                            store.commit("removeDevice", eventData);
+                            return;
                         }
                     }
                 );
