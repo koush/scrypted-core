@@ -1,5 +1,6 @@
 <template>
   <v-text-field
+    autocomplete="off"
     outlined
     solo
     flat

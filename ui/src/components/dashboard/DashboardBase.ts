@@ -13,7 +13,9 @@ export default {
       const device = this.$scrypted.systemManager.getDeviceById(this.deviceId);
       if (device.interfaces.includes("Refresh")) {
         const listener = device.listen(null, () => { });
-        this.$once('destroyed', () => listener.removeListener());
+        this.$once('destroyed', () => {
+          listener.removeListener();
+        });
       }
       return device;
     },
@@ -27,7 +29,9 @@ export default {
         }
       });
 
-      this.$once('destroyed', () => listeners.forEach(listener => listener.removeListener()));
+      this.$once('destroyed', () => listeners.forEach(listener => {
+        listener.removeListener(); }
+      ));
 
       return devices;
     },

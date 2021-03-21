@@ -49,8 +49,8 @@ module.exports = {
   runtimeCompiler: true,
   devServer: {
     port: 8081,
-    // disableHostCheck: true,
-    // public: 'home.koushikdutta.com',
+    disableHostCheck: true,
+    public: 'home.scrypted.app',
     https: true,
     proxy: {
       '^/(login|logout|static|endpoint|whitelist|web)': proxyOpts,
