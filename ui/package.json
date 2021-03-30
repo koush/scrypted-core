@@ -16,7 +16,7 @@
     "@scrypted/client": "0.0.7",
     "@scrypted/sdk": "0.0.51",
     "apexcharts": "^3.25.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "core-js": "^2.6.12",
     "engine.io-client": "^3.5.1",
     "feather-icons": "^4.28.0",
