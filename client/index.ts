@@ -30,7 +30,7 @@ export default {
                     const rpcPeer = new RpcPeer(message => socket.send(JSON.stringify(message)));
                     socket.on('message', data => rpcPeer.handleMessage(JSON.parse(data as string)));
                     
-                    const scrypted = await attachPluginRemote(rpcPeer);
+                    const scrypted = await attachPluginRemote(rpcPeer, undefined);
                     const {
                         systemManager,
                         deviceManager,

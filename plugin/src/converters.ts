@@ -45,7 +45,7 @@ export class UrlConverter extends ScryptedDeviceBase implements HttpRequestHandl
         throw new Error("Method not implemented.");
     }
 
-    async convert(buffer: Buffer, fromMimeType: string): Promise<Buffer> {
+    async convert(buffer: Buffer, fromMimeType: string): Promise<Buffer|string> {
         const uuid = uuidv4();
 
         const endpoint = await (this.secure ? endpointManager.getPublicLocalEndpoint(this.nativeId) : endpointManager.getInsecurePublicLocalEndpoint(this.nativeId));
@@ -55,6 +55,6 @@ export class UrlConverter extends ScryptedDeviceBase implements HttpRequestHandl
 
         this.hosted.set(`/${filename}`, { buffer, fromMimeType });
 
-        return Buffer.from(`${endpoint}${filename}`);
+        return `${endpoint}${filename}`;
     }
 }

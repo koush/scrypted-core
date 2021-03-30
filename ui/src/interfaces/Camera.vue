@@ -13,14 +13,16 @@ export default {
         };
     },
     mounted() {
-      const picture = this.device.takePicture();
-      this.$scrypted.mediaManager
-        .convertMediaObjectToLocalUri(picture, "image/jpeg")
-        .then(result => {
-          this.picture = true;
-          const url = new URL(result);
-          this.src = url.pathname;
-        });
+        (async() => {
+            const videoStream = await this.device.takePicture();
+            this.$scrypted.mediaManager
+            .convertMediaObjectToLocalUrl(videoStream, "image/jpeg")
+            .then(result => {
+                this.picture = true;
+                const url = new URL(result);
+                this.src = url.pathname;
+            });
+        })();
     }
 };
 </script>

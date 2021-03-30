@@ -101,17 +101,8 @@ export default {
       });
     }
   },
-  computed: {
-    componentWebPath() {
-      return getComponentWebPath(this.id);
-    },
-    componentViewPath() {
-      return getComponentViewPath(this.id);
-    },
-    id() {
-      return window.location.hash.replace("#/component/", "");
-    },
-    deviceGroups() {
+  asyncComputed: {
+        deviceGroups() {
       const ids = this.$store.state.scrypted.devices;
       const devices = ids
         .map(id => this.$scrypted.systemManager.getDeviceById(id))
@@ -136,6 +127,17 @@ export default {
         }
       ];
     }
+  },
+  computed: {
+    componentWebPath() {
+      return getComponentWebPath(this.id);
+    },
+    componentViewPath() {
+      return getComponentViewPath(this.id);
+    },
+    id() {
+      return window.location.hash.replace("#/component/", "");
+    },
   }
 };
 </script>

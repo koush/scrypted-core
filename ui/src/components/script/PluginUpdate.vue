@@ -3,7 +3,7 @@
     <div
       v-if="!updateAvailable"
       class="body-2 font-weight-light"
-    >{{ device.metadata.npmPackageVersion }}</div>
+    >{{ device.npmPackageVersion }}</div>
     <v-btn
       @click="doInstall"
       small
@@ -24,8 +24,8 @@ export default {
   props: ["device"],
   mounted() {
     checkUpdate(
-      this.device.metadata.npmPackage,
-      this.device.metadata.npmPackageVersion
+      this.device.pluginId,
+      this.device.npmPackageVersion
     ).then(updateAvailable => (this.updateAvailable = updateAvailable));
   },
   data() {
@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     doInstall() {
-      installNpm(this.device.id, this.device.metadata.npmPackage).then(id =>
+      installNpm(this.device.id, this.device.pluginId).then(id =>
         this.$router.push(getDeviceViewPath(id))
       );
     }

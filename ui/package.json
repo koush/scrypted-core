@@ -29,6 +29,7 @@
     "semver": "^6.3.0",
     "vue": "^2.6.12",
     "vue-apexcharts": "^1.6.0",
+    "vue-async-computed": "^3.9.0",
     "vue-click-outside": "^1.1.0",
     "vue-clipboard2": "^0.3.1",
     "vue-feather": "^1.1.1",

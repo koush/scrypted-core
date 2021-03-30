@@ -44,7 +44,7 @@
                 <v-layout row justify-end align-center>
                   <component
                     :value="deviceState"
-                    :device="systemDevice"
+                    :device="device"
                     :is="iface"
                     v-for="iface in cardHeaderInterfaces"
                     :key="iface"
@@ -58,7 +58,7 @@
                     v-for="iface in cardButtonInterfaces"
                     :key="iface"
                     :value="deviceState"
-                    :device="systemDevice"
+                    :device="device"
                     :is="iface"
                   ></component>
                 </v-layout>
@@ -105,7 +105,7 @@
                   v-for="iface in cardActionInterfaces"
                   :key="iface"
                   :value="deviceState"
-                  :device="systemDevice"
+                  :device="device"
                   :is="iface"
                 ></component>
                 <v-spacer></v-spacer>
@@ -284,7 +284,7 @@
               </v-card-title>
               <component
                 :value="deviceState"
-                :device="systemDevice"
+                :device="device"
                 :is="iface"
               ></component>
             </v-card>
@@ -304,7 +304,7 @@
               >
               <component
                 :value="deviceState"
-                :device="systemDevice"
+                :device="device"
                 :is="iface"
               ></component>
             </v-card>
@@ -473,7 +473,7 @@ export default {
     if (this.needsLoad) {
       this.reload();
     }
-    this.systemDevice.refresh?.(undefined, true);
+    this.device.refresh?.(undefined, true);
   },
   destroyed() {
     this.cleanupListener();
@@ -505,7 +505,6 @@ export default {
         name: undefined,
         room: undefined,
         type: undefined,
-        device: undefined,
         loading: false,
         showStorage: false,
         syncWithIntegrations: undefined,
@@ -540,17 +539,14 @@ export default {
       return metadata && metadata.value && metadata.value[prop];
     },
     async reloadPlugin() {
-      const plugins = await this.$scrypted.systemManager.getComponent(
-        "plugins"
-      );
+      const plugins = await this.$scrypted.systemManager.getComponent("plugins");
       await plugins.reload(this.pluginData.packageJson.name);
     },
     reload() {
-      this.name = this.$store.state.systemState[this.id].name.value;
-      this.room = this.$store.state.systemState[this.id].room.value;
-      this.type = this.$store.state.systemState[this.id].type.value;
-      this.syncWithIntegrations = this.getMetadata("syncWithIntegrations");
-      this.device = undefined;
+      this.name = this.device.name;
+      this.room = this.device.room;
+      this.type = this.device.type;
+      this.syncWithIntegrations = !!this.device.metadata?.syncWithIntegrations;
       this.loading = true;
       this.$scrypted.systemManager
         .getComponent("plugins")
@@ -575,7 +571,7 @@ export default {
       this.showSaveError = false;
       this.showSave = false;
       try {
-        const device = this.systemDevice;
+        const device = this.device;
         await device.setName(this.name);
         await device.setType(this.type);
         await device.setRoom(this.room);
@@ -596,10 +592,10 @@ export default {
   },
   computed: {
     ownerDevice() {
-      if (this.systemDevice.providerId === this.systemDevice.id)
+      if (this.device.providerId === this.device.id)
         return;
       return this.$scrypted.systemManager.getDeviceById(
-        this.systemDevice.providerId
+        this.device.providerId
       );
     },
     deviceState() {
@@ -647,7 +643,7 @@ export default {
     needsLoad() {
       return !this.pluginData && this.canLoad && !this.loading;
     },
-    systemDevice() {
+    device() {
       return this.$scrypted.systemManager.getDeviceById(this.id);
     },
   },

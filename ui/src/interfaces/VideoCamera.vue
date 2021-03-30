@@ -1,16 +1,24 @@
 <template>
   <v-dialog v-model="dialog" width="1024">
     <template v-slot:activator="{ on }">
-      <a v-on="on"><v-img  contain :src="src" lazy-src="images/cameraloading.jpg"></v-img></a>
+      <a v-on="on"
+        ><v-img contain :src="src" lazy-src="images/cameraloading.jpg"></v-img
+      ></a>
     </template>
-    <video ref="video" width="100%" style="background-color: black;" playsinline autoplay></video>
+    <video
+      ref="video"
+      width="100%"
+      style="background-color: black"
+      playsinline
+      autoplay
+    ></video>
   </v-dialog>
 </template>
 
 <script>
 import RPCInterface from "./RPCInterface.vue";
-
-var currentStream;
+import { ScryptedMimeTypes } from "@scrypted/sdk/types";
+import { streamCamera } from "../common/camera";
 
 const scryptedServerVariables = {};
 scryptedServerVariables.registrationId = "web:/web/message";
@@ -21,49 +29,47 @@ export default {
   mixins: [RPCInterface],
   data() {
     return {
+      pc: undefined,
       src: "images/cameraloading.jpg",
       dialog: false,
     };
   },
+  destroyed() {
+    this.cleanupConnection();
+  },
+  methods: {
+    cleanupConnection() {
+      if (this.pc) {
+        this.pc.close();
+        this.pc = undefined;
+      }
+    },
+  },
   watch: {
-    dialog(val) {
-
+    async dialog(val) {
+      this.cleanupConnection();
       if (!val) {
-        if (currentStream) {
-          currentStream.then(connection => connection.destroy());
-        }
         return;
       }
-
-      this.$pushconnect().then(rtcManager => {
-        const rtspUrl = `camera://${this.device.id}`;
-
-        currentStream = rtcManager.connect({
-          senderId: scryptedServerVariables.senderId,
-          registrationId: scryptedServerVariables.registrationId,
-          port: rtspUrl,
-          offerToReceiveAudio: 1,
-          offerToReceiveVideo: 1
-        });
-
-        currentStream.then(conn => {
-          var video = this.$refs.video;
-          var mediaStream = new MediaStream();
-          mediaStream.addTrack(conn.peerConnection.getReceivers()[1].track);
-          video.srcObject = mediaStream;
-        });
-      });
-    }
+      await streamCamera(
+        this.$scrypted.mediaManager,
+        this.device,
+        () => this.$refs.video,
+        (configuration) => (this.pc = new RTCPeerConnection(configuration))
+      );
+    },
   },
   mounted() {
-    const videoStream = this.device.getVideoStream();
-    this.$scrypted.mediaManager
-      .convertMediaObjectToLocalUri(videoStream, "image/jpeg")
-      .then(result => {
-        this.picture = true;
-        const url = new URL(result);
-        this.src = url.pathname;
-      });
-  }
+    (async () => {
+      const videoStream = await this.device.getVideoStream();
+      this.$scrypted.mediaManager
+        .convertMediaObjectToLocalUrl(videoStream, "image/jpeg")
+        .then((result) => {
+          this.picture = true;
+          const url = new URL(result);
+          this.src = url.pathname;
+        });
+    })();
+  },
 };
 </script>

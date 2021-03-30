@@ -1,7 +1,7 @@
 // https://developer.scrypted.app/#getting-started
 // package.json contains the metadata (name, interfaces) about this device
 // under the "scrypted" key.
-import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister, Device, DeviceManifest, EventListenerOptions, ScryptedInterfaceProperty, BufferConverter, ScryptedMimeTypes, DeviceProvider, ScryptedDeviceType, ScryptedInterface } from '@scrypted/sdk';
+import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister, Device, DeviceManifest, EventListenerOptions, ScryptedInterfaceProperty, DeviceProvider, ScryptedInterface, MediaManager } from '@scrypted/sdk';
 import sdk from '@scrypted/sdk';
 const { systemManager, deviceManager, mediaManager, endpointManager } = sdk;
 import Router from 'router';
@@ -12,8 +12,9 @@ import { setupPluginRemote } from '../../../../node-scrypted/src/plugin/plugin-r
 import { PluginAPI } from '../../../../node-scrypted/src/plugin/plugin-api';
 import { Logger } from '../../../../node-scrypted/src/logger';
 import { UrlConverter } from './converters';
-import process from 'process';
-const indexHtml: string = require('raw-loader!../fs/dist/index.html');
+import fs from 'fs';
+
+const indexHtml = fs.readFileSync('dist/index.html').toString();
 
 class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler, DeviceProvider {
     router = Router();
@@ -81,6 +82,9 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         peer.params.userStorage = userStorage;
 
         class PluginAPIImpl implements PluginAPI {
+            async getMediaManager(): Promise<MediaManager> {
+                return mediaManager;
+            }
             getLogger(nativeId: string): Promise<Logger> {
                 throw new Error('Method not implemented.');
             }

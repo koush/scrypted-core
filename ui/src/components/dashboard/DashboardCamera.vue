@@ -9,17 +9,24 @@
         v-if="video"
         ref="video"
         width="100%"
-        style="background-color: black;"
+        style="background-color: black"
         playsinline
         autoplay
       ></video>
-      <v-img v-else contain :src="src" lazy-src="images/cameraloading.jpg"></v-img>
+      <v-img
+        v-else
+        contain
+        :src="src"
+        lazy-src="images/cameraloading.jpg"
+      ></v-img>
     </v-dialog>
   </div>
 </template>
 <script>
 import { ScryptedInterface } from "@scrypted/sdk/types";
 import DashboardBase from "./DashboardBase";
+import { streamCamera } from "../../common/camera";
+
 var currentStream;
 
 const scryptedServerVariables = {};
@@ -33,57 +40,47 @@ export default {
   mixins: [DashboardBase],
   data() {
     return {
+      pc: null,
       video: false,
       src: undefined,
       overlay: false,
-      dialog: false
+      dialog: false,
     };
   },
   watch: {
-    dialog(val) {
-      if (!this.video) {
-        return;
-      }
-
+    async dialog(val) {
+      this.cleanupConnection();
       if (!val) {
-        if (currentStream) {
-          currentStream.then(connection => connection.destroy());
-        }
         return;
       }
-
-      this.$pushconnect().then(rtcManager => {
-        const rtspUrl = `camera://${this.deviceId}`;
-
-        currentStream = rtcManager.connect({
-          senderId: scryptedServerVariables.senderId,
-          registrationId: scryptedServerVariables.registrationId,
-          port: rtspUrl,
-          offerToReceiveAudio: 1,
-          offerToReceiveVideo: 1
-        });
-
-        currentStream.then(conn => {
-          var video = this.$refs.video;
-          var mediaStream = new MediaStream();
-          mediaStream.addTrack(conn.peerConnection.getReceivers()[1].track);
-          video.srcObject = mediaStream;
-        });
-      });
-    }
+      await streamCamera(
+        this.$scrypted.mediaManager,
+        this.device,
+        () => this.$refs.video,
+        (configuration) => (this.pc = new RTCPeerConnection(configuration))
+      );
+    },
   },
   methods: {
-    fetchCamera(media) {
-        this.$scrypted.mediaManager
-          .convertMediaObjectToLocalUri(media, "image/jpeg")
-          .then(result => {
-            const url = new URL(result);
-            this.src = url.pathname;
-          })
-          .catch(e => {
-            console.error(this.deviceId, e);
-            this.src = "images/cameraloading.jpg";
-          });
+    cleanupConnection() {
+      if (this.pc) {
+        this.pc.close();
+        this.pc = undefined;
+      }
+    },
+    async fetchCamera(media) {
+      let picture;
+      if (this.device.interfaces.includes(ScryptedInterface.Camera)) {
+        picture = await this.device.takePicture();
+      } else {
+        picture = await this.device.getVideoStream();
+      }
+      const result = await this.$scrypted.mediaManager.convertMediaObjectToLocalUrl(
+        picture,
+        "image/jpeg"
+      );
+      const url = new URL(result);
+      this.src = url.pathname;
     },
   },
   mounted() {
@@ -93,11 +90,10 @@ export default {
     if (this.device.interfaces.includes(ScryptedInterface.Camera)) {
       const picture = this.device.takePicture();
       this.fetchCamera(picture);
-    }
-    else if (this.device.interfaces.includes(ScryptedInterface.VideoCamera)) {
+    } else if (this.device.interfaces.includes(ScryptedInterface.VideoCamera)) {
       const videoStream = this.device.getVideoStream();
       this.fetchCamera(videoStream);
     }
-  }
+  },
 };
 </script>
