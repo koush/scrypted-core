@@ -3,6 +3,7 @@ import { ScryptedDeviceType, ScryptedInterface } from "@scrypted/sdk/types";
 export function typeToIcon(type) {
     switch (type) {
         case ScryptedDeviceType.Camera: return "video";
+        case ScryptedDeviceType.Doorbell: return "bell";
         case ScryptedDeviceType.Fan: return "angle-double-right";
         case ScryptedDeviceType.Light: return "lightbulb";
         case ScryptedDeviceType.Switch: return "toggle-on";
@@ -72,56 +73,77 @@ export function hasFixedPhysicalLocation(type: ScryptedDeviceType, interfaces?: 
         case ScryptedDeviceType.Lock:
         case ScryptedDeviceType.Fan:
         case ScryptedDeviceType.Camera:
+        case ScryptedDeviceType.Doorbell:
         case ScryptedDeviceType.Entry:
         case ScryptedDeviceType.Speaker:
         case ScryptedDeviceType.Display:
         case ScryptedDeviceType.Thermostat:
         case ScryptedDeviceType.Vacuum:
         case ScryptedDeviceType.Garage:
+        case ScryptedDeviceType.Sensor:
             return true;
         case ScryptedDeviceType.Sensor:
-            return interfaces && !interfaces.includes(ScryptedInterface.PositionSensor);
+            return !interfaces || !interfaces.includes(ScryptedInterface.PositionSensor);
     }
     return false;
 }
 
-const inference = {
+interface Inference {
+    type: ScryptedDeviceType,
+    interfaces: ScryptedInterface[];
+}
+const inference: Inference[] = [];
+
+function addInference(type: ScryptedDeviceType, ...interfaces: ScryptedInterface[]) {
+    inference.push({
+        type,
+        interfaces,
+    })
 }
 
-function addInference(iface: ScryptedInterface, ...types: ScryptedDeviceType[]) {
-    inference[iface] = types;
+// in order of least ambiguous to most ambiguous
+addInference(ScryptedDeviceType.Lock, ScryptedInterface.Lock);
+addInference(ScryptedDeviceType.PasswordControl, ScryptedInterface.PasswordStore);
+addInference(ScryptedDeviceType.Camera, ScryptedInterface.Camera);
+addInference(ScryptedDeviceType.Camera, ScryptedInterface.VideoCamera);
+addInference(ScryptedDeviceType.Doorbell, ScryptedInterface.VideoCamera);
+addInference(ScryptedDeviceType.Thermostat, ScryptedInterface.TemperatureSetting);
+addInference(ScryptedDeviceType.Garage, ScryptedInterface.Entry);
+addInference(ScryptedDeviceType.Entry, ScryptedInterface.Entry);
+
+addInference(ScryptedDeviceType.Light, ScryptedInterface.Brightness);
+
+addInference(ScryptedDeviceType.Outlet, ScryptedInterface.OnOff);
+addInference(ScryptedDeviceType.Switch, ScryptedInterface.OnOff);
+addInference(ScryptedDeviceType.Light, ScryptedInterface.OnOff);
+addInference(ScryptedDeviceType.Fan, ScryptedInterface.OnOff);
+
+addInference(ScryptedDeviceType.Sensor, ScryptedInterface.Thermometer);
+
+function checkSubset(set: ScryptedInterface[], subset: ScryptedInterface[]) {
+    for (const i of subset) {
+        if (!set.includes(i))
+            return false;
+    }
+
+    return true;
 }
-
-addInference(ScryptedInterface.Lock, ScryptedDeviceType.Lock);
-addInference(ScryptedInterface.PasswordStore, ScryptedDeviceType.PasswordControl);
-addInference(ScryptedInterface.VideoCamera, ScryptedDeviceType.Camera);
-addInference(ScryptedInterface.Camera, ScryptedDeviceType.Camera);
-addInference(ScryptedInterface.TemperatureSetting, ScryptedDeviceType.Thermostat);
-addInference(ScryptedInterface.Entry, ScryptedDeviceType.Garage, ScryptedDeviceType.Entry);
-
-addInference(ScryptedInterface.OnOff, ScryptedDeviceType.Outlet, ScryptedDeviceType.Light, ScryptedDeviceType.Switch, ScryptedDeviceType.Fan);
-addInference(ScryptedInterface.Brightness, ScryptedDeviceType.Light);
 
 export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, interfaces: ScryptedInterface[]): ScryptedDeviceType[] {
-    const ret: Set<ScryptedDeviceType> = new Set<ScryptedDeviceType>();
+    const ret: Set<ScryptedDeviceType> = new Set();
+    if (existingType)
+        ret.add(existingType);
+
+    inference.filter(i => checkSubset(interfaces, i.interfaces)).forEach(i => ret.add(i.type));
 
     for (const iface of interfaces) {
-        const types: ScryptedDeviceType[] = inference[iface];
-        if (types) {
-            types.forEach(type => ret.add(type));
-        }
-        if (iface.indexOf("Sensor") != -1) {
+        if (iface.indexOf("Sensor") !== -1) {
             ret.add(ScryptedDeviceType.Sensor);
         }
     }
 
-    if (existingType) {
-        ret.add(existingType);
-    }
     return [...ret];
 }
-
-
 
 export function isSyncable(type: ScryptedDeviceType) {
     if (hasFixedPhysicalLocation(type)) {
