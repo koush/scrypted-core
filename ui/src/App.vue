@@ -46,7 +46,7 @@
             @click="doAlert(alert)"
           >
             <v-list-item-icon>
-              <font-awesome-icon size="sm" :icon="alert.icon" style="color: #a9afbb;" />
+              <font-awesome-icon size="sm" :icon="getAlertIcon(alert)" style="color: #a9afbb;" />
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title class="caption">{{ alert.title }}</v-list-item-title>
@@ -188,7 +188,7 @@ import qs from "query-string";
 import axios from "axios";
 
 import Drawer from "./components/Drawer.vue";
-import { removeAlert } from "./components/helpers";
+import { removeAlert, getAlertIcon } from "./components/helpers";
 import router from "./router";
 
 import Vue from "vue";
@@ -284,16 +284,15 @@ export default {
           this.loginResult = e.toString();
         });
     },
-    clearAlerts() {
-      this.$scrypted.rpc("this", "removeAlerts", []).then(() => {
-        this.$store.commit("setAlerts", []);
-      });
+    async clearAlerts() {
+        const alerts = await this.$scrypted.systemManager.getComponent('alerts')
+        await alerts.clearAlerts();
     },
+    getAlertIcon,
     removeAlert,
     doAlert(alert) {
-      const alertPath = alert.url.replace("/web/", "/");
       this.removeAlert(alert);
-      this.$router.push(alertPath);
+      this.$router.push(alert.path);
     },
     friendlyTime(timestamp) {
       var date = new Date(parseFloat(timestamp));

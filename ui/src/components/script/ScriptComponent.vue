@@ -75,7 +75,6 @@ export default {
             continue;
           const {name, type} = device;
           const pluginId = await plugins.getPluginId(device.id);
-          console.log(pluginId);
           const packageJson = await plugins.getPackageJson(pluginId);
           const npmPackageVersion = packageJson.version;
           devices.push({

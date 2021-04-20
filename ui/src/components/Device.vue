@@ -4,7 +4,7 @@
       <v-layout row wrap>
         <v-flex xs12>
           <v-flex>
-            <div v-if="deviceAlerts.length" class="mb-5">
+            <div v-if="deviceAlerts.length" class="pb-5">
               <v-alert
                 dismissible
                 @input="removeAlert(alert)"
@@ -23,7 +23,7 @@
                   <font-awesome-icon
                     class="white--text mr-3"
                     size="sm"
-                    :icon="alert.icon"
+                    :icon="getAlertIcon(alert)"
                     color="#a9afbb"
                   />
                 </template>
@@ -170,10 +170,7 @@
           </v-flex>
         </v-flex>
 
-        <v-flex
-          xs12
-          v-if="!ownerDevice && pluginData"
-        >
+        <v-flex xs12 v-if="!ownerDevice && pluginData">
           <v-flex>
             <v-card raised class="header-card">
               <v-card-title
@@ -216,16 +213,22 @@
           </v-flex>
         </v-flex>
 
-        <v-flex
-          xs12
-          v-if="ownerDevice && pluginData"
-        >
+        <v-flex xs12 v-if="deviceComponent">
+          <component
+            :is="deviceComponent"
+            v-model="deviceData"
+            :id="id"
+            ref="componentCard"
+          ></component>
+        </v-flex>
+
+        <v-flex xs12 v-if="ownerDevice && pluginData">
           <v-flex>
             <v-card raised class="header-card">
               <v-card-title
                 class="green-gradient subtitle-1 text--white font-weight-light"
               >
-                <font-awesome-icon size="sm" icon="database" />
+                <font-awesome-icon size="sm" icon="server" />
                 &nbsp;&nbsp;Managed Device
               </v-card-title>
               <v-card-text></v-card-text>
@@ -242,6 +245,44 @@
                   ownerDevice.name
                 }}</v-btn>
               </v-card-actions>
+            </v-card>
+          </v-flex>
+        </v-flex>
+
+        <v-flex xs12 v-if="availableMixins.length">
+          <v-flex>
+            <v-card raised class="header-card">
+              <v-card-title
+                class="green-gradient subtitle-1 text--white font-weight-light"
+              >
+                <font-awesome-icon size="sm" icon="puzzle-piece" />
+                &nbsp;&nbsp;Integrations and Extensions
+              </v-card-title>
+
+              <v-list-item-group>
+                <v-list-item
+                  @click="
+                    mixin.enabled = !mixin.enabled;
+                    toggleMixin(mixin);
+                  "
+                  v-for="mixin in availableMixins"
+                  :key="mixin.id"
+                  inactive
+                >
+                  <v-list-item-action>
+                    <v-checkbox
+                      @click.stop
+                      @change="toggleMixin(mixin)"
+                      v-model="mixin.enabled"
+                      color="primary"
+                    ></v-checkbox>
+                  </v-list-item-action>
+
+                  <v-list-item-content>
+                    <v-list-item-title>{{ mixin.name }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
             </v-card>
           </v-flex>
         </v-flex>
@@ -340,6 +381,7 @@ import {
   getComponentWebPath,
   getDeviceViewPath,
   removeAlert,
+  getAlertIcon,
   hasFixedPhysicalLocation,
 } from "./helpers";
 import { ScryptedInterface } from "@scrypted/sdk/types";
@@ -495,6 +537,7 @@ export default {
     hasFixedPhysicalLocation,
     getComponentWebPath,
     removeAlert,
+    getAlertIcon,
     initialState() {
       return {
         showLogs: false,
@@ -506,6 +549,8 @@ export default {
         room: undefined,
         type: undefined,
         loading: false,
+        deviceComponent: undefined,
+        deviceData: undefined,
         showStorage: false,
         syncWithIntegrations: undefined,
       };
@@ -539,28 +584,41 @@ export default {
       return metadata && metadata.value && metadata.value[prop];
     },
     async reloadPlugin() {
-      const plugins = await this.$scrypted.systemManager.getComponent("plugins");
+      const plugins = await this.$scrypted.systemManager.getComponent(
+        "plugins"
+      );
       await plugins.reload(this.pluginData.packageJson.name);
     },
-    reload() {
+    async reload() {
       this.name = this.device.name;
       this.room = this.device.room;
       this.type = this.device.type;
-      this.syncWithIntegrations = !!this.device.metadata?.syncWithIntegrations;
+      this.syncWithIntegrations =
+        this.device.metadata?.syncWithIntegrations !== false;
       this.loading = true;
-      this.$scrypted.systemManager
-        .getComponent("plugins")
-        .then(async (plugins) => {
-          const pluginData = {};
-          pluginData.nativeId = await plugins.getNativeId(this.id);
-          pluginData.pluginId = await plugins.getPluginId(this.id);
-          pluginData.storage = await plugins.getStorage(this.id);
-          pluginData.packageJson = await plugins.getPackageJson(
-            pluginData.pluginId
-          );
-          this.pluginData = pluginData;
-          this.loading = false;
-        });
+      const plugins = await this.$scrypted.systemManager.getComponent(
+        "plugins"
+      );
+      const pluginData = {};
+      pluginData.nativeId = await plugins.getNativeId(this.id);
+      pluginData.pluginId = await plugins.getPluginId(this.id);
+      pluginData.storage = await plugins.getStorage(this.id);
+      pluginData.packageJson = await plugins.getPackageJson(
+        pluginData.pluginId
+      );
+      this.pluginData = pluginData;
+
+      const device = this.device;
+      if (
+        pluginData.pluginId === "@scrypted/core" &&
+        pluginData.nativeId?.startsWith("automation:")
+      ) {
+        const storage = await plugins.getStorage(device.id);
+        this.deviceData = storage["data"];
+        this.deviceComponent = "Automation";
+      }
+
+      this.loading = false;
     },
     remove() {
       const id = this.id;
@@ -583,20 +641,75 @@ export default {
           "syncWithIntegrations",
           this.syncWithIntegrations
         );
+        if (this.deviceData) {
+          this.pluginData.storage.data = this.deviceData;
+        }
         await plugins.setStorage(device.id, this.pluginData.storage);
+        if (this.deviceData) {
+          await this.$scrypted.deviceManager.onDeviceEvent(
+            this.pluginData.nativeId,
+            "Storage",
+            null
+          );
+        }
         this.showSave = true;
       } catch (e) {
         this.showSaveError = true;
       }
     },
+    async toggleMixin(mixin) {
+      // mixin.enabled = !mixin.enabled;
+
+      const plugins = await this.$scrypted.systemManager.getComponent(
+        "plugins"
+      );
+      let mixins = await plugins.getMixins(this.device.id);
+      if (mixin.enabled) {
+        mixins.push(mixin.id);
+      } else {
+        mixins = mixins.filter((id) => mixin.id !== id);
+      }
+
+      plugins.setMixins(this.device.id, mixins);
+    },
+  },
+  asyncComputed: {
+    availableMixins: {
+      async get() {
+        const plugins = await this.$scrypted.systemManager.getComponent(
+          "plugins"
+        );
+        const mixins = await plugins.getMixins(this.id);
+
+        const device = this.device;
+        const ret = [];
+        for (const id of Object.keys(this.$store.state.systemState)) {
+          const check = this.$scrypted.systemManager.getDeviceById(id);
+          if (check.interfaces.includes(ScryptedInterface.MixinProvider)) {
+            try {
+              if (await check.canMixin(device.type, device.interfaces)) {
+                ret.push({
+                  id: check.id,
+                  name: check.name,
+                  enabled: mixins.includes(check.id),
+                });
+              }
+            } catch (e) {
+              console.error("mixin check error", id, e);
+            }
+          }
+        }
+
+        return ret;
+      },
+      watch: ["id"],
+      default: [],
+    },
   },
   computed: {
     ownerDevice() {
-      if (this.device.providerId === this.device.id)
-        return;
-      return this.$scrypted.systemManager.getDeviceById(
-        this.device.providerId
-      );
+      if (this.device.providerId === this.device.id) return;
+      return this.$scrypted.systemManager.getDeviceById(this.device.providerId);
     },
     deviceState() {
       var ret = {};
@@ -628,7 +741,7 @@ export default {
     },
     deviceAlerts() {
       return this.$store.state.scrypted.alerts.filter((alert) =>
-        alert.path.startsWith("/web" + getDeviceViewPath(this.id))
+        alert.path.startsWith(getDeviceViewPath(this.id))
       );
     },
     devices() {

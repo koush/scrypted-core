@@ -1,7 +1,7 @@
 // https://developer.scrypted.app/#getting-started
 // package.json contains the metadata (name, interfaces) about this device
 // under the "scrypted" key.
-import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister, Device, DeviceManifest, EventListenerOptions, ScryptedInterfaceProperty, DeviceProvider, ScryptedInterface, MediaManager } from '@scrypted/sdk';
+import { ScryptedDeviceBase, HttpRequestHandler, HttpRequest, HttpResponse, EngineIOHandler, EventDetails, ScryptedDevice, EventListenerRegister, Device, DeviceManifest, EventListenerOptions, ScryptedInterfaceProperty, DeviceProvider, ScryptedInterface, MediaManager, ScryptedDeviceType } from '@scrypted/sdk';
 import sdk from '@scrypted/sdk';
 const { systemManager, deviceManager, mediaManager, endpointManager } = sdk;
 import Router from 'router';
@@ -13,35 +13,74 @@ import { PluginAPI } from '../../../../node-scrypted/src/plugin/plugin-api';
 import { Logger } from '../../../../node-scrypted/src/logger';
 import { UrlConverter } from './converters';
 import fs from 'fs';
+import { sendJSON } from './http-helpers';
+import { Automation } from './automation';
 
 const indexHtml = fs.readFileSync('dist/index.html').toString();
 
-class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler, DeviceProvider {
+interface RoutedHttpRequest extends HttpRequest {
+    params: { [key: string]: string };
+}
+
+class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler, DeviceProvider {
     router = Router();
     publicRouter = Router();
     httpHost: UrlConverter;
     httpsHost: UrlConverter;
+    automations = new Map<string, Automation>();
 
     constructor() {
         super();
 
-        deviceManager.onDevicesChanged({
-            devices: [
+        (async () => {
+            await deviceManager.onDeviceDiscovered(
                 {
                     name: 'HTTP file host',
                     nativeId: 'http',
                     interfaces: [ScryptedInterface.BufferConverter, ScryptedInterface.HttpRequestHandler],
                 },
+            );
+            await deviceManager.onDeviceDiscovered(
                 {
                     name: 'HTTPS file host',
                     nativeId: 'https',
                     interfaces: [ScryptedInterface.BufferConverter, ScryptedInterface.HttpRequestHandler],
                 }
-            ]
-        })
-        .then(() => {
+            );
             this.httpHost = new UrlConverter(false);
             this.httpsHost = new UrlConverter(true);
+        })();
+
+        for (const nativeId of deviceManager.getNativeIds()) {
+            if (nativeId?.startsWith('automation:')) {
+                const automation = new Automation(nativeId);
+                this.automations.set(nativeId, automation);
+            }
+        }
+
+        this.router.post('/api/new/automation', async (req: RoutedHttpRequest, res: HttpResponse) => {
+            const nativeId = `automation:${Math.random()}`;
+            const device: Device = {
+                nativeId,
+                type: ScryptedDeviceType.Automation,
+                interfaces: [ScryptedInterface.OnOff]
+            }
+            await deviceManager.onDeviceDiscovered(device);
+            const automation = new Automation(nativeId);
+            this.automations.set(nativeId, automation);
+            const { id } = automation;
+            sendJSON(res, {
+                id,
+            });
+        })
+
+        this.router.post('/api/new/automation/:nativeId/reload', async (req: RoutedHttpRequest, res: HttpResponse) => {
+            const nativeId = req.params['nativeId'];
+            const automation = this.automations.get(nativeId);
+            automation?.bind();
+            sendJSON(res, {
+                success: !!automation
+            });
         })
     }
 
@@ -52,20 +91,8 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             return this.httpsHost;
     }
 
-    discoverDevices(duration: number): void {
+    async discoverDevices(duration: number) {
         throw new Error('Method not implemented.');
-    }
-
-    getEndpoint(): string {
-        return '@scrypted/core';
-    }
-
-    sendJson(response: HttpResponse, data: object) {
-        response.send(JSON.stringify(data), {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
     }
 
     async onConnection(request: HttpRequest, webSocketUrl: string): Promise<void> {
@@ -103,42 +130,46 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                     throw new Error(`Not allowed to set property ${property}`);
             }
             async setState(nativeId: string, key: string, value: any) {
-                throw new Error('Method not implemented.');
+                deviceManager.getDeviceState(nativeId)[key] = value;
             }
             async onDevicesChanged(deviceManifest: DeviceManifest) {
-                throw new Error('Method not implemented.');
+                return deviceManager.onDevicesChanged(deviceManifest);
             }
             async onDeviceDiscovered(device: Device) {
-                throw new Error('Method not implemented.');
+                return deviceManager.onDeviceDiscovered(device);
             }
             async onDeviceEvent(nativeId: string, eventInterface: any, eventData?: any) {
-                throw new Error('Method not implemented.');
+                return deviceManager.onDeviceEvent(nativeId, eventInterface, eventData);
             }
-            async onDeviceRemoved(nativeId: String) {
-                throw new Error('Method not implemented.');
+            async onDeviceRemoved(nativeId: string) {
+                return deviceManager.onDeviceRemoved(nativeId);
             }
-            setStorage(nativeId: string, storage: { [key: string]: any; }): void {
-                throw new Error('Method not implemented.');
+            async setStorage(nativeId: string, storage: { [key: string]: any; }) {
+                const ds = deviceManager.getDeviceStorage(nativeId);
+                ds.clear();
+                for (const key of Object.keys(storage)) {
+                    ds.setItem(key, storage[key]);
+                }
             }
             async getDeviceById(id: string): Promise<ScryptedDevice> {
                 return systemManager.getDeviceById(id);
             }
-            async listen(EventListener: (id: string, eventDetails: EventDetails, eventData: object) => void): Promise<EventListenerRegister> {
+            async listen(EventListener: (id: string, eventDetails: EventDetails, eventData: any) => void): Promise<EventListenerRegister> {
                 return systemManager.listen((eventSource, eventDetails, eventData) => EventListener(eventSource?.id, eventDetails, eventData));
             }
             async listenDevice(id: string, event: string | EventListenerOptions, callback: (eventDetails: EventDetails, eventData: object) => void): Promise<EventListenerRegister> {
                 return systemManager.listenDevice(id, event, (eventSource, eventDetails, eventData) => callback(eventDetails, eventData));
             }
-            ioClose(id: string): void {
+            async ioClose(id: string) {
                 throw new Error('Method not implemented.');
             }
-            ioSend(id: string, message: string): void {
+            async ioSend(id: string, message: string) {
                 throw new Error('Method not implemented.');
             }
             async removeDevice(id: string) {
-                systemManager.removeDevice(id);
+                return systemManager.removeDevice(id);
             }
-            kill() {
+            async kill() {
             }
         }
         const api = new PluginAPIImpl();
@@ -146,11 +177,21 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
         const remote = await setupPluginRemote(peer, api, null);
         await remote.setSystemState(systemManager.getSystemState());
 
-
         // this listener keeps the system state up to date on the other end.
-        systemManager.listen((eventSource: ScryptedDevice | null, eventDetails: EventDetails, eventData: any) => {
+        // use the api listen instead of system manager because the listeners are detached
+        // on connection close.
+        api.listen((id, eventDetails, eventData) => {
+            const eventSource = systemManager.getDeviceById(id);
             if (eventSource) {
                 remote.updateState(eventSource.id, systemManager.getDeviceState(eventSource.id));
+
+                if (eventDetails.eventInterface === 'Storage') {
+                    const ids = [...this.automations.values()].map(a => a.id);
+                    if (ids.includes(eventSource.id)) {
+                        const automation = [...this.automations.values()].find(a => a.id === eventSource.id);
+                        automation.bind();
+                    }
+                }
             }
             else {
                 if (eventDetails.property === ScryptedInterfaceProperty.id && eventData != null)
@@ -158,7 +199,7 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
                 else
                     console.warn('unknown event source', eventData);
             }
-        });
+        })
 
         ws.onclose = () => {
             api.kill();
@@ -194,8 +235,10 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
             });
     }
 
-    onRequest(request: HttpRequest, response: HttpResponse) {
-        const normalizedRequest = Object.assign({}, request);
+    async onRequest(request: HttpRequest, response: HttpResponse) {
+        const normalizedRequest: RoutedHttpRequest = Object.assign({
+            params: {},
+        }, request);
         normalizedRequest.url = normalizedRequest.url.replace(normalizedRequest.rootPath, '');
         if (normalizedRequest.url == '/') {
             normalizedRequest.url = '/index.html';
@@ -214,4 +257,4 @@ class ScryptedUI extends ScryptedDeviceBase implements HttpRequestHandler, Engin
     }
 }
 
-export default new ScryptedUI();
+export default new ScryptedCore();

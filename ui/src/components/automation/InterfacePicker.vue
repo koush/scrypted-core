@@ -7,7 +7,7 @@
           <v-flex xs12>
             <Select2
               v-model="lazyValue.selected"
-              :options="actionableInterfaces"
+              :options="interfaces"
               :unselected="unselected"
               @input="onInput"
             ></Select2>
@@ -49,6 +49,7 @@ import Program from "../../interfaces/Program.vue";
 import ColorSettingRgb from "../../interfaces/ColorSettingRgb.vue";
 import ColorSettingTemperature from "../../interfaces/ColorSettingTemperature.vue";
 import Brightness from "../../interfaces/Brightness.vue";
+import { actionableInterfaces } from './interfaces';
 
 import Select2 from "../../common/Select2.vue";
 function unassigned() {
@@ -69,11 +70,6 @@ export default {
     }
   },
   mixins: [CustomValue],
-  computed: {
-    actionableInterfaces() {
-      return this.interfaces.filter(iface => iface.action);
-    }
-  },
   components: {
     Unassigned,
     CustomValue,

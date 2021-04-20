@@ -13,7 +13,7 @@
               label="Event"
             ></Select2>
             <component
-              v-if="lazyValue.selected.component && lazyValue.selected.properties && lazyValue.selected.properties.event"
+              v-if="lazyValue.selected.component && lazyValue.selected.event"
               :is="lazyValue.selected.component"
               v-model="lazyValue.model"
               :events="events"

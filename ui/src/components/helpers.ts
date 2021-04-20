@@ -25,6 +25,7 @@ export function typeToIcon(type) {
         case ScryptedDeviceType.DeviceProvider: return "database";
         case ScryptedDeviceType.API: return "cloud";
         case ScryptedDeviceType.DataSource: return "chart-area";
+        case ScryptedDeviceType.DeviceProvider: return "server";
         case ScryptedDeviceType.Unknown: return "question-circle";
 
     }
@@ -59,10 +60,22 @@ export function getComponentViewPath(id) {
     return `/component/${id}`;
 }
 
-export function removeAlert(alert) {
-    this.$scrypted.rpc('this', "removeAlerts", [[alert.id]]).then(() => {
-        this.$store.commit("removeAlert", alert.id);
-    });
+export async function removeAlert(alert) {
+    const alerts = await this.$scrypted.systemManager.getComponent('alerts');
+    await alerts.removeAlert(alert);
+    this.$store.commit("removeAlert", alert._id);
+}
+
+export function getAlertIcon(alert) {
+    const device = '/device/';
+    if (alert.path.startsWith(device)) {
+        const id = alert.path.replace(device, '');
+        const d = this.$scrypted.systemManager.getDeviceById(id);
+        if (!d)
+            return 'question';
+        return typeToIcon(d.type);
+    }
+    return 'bell';
 }
 
 export function hasFixedPhysicalLocation(type: ScryptedDeviceType, interfaces?: ScryptedInterface[]) {
@@ -102,6 +115,9 @@ function addInference(type: ScryptedDeviceType, ...interfaces: ScryptedInterface
 }
 
 // in order of least ambiguous to most ambiguous
+addInference(ScryptedDeviceType.Display, ScryptedInterface.MediaPlayer);
+addInference(ScryptedDeviceType.Speaker, ScryptedInterface.MediaPlayer);
+
 addInference(ScryptedDeviceType.Lock, ScryptedInterface.Lock);
 addInference(ScryptedDeviceType.PasswordControl, ScryptedInterface.PasswordStore);
 addInference(ScryptedDeviceType.Camera, ScryptedInterface.Camera);
@@ -119,6 +135,8 @@ addInference(ScryptedDeviceType.Light, ScryptedInterface.OnOff);
 addInference(ScryptedDeviceType.Fan, ScryptedInterface.OnOff);
 
 addInference(ScryptedDeviceType.Sensor, ScryptedInterface.Thermometer);
+
+addInference(ScryptedDeviceType.DeviceProvider, ScryptedInterface.DeviceProvider);
 
 function checkSubset(set: ScryptedInterface[], subset: ScryptedInterface[]) {
     for (const i of subset) {

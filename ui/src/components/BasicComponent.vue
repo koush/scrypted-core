@@ -82,12 +82,9 @@ export default {
     getOwnerLink() {
       return null;
     },
-    newDevice(body) {
+    newDevice(type) {
       axios
-        .post(
-          `${this.componentWebPath}/new`,
-          body ? qs.stringify(body) : undefined
-        )
+        .post(`/endpoint/@scrypted/core/api/new/${type}`)
         .then(response => {
           const { id } = response.data;
           window.location.hash = "#" + getDeviceViewPath(id);

@@ -5,6 +5,9 @@ Vue.use(VueFeather);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faQuestion,
+  faServer,
+  faPuzzlePiece,
   faVolumeOff,
   faHome,
   faPlayCircle,
@@ -75,6 +78,9 @@ import {
 } from '@fortawesome/free-brands-svg-icons'
 
 const icons =[
+  faQuestion,
+  faServer,
+  faPuzzlePiece,
   faVolumeOff,
   faHome,
   faPlayCircle,

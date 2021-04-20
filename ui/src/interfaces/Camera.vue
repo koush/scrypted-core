@@ -16,7 +16,7 @@ export default {
         (async() => {
             const videoStream = await this.device.takePicture();
             this.$scrypted.mediaManager
-            .convertMediaObjectToLocalUrl(videoStream, "image/jpeg")
+            .convertMediaObjectToLocalUrl(videoStream, "image/*")
             .then(result => {
                 this.picture = true;
                 const url = new URL(result);

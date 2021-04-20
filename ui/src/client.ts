@@ -2,6 +2,7 @@ import Vue from "vue";
 import client from '../../client/index';
 import axios from 'axios';
 import store from './store';
+import { ScryptedInterface } from "@scrypted/sdk/types";
 
 function hasValue(state, property) {
     return state[property] && state[property].value;
@@ -10,12 +11,8 @@ function hasValue(state, property) {
 function isValidDevice(id) {
     const state = store.state.systemState[id];
     for (let property of [
-        "id",
         "name",
         "interfaces",
-        "component",
-        "events",
-        "metadata",
         "type"
     ]) {
         if (!hasValue(state, property)) {
@@ -75,7 +72,7 @@ Vue.use(Vue => {
                 };
 
                 scrypted.systemManager.listen(
-                    (eventSource, eventDetails, eventData) => {
+                    async (eventSource, eventDetails, eventData) => {
                         if (eventSource) {
                             const id = eventSource.id;
 
@@ -88,7 +85,9 @@ Vue.use(Vue => {
                                 return;
                             }
                         } else if (eventDetails.eventInterface == "Logger") {
-                            store.commit("addAlert", eventData);
+                            const alerts = await scrypted.systemManager.getComponent('alerts');
+                            const ret = await alerts.getAlerts();
+                            store.commit("setAlerts", ret);
                         }
                         else if (eventDetails.property === "id") {
                             Vue.delete(systemState, eventData);
@@ -98,8 +97,9 @@ Vue.use(Vue => {
                     }
                 );
 
-                scrypted.rpc("this", "getAlerts", []).then(alerts => {
-                    store.commit("setAlerts", alerts);
+                scrypted.systemManager.getComponent('alerts').then(async (alerts) => {
+                    const ret = await alerts.getAlerts();
+                    store.commit("setAlerts", ret);
                 });
             })
             .catch(e => {

@@ -6,7 +6,6 @@ import { RpcPeer } from '../../../node-scrypted/src/rpc';
 
 export interface ScryptedClientStatic extends ScryptedStatic {
     disconnect(): void;
-    rpc(target: string, method: string, args: any[]): Promise<any>;
     onClose?: Function;
     userStorage: Storage,
 }
@@ -15,8 +14,6 @@ export default {
     connect(baseUrl: string): Promise<ScryptedClientStatic> {
         const rootLocation = baseUrl || `${window.location.protocol}//${window.location.host}`;
         const endpointPath = `/endpoint/@scrypted/core`;
-        const endpointUrl = `${rootLocation}${endpointPath}`;
-        const apiUrl = `${endpointUrl}/api`;
 
         return new Promise((resolve, reject) => {
 
@@ -46,13 +43,12 @@ export default {
                         endpointManager,
                         mediaManager,
                         userStorage,
-                        async rpc(target: string, method: string, args: any[]) {
-                            return [];
-                        },
                         disconnect() {
                             socket.close();
                         }
                     }
+
+                    socket.on('close', () => ret.onClose?.());
 
                     resolve(ret);
                 }
@@ -60,7 +56,7 @@ export default {
                     socket.close();
                     reject(e);
                 }
-            })
+            });
         });
     }
 }

@@ -29,7 +29,7 @@ const store = new Vuex.Store({
     },
     removeAlert(store, alertId) {
       store.scrypted.alerts = store.scrypted.alerts.filter(
-        alert => alert.id != alertId
+        alert => alert._id != alertId
       );
     },
     addAlert(store, alert) {
