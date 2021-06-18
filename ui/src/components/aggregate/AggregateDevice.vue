@@ -14,13 +14,11 @@
               <InterfaceMultiselect
                 @input="onChange"
                 v-model="device.deviceInterfaces"
-                :devices="deviceProps.allDevices"
                 name="Interfaces"
               ></InterfaceMultiselect>
               <InterfaceMultiselect
                 @input="onChange"
                 v-model="device.deviceEvents"
-                :devices="deviceProps.allDevices"
                 name="Events"
               ></InterfaceMultiselect>
             </v-flex>
@@ -38,27 +36,34 @@ import InterfaceMultiselect from "./InterfaceMultiselect.vue";
 export default {
   props: ["value", "id", "name", "deviceProps"],
   components: {
-    InterfaceMultiselect
+    InterfaceMultiselect,
   },
-  data: function() {
+  data: function () {
+    let device;
+    try {
+      device = JSON.parse(this.value);
+    } catch (e) {
+      device = {
+        deviceEvents: [],
+        deviceInterfaces: [],
+      };
+    }
+
     return {
-      device: {
-        deviceInterfaces: cloneDeep(this.deviceProps.selectedInterfaces),
-        deviceEvents: cloneDeep(this.deviceProps.selectedEvents)
-      }
+      device,
     };
   },
   methods: {
     onChange() {
-      this.$emit("input", this.device);
-    }
+      this.$emit("input", JSON.stringify(this.device));
+    },
   },
   computed: {
     mappedInterfaces: {
-      get: function() {
+      get: function () {
         return this.mapThem();
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>

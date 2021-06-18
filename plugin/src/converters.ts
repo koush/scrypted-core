@@ -22,7 +22,7 @@ export class UrlConverter extends ScryptedDeviceBase implements HttpRequestHandl
         this.toMimeType = secure ? ScryptedMimeTypes.LocalUrl : ScryptedMimeTypes.InsecureLocalUrl;
     }
 
-    onRequest(request: HttpRequest, response: HttpResponse): void {
+    async onRequest(request: HttpRequest, response: HttpResponse) {
         const normalizedRequest = Object.assign({}, request);
         normalizedRequest.url = normalizedRequest.url.replace(normalizedRequest.rootPath, '');
         const pathOnly = normalizedRequest.url.split('?')[0];

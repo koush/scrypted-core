@@ -75,55 +75,7 @@ export default {
             icon: "folder-plus",
             category: "Components"
           },
-          {
-            id: "webpush",
-            name: "Browser Notifications",
-            icon: "bell",
-            category: "Components"
-          },
-          {
-            id: "remote",
-            name: "Remote Management",
-            icon: "cloud",
-            category: "Integrations"
-          },
-          {
-            id: "home",
-            name: "Google Home",
-            icon: "home",
-            category: "Integrations"
-          },
-          {
-            id: "homekit",
-            name: "Apple HomeKit",
-            icon: "home",
-            category: "Integrations"
-          },
-          {
-            id: "alexa",
-            name: "Amazon Alexa",
-            icon: "home",
-            category: "Integrations"
-          },
-          {
-            id: "zwave",
-            name: "Z-Wave",
-            icon: "radio",
-            category: "Components"
-          },
-          {
-            id: "mail",
-            name: "Incoming Mail",
-            icon: "inbox",
-            category: "Components"
-          },
           { id: "log", name: "Live Log", icon: "list", category: "Utilities" },
-          // {
-          //   id: "file",
-          //   name: "File Browser",
-          //   icon: "file-text",
-          //   category: "Utilities"
-          // },
           {
             id: "settings",
             name: "Settings",
@@ -134,14 +86,6 @@ export default {
       }
     }
   },
-  // created: async function() {
-  //   fetch("/endpoint/@scrypted/ui/api/components")
-  //     .then(response => response.json())
-  //     .then(json => {
-  //       this.$data.components.push(...json);
-  //     })
-  //     .catch();
-  // },
   methods: {
     getComponentViewPath,
     filterComponents: function(category) {
@@ -170,7 +114,7 @@ export default {
           active: false
         }
       ],
-      categories: ["Components", "Integrations", "Utilities"]
+      categories: ["Components", "Utilities"]
     };
   }
 };

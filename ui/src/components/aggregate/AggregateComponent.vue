@@ -14,9 +14,9 @@ export default {
               method: "POST",
               path: "new",
               title: "Create Device Group",
-              value: "automation",
+              value: "aggregate",
               click() {
-                self.newDevice();
+                self.newDevice('aggregate');
               }
             }
           ],

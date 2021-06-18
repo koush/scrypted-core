@@ -113,6 +113,7 @@ export default {
         logger = await logger.getLogger(part);
       }
       this.logs.push(...await logger.getLogs());
+      this.logs.reverse();
 
       const observer = (entry) => {
         this.logs.unshift(entry);

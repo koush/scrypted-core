@@ -147,11 +147,12 @@ function checkSubset(set: ScryptedInterface[], subset: ScryptedInterface[]) {
     return true;
 }
 
-export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, interfaces: ScryptedInterface[]): ScryptedDeviceType[] {
+export function inferTypesFromInterfaces(existingType: ScryptedDeviceType, providedType: ScryptedDeviceType, interfaces: ScryptedInterface[]): ScryptedDeviceType[] {
     const ret: Set<ScryptedDeviceType> = new Set();
     if (existingType)
         ret.add(existingType);
-
+    if (providedType)
+        ret.add(providedType);
     inference.filter(i => checkSubset(interfaces, i.interfaces)).forEach(i => ret.add(i.type));
 
     for (const iface of interfaces) {

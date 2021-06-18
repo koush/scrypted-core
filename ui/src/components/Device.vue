@@ -90,11 +90,6 @@
                         label="Room"
                         required
                       ></v-combobox>
-                      <v-checkbox
-                        v-if="syncable"
-                        v-model="syncWithIntegrations"
-                        label="Sync with Integrations"
-                      ></v-checkbox>
                     </v-flex>
                   </v-layout>
                 </v-container>
@@ -376,7 +371,6 @@ import ScriptDevice from "./script/ScriptDevice.vue";
 import AggregateDevice from "./aggregate/AggregateDevice.vue";
 import WebPushRegistration from "./webpush/WebPushRegistration.vue";
 import {
-  isSyncable,
   inferTypesFromInterfaces,
   getComponentWebPath,
   getDeviceViewPath,
@@ -552,7 +546,6 @@ export default {
         deviceComponent: undefined,
         deviceData: undefined,
         showStorage: false,
-        syncWithIntegrations: undefined,
       };
     },
     openNpm() {
@@ -593,8 +586,6 @@ export default {
       this.name = this.device.name;
       this.room = this.device.room;
       this.type = this.device.type;
-      this.syncWithIntegrations =
-        this.device.metadata?.syncWithIntegrations !== false;
       this.loading = true;
       const plugins = await this.$scrypted.systemManager.getComponent(
         "plugins"
@@ -609,13 +600,14 @@ export default {
       this.pluginData = pluginData;
 
       const device = this.device;
-      if (
-        pluginData.pluginId === "@scrypted/core" &&
-        pluginData.nativeId?.startsWith("automation:")
-      ) {
+      if (pluginData.pluginId === "@scrypted/core") {
         const storage = await plugins.getStorage(device.id);
         this.deviceData = storage["data"];
-        this.deviceComponent = "Automation";
+        if (pluginData.nativeId?.startsWith("automation:")) {
+          this.deviceComponent = "Automation";
+        } else if (pluginData.nativeId?.startsWith("aggregate:")) {
+          this.deviceComponent = "AggregateDevice";
+        }
       }
 
       this.loading = false;
@@ -635,11 +627,6 @@ export default {
         await device.setRoom(this.room);
         const plugins = await this.$scrypted.systemManager.getComponent(
           "plugins"
-        );
-        await plugins.setMetadata(
-          device.id,
-          "syncWithIntegrations",
-          this.syncWithIntegrations
         );
         if (this.deviceData) {
           this.pluginData.storage.data = this.deviceData;
@@ -687,7 +674,7 @@ export default {
           const check = this.$scrypted.systemManager.getDeviceById(id);
           if (check.interfaces.includes(ScryptedInterface.MixinProvider)) {
             try {
-              if (await check.canMixin(device.type, device.interfaces)) {
+              if (await check.canMixin(this.type, device.interfaces)) {
                 ret.push({
                   id: check.id,
                   name: check.name,
@@ -723,13 +710,11 @@ export default {
     cardInterfaces: filterInterfaces(cardInterfaces),
     cardUnderInterfaces: filterInterfaces(cardUnderInterfaces),
     cardHeaderInterfaces: filterInterfaces(cardHeaderInterfaces),
-    syncable() {
-      return isSyncable(this.type);
-    },
     inferredTypes() {
       return inferTypesFromInterfaces(
-        this.type,
-        this.$store.state.systemState[this.id].interfaces.value
+        this.device.type,
+        this.device.providedType,
+        this.device.interfaces
       );
     },
     existingRooms() {

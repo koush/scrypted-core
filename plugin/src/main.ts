@@ -15,11 +15,41 @@ import { UrlConverter } from './converters';
 import fs from 'fs';
 import { sendJSON } from './http-helpers';
 import { Automation } from './automation';
+import { AggregateDevice, createAggregateDevice } from './aggregate';
 
 const indexHtml = fs.readFileSync('dist/index.html').toString();
 
 interface RoutedHttpRequest extends HttpRequest {
     params: { [key: string]: string };
+}
+
+class DeviceLogger {
+    logger: any;
+    constructor(logger: any) {
+        this.logger = logger;
+    }
+
+    log(level: string, msg: string) {
+        this.logger?.[level]?.(msg);
+    };
+}
+
+async function reportAutomation(nativeId: string) {
+    const device: Device = {
+        nativeId,
+        type: ScryptedDeviceType.Automation,
+        interfaces: [ScryptedInterface.OnOff]
+    }
+    await deviceManager.onDeviceDiscovered(device);
+}
+
+async function reportAggregate(nativeId: string, interfaces: string[]) {
+    const device: Device = {
+        nativeId,
+        type: ScryptedDeviceType.Automation,
+        interfaces,
+    }
+    await deviceManager.onDeviceDiscovered(device);
 }
 
 class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, EngineIOHandler, DeviceProvider {
@@ -28,6 +58,7 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
     httpHost: UrlConverter;
     httpsHost: UrlConverter;
     automations = new Map<string, Automation>();
+    aggregate = new Map<string, AggregateDevice>();
 
     constructor() {
         super();
@@ -55,20 +86,34 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
             if (nativeId?.startsWith('automation:')) {
                 const automation = new Automation(nativeId);
                 this.automations.set(nativeId, automation);
+                reportAutomation(nativeId);
+            }
+            else if (nativeId?.startsWith('aggregate:')) {
+                const aggregate = createAggregateDevice(nativeId);
+                this.aggregate.set(nativeId, aggregate);
+                reportAggregate(nativeId, aggregate.computeInterfaces());
             }
         }
 
         this.router.post('/api/new/automation', async (req: RoutedHttpRequest, res: HttpResponse) => {
             const nativeId = `automation:${Math.random()}`;
-            const device: Device = {
-                nativeId,
-                type: ScryptedDeviceType.Automation,
-                interfaces: [ScryptedInterface.OnOff]
-            }
-            await deviceManager.onDeviceDiscovered(device);
+            await reportAutomation(nativeId);
             const automation = new Automation(nativeId);
             this.automations.set(nativeId, automation);
             const { id } = automation;
+            sendJSON(res, {
+                id,
+            });
+        });
+
+        this.router.post('/api/new/aggregate', async (req: RoutedHttpRequest, res: HttpResponse) => {
+            const nativeId = `aggregate:${Math.random()}`;
+            const device: Device = {
+                nativeId,
+            }
+            await deviceManager.onDeviceDiscovered(device);
+            const aggregate = new ScryptedDeviceBase(nativeId);
+            const { id } = aggregate;
             sendJSON(res, {
                 id,
             });
@@ -81,7 +126,18 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
             sendJSON(res, {
                 success: !!automation
             });
-        })
+        });
+
+
+        this.router.post('/api/new/aggregate/:nativeId/reload', async (req: RoutedHttpRequest, res: HttpResponse) => {
+            const nativeId = req.params['nativeId'];
+            const aggregate = this.aggregate.get(nativeId);
+            if (aggregate)
+                reportAggregate(nativeId, aggregate.interfaces);
+            sendJSON(res, {
+                success: !!aggregate
+            });
+        });
     }
 
     getDevice(nativeId: string) {
@@ -89,10 +145,13 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
             return this.httpHost;
         if (nativeId === 'https')
             return this.httpsHost;
+        if (nativeId?.startsWith('automation:'))
+            return this.automations.get(nativeId);
+        if (nativeId?.startsWith('aggregate:'))
+            return createAggregateDevice(nativeId);
     }
 
     async discoverDevices(duration: number) {
-        throw new Error('Method not implemented.');
     }
 
     async onConnection(request: HttpRequest, webSocketUrl: string): Promise<void> {
@@ -112,8 +171,10 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
             async getMediaManager(): Promise<MediaManager> {
                 return mediaManager;
             }
-            getLogger(nativeId: string): Promise<Logger> {
-                throw new Error('Method not implemented.');
+            async getLogger(nativeId: string): Promise<Logger> {
+                const dl = deviceManager.getDeviceLogger(nativeId);
+                const ret = new DeviceLogger(dl);
+                return ret as any;
             }
             getComponent(id: string): Promise<any> {
                 return systemManager.getComponent(id);
@@ -186,10 +247,15 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
                 remote.updateState(eventSource.id, systemManager.getDeviceState(eventSource.id));
 
                 if (eventDetails.eventInterface === 'Storage') {
-                    const ids = [...this.automations.values()].map(a => a.id);
+                    let ids = [...this.automations.values()].map(a => a.id);
                     if (ids.includes(eventSource.id)) {
                         const automation = [...this.automations.values()].find(a => a.id === eventSource.id);
                         automation.bind();
+                    }
+                    ids = [...this.aggregate.values()].map(a => a.id);
+                    if (ids.includes(eventSource.id)) {
+                        const aggregate = [...this.aggregate.values()].find(a => a.id === eventSource.id);
+                        reportAggregate(aggregate.nativeId, aggregate.computeInterfaces());
                     }
                 }
             }

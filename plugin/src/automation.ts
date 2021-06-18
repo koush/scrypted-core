@@ -1,6 +1,8 @@
-import { EventDetails, EventListenerRegister, OnOff, ScryptedDevice, ScryptedDeviceBase } from "@scrypted/sdk";
+import { EventDetails, EventListenerOptions, EventListenerRegister, OnOff, ScryptedDevice, ScryptedDeviceBase, ScryptedInterface } from "@scrypted/sdk";
 import sdk from "@scrypted/sdk";
 import { Javascript } from "./builtins/javascript";
+import { Scheduler } from "./builtins/scheduler";
+import { Listen } from "./builtins/listen";
 const { systemManager } = sdk;
 
 export class Automation extends ScryptedDeviceBase implements OnOff {
@@ -17,11 +19,13 @@ export class Automation extends ScryptedDeviceBase implements OnOff {
     async turnOff() {
         this.storage.setItem('enabled', 'false');
         this.on = false;
+        this.bind();
     }
 
     async turnOn() {
         this.storage.removeItem('enabled');
         this.on = true;
+        this.bind();
     }
 
     bind() {
@@ -29,6 +33,11 @@ export class Automation extends ScryptedDeviceBase implements OnOff {
             register.removeListener();
         }
         this.registers = [];
+
+        if (!this.on) {
+            this.log.i('automation is turned off, and will not be scheduled.')
+            return;
+        }
 
         try {
             const data = JSON.parse(this.storage.getItem('data'));
@@ -44,6 +53,8 @@ export class Automation extends ScryptedDeviceBase implements OnOff {
                     }
                     else {
                         device = systemManager.getDeviceById(id);
+                        if (!device)
+                            throw new Error(`unknown trigger ${action.id}`);
                     }
 
                     const { rpc } = action.model;
@@ -51,14 +62,34 @@ export class Automation extends ScryptedDeviceBase implements OnOff {
                 }
             }
 
+            const denoise = data.denoiseEvents;
+
             for (const trigger of data.triggers) {
                 const parts = trigger.id.split('#');
                 const id = parts[0];
-                const denoise = data.denoiseEvents;
-                const { condition } = trigger;
                 const event = parts[1];
-                const device = systemManager.getDeviceById(id);
-                const register = device.listen({
+                const { condition } = trigger;
+
+                let register: EventListenerRegister;
+                let listen: Listen;
+                if (event) {
+                    const device = systemManager.getDeviceById(id);
+                    listen = device;
+                }
+                else {
+                    let device: any;
+                    if (id === 'scheduler') {
+                        device = new Scheduler();
+                    }
+                    else {
+                        throw new Error(`unknown action ${trigger.id}`);
+                    }
+
+                    const { rpc } = trigger.model;
+                    listen = device[rpc.method](...rpc.parameters || []);
+                }
+
+                register = listen.listen({
                     denoise,
                     event,
                 }, (eventSource, eventDetails, eventData) => {
@@ -77,7 +108,7 @@ export class Automation extends ScryptedDeviceBase implements OnOff {
 
                     console.log('starting automation');
                     runActions(eventSource, eventDetails, eventData);
-                });
+                }, this);
 
                 this.registers.push(register);
             }

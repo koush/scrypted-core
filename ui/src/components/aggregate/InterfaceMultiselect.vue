@@ -17,7 +17,6 @@ export default {
   props: {
     name: String,
     value: Array,
-    devices: Array
   },
   mixins: [CustomValue],
   components: {
@@ -34,15 +33,18 @@ export default {
       return this.lazyValue.map(iface => iface.id);
     },
     mapThem: function() {
-      var name = this.name.toLowerCase();
-      return this.devices
-        .map(device =>
-          Object.keys(device[name]).map(iface => ({
-            id: device[name][iface],
-            text: `${device.name} (${iface})`
-          }))
-        )
-        .flat();
+      const ret = [];
+      for (const id of Object.keys(
+        this.$scrypted.systemManager.getSystemState()
+      )) { 
+        const device = this.$scrypted.systemManager.getDeviceById(id);
+        ret.push(device.interfaces.map(iface => ({
+          id: `${device.id}#${iface}`,
+          text: `${device.name} (${iface})`,
+        })))
+      }
+
+      return ret.flat();
     }
   },
   computed: {

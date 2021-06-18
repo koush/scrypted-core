@@ -1,4 +1,4 @@
-const scryptedServer = 'https://192.168.2.7:9443';
+const scryptedServer = 'https://192.168.2.206:9443';
 const path = require('path');
 
 const proxyOpts = {
