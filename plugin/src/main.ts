@@ -244,7 +244,9 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
         api.listen((id, eventDetails, eventData) => {
             const eventSource = systemManager.getDeviceById(id);
             if (eventSource) {
-                remote.updateState(eventSource.id, systemManager.getDeviceState(eventSource.id));
+                const propertyState = systemManager.getDeviceState(eventSource.id)?.[eventDetails.property];
+                if (propertyState)
+                    remote.updateProperty(eventSource.id, eventDetails.eventInterface, eventDetails.property, propertyState);
 
                 if (eventDetails.eventInterface === 'Storage') {
                     let ids = [...this.automations.values()].map(a => a.id);
@@ -261,7 +263,7 @@ class ScryptedCore extends ScryptedDeviceBase implements HttpRequestHandler, Eng
             }
             else {
                 if (eventDetails.property === ScryptedInterfaceProperty.id && eventData != null)
-                    remote.updateState(eventData as ScryptedInterfaceProperty, undefined);
+                    remote.updateDescriptor(eventData as ScryptedInterfaceProperty, undefined);
                 else
                     console.warn('unknown event source', eventData);
             }

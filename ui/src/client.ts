@@ -2,7 +2,6 @@ import Vue from "vue";
 import client from '../../client/index';
 import axios from 'axios';
 import store from './store';
-import { ScryptedInterface } from "@scrypted/sdk/types";
 
 function hasValue(state, property) {
     return state[property] && state[property].value;
@@ -10,7 +9,7 @@ function hasValue(state, property) {
 
 function isValidDevice(id) {
     const state = store.state.systemState[id];
-    for (let property of [
+    for (const property of [
         "name",
         "interfaces",
         "type"
